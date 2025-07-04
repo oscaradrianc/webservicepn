@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortalNegocioWS", "PortalNegocioWS\PortalNegocioWS.csproj", "{6BA6E438-E1F5-4461-BDDF-274EBF92FE84}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisManager", "RedisManager\RedisManager.csproj", "{0D9225D6-164A-4C5A-A875-F095ECF017CB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Negocio.Model", "Negocio.Model\Negocio.Model.csproj", "{69D0B59C-7B25-4721-A47E-19D8FEC05A5C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Negocio.Business", "Negocio.Business\Negocio.Business.csproj", "{EDDE710D-BFBF-4AD5-922D-00E79C974445}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Negocio.Data", "Negocio.Data\Negocio.Data.csproj", "{C809360F-0B1A-4823-889F-31E2021CCA70}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{4920A9C0-0108-4923-A2AA-2E94A9DC759D}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6BA6E438-E1F5-4461-BDDF-274EBF92FE84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BA6E438-E1F5-4461-BDDF-274EBF92FE84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BA6E438-E1F5-4461-BDDF-274EBF92FE84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BA6E438-E1F5-4461-BDDF-274EBF92FE84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D9225D6-164A-4C5A-A875-F095ECF017CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D9225D6-164A-4C5A-A875-F095ECF017CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D9225D6-164A-4C5A-A875-F095ECF017CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D9225D6-164A-4C5A-A875-F095ECF017CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69D0B59C-7B25-4721-A47E-19D8FEC05A5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69D0B59C-7B25-4721-A47E-19D8FEC05A5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69D0B59C-7B25-4721-A47E-19D8FEC05A5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69D0B59C-7B25-4721-A47E-19D8FEC05A5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDDE710D-BFBF-4AD5-922D-00E79C974445}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDDE710D-BFBF-4AD5-922D-00E79C974445}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDDE710D-BFBF-4AD5-922D-00E79C974445}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDDE710D-BFBF-4AD5-922D-00E79C974445}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C809360F-0B1A-4823-889F-31E2021CCA70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C809360F-0B1A-4823-889F-31E2021CCA70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C809360F-0B1A-4823-889F-31E2021CCA70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C809360F-0B1A-4823-889F-31E2021CCA70}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {52AC147A-1DFD-4012-BBC3-DB222A3793C5}
+	EndGlobalSection
+EndGlobal

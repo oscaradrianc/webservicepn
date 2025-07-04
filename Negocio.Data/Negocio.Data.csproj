@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Devart.Data.Linq" />
+    <PackageReference Include="Devart.Data.Oracle" />
+    <PackageReference Include="Devart.Data.Oracle.Linq" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <Reference Include="Devart.Data.Linq">
+      <HintPath>C:\Program Files (x86)\Devart\dotConnect\Linq\Devart.Data.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="Devart.Data.Oracle.Entity.EF6">
+      <HintPath>C:\Program Files (x86)\Devart\dotConnect\Oracle\Entity\EF6\Devart.Data.Oracle.Entity.EF6.dll</HintPath>
+    </Reference>
+  </ItmGroup>-->
+
+  <ItemGroup>
+    <Compile Update="DataContext.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DataContext.lqml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DataContext.Diagram1.view">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DataContext.lqml</DependentUpon>
+    </None>
+    <None Update="DataContext.edps">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DataContext.lqml</DependentUpon>
+    </None>
+    <None Update="DataContext.info">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DataContext.lqml</DependentUpon>
+    </None>
+    <None Update="DataContext.lqml">
+      <Generator>DevartLinqToSqlGenerator</Generator>
+      <LastGenOutput>DataContext.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>
