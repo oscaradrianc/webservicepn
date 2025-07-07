@@ -47,6 +47,13 @@ namespace Negocio.Business
                 {
                     try
                     {
+                        if (!_storageService.ExistsDirectory())
+                        {
+                            resp.Status = Configuracion.StatusError;
+                            resp.Message = "No existe Directorio para almacenar archivos, por favor validar con el área de compras de EEP.";
+                            return resp;
+                        }
+
                         bool personaNatural = request.TipoPersona == 1;
 
                         var existeProveedor = cx.PONEPROVEEDORs.Where(p => p.PROVIDENTIFICACION == (personaNatural ? request.Documento : request.Nit)).SingleOrDefault();

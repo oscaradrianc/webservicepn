@@ -37,6 +37,13 @@ namespace Negocio.Business
         {
             using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
             {
+                //Valida ruta para almacenar archivos
+                if(!_storageService.ExistsDirectory())
+                {
+                    return "No existe Directorio para almacenar archivos, validar con TI.";
+
+                }
+
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
                 {

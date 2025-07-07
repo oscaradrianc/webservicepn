@@ -37,6 +37,13 @@ namespace Negocio.Business
         {            
             ResponseStatus resp = new ResponseStatus();
 
+            if(!_storageService.ExistsDirectory())
+            {
+                resp.Status = Configuracion.StatusError;
+                resp.Message = "No existe Directorio para almacenar archivos, por favor validar con el área de compras de EEP.";
+                return resp;
+            }
+
             using var cx = new PORTALNEGOCIODataContext();
             
             cx.Connection.Open();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -237,11 +238,27 @@ namespace SWNegocio.Controllers
 
         [HttpGet]
         [Route("validarfile")]
-        public async Task<string> ValidarFile(string basePath)
+        public IActionResult ValidarFile() // Cambia el tipo de retorno a IActionResult
         {
+            try
+            {
+                if (!_storageService.ExistsDirectory())
+                {
+                    string errorMessage = "Error de configuración: No existe directorio para almacenar archivos. Validar con el área de compras o TI de EEP.";
+                    // Devuelve un error 400 (Bad Request) con un objeto JSON
+                    return Ok(new { message = errorMessage });
+                }
+            }
+            catch (Exception ex) // Es buena práctica capturar la excepción específica
+            {
+                // Log ex.Message para depuración
+                string errorMessage = "Error de configuración: Error al validar ruta de archivos. Validar con el área de TI.";
+                // Devuelve un error 500 (Internal Server Error) o 400
+                return BadRequest(new { message = errorMessage });
+            }
 
+            // Si todo está bien, devuelve un 200 OK con un objeto JSON
+            return Ok(new { message = "OK" });
         }
-
-
     }
 }

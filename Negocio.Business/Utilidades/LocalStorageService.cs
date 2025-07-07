@@ -87,5 +87,14 @@ namespace Negocio.Business.Utilidades
             memoryStream.Position = 0;
             return memoryStream;
         }
+
+        /// <summary>
+        /// Devuelve true si la ruta de archivo existe
+        /// </summary>
+        /// <returns></returns>
+        public bool ExistsDirectory()
+        {
+            return !string.IsNullOrWhiteSpace(this._basePath) && (Directory.Exists(this._basePath));
+        }
     }
 }

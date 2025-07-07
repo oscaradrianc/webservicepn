@@ -519,16 +519,5 @@ namespace Negocio.Business
             // Si no hay encabezado MIME, asumimos un tipo genérico
             return ("application/octet-stream", Convert.FromBase64String(base64Content));
         }
-
-        public static string ValidarRutaArchivo(string basePath)
-        {
-            if (string.IsNullOrWhiteSpace(basePath))
-               return $"Error de configuración: La ruta base no puede estar vacía. Validar con el área de TI.";
-
-            if (!Directory.Exists(basePath))
-               return $"Error de configuración: La ruta base no existe.";
-
-            return null;
-        }
     }
 }
