@@ -16,7 +16,7 @@ namespace Negocio.Model
                     CodigoProveedor = (int)p.PROVPROVEEDOR,
                     NombreJuridica = p.PROVRAZONSOCIAL,
                     TipoPersona = (int)p.CLASTIPOPERSONAL1,
-                    TipoDocumento = (int)p.CLASTIPOIDENTIFICACION2,
+                    TipoDocumento = (int?)p.CLASTIPOIDENTIFICACION2,
                     Documento = p.PROVIDENTIFICACION,
                     LugarExpedicion = p.PROVLUGAREXPEDICION != null ? (int)p.PROVLUGAREXPEDICION : (int?)null,
                     Nombre = p.PROVRAZONSOCIAL,
@@ -105,7 +105,7 @@ namespace Negocio.Model
         public int CodigoProveedor { get; set; }
         public string Nombre { get; set; }
         public int TipoPersona { get; set; }
-        public int TipoDocumento { get; set; }
+        public int? TipoDocumento { get; set; }
         public string Documento { get; set; }
         public int? LugarExpedicion { get; set; }
         public DateTime? FechaNacimiento { get; set; }

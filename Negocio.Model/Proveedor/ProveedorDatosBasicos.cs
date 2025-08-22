@@ -5,7 +5,7 @@
         public int CodigoProveedor { get; set; }
         public string Nombre { get; set; }
         public string TipoPersona { get; set; }
-        public string TipoIdentificacion { get; set; }
+        public string? TipoIdentificacion { get; set; }
         public string Documento { get; set; }
         public string Ciudad { get; set; }
         public string Direccion { get; set; }

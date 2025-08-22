@@ -635,15 +635,16 @@ namespace Negocio.Business
                         select new ProveedorDatosBasicos { CodigoProveedor = (int)p.PROVPROVEEDOR, Documento = p.PROVIDENTIFICACION, TipoPersona = p.CLASTIPOPERSONAL1, Nombre = p.PROVRAZONSOCIAL }).ToList();*/
 
                 prov = [.. (from p in cx.PONEPROVEEDORs
-                        join t in cx.PONEVTIPOPERSONAs on p.CLASTIPOPERSONAL1 equals t.CLVACLASEVALOR
-                        join ti in cx.PONEVTIPOIDENTIFICACIONs on p.CLASTIPOIDENTIFICACION2 equals ti.CLVACLASEVALOR
+                        join t in cx.PONEVTIPOPERSONAs on p.CLASTIPOPERSONAL1 equals t.CLVACLASEVALOR                        
                         //join c in cx.POGEMUNICIPIOs on p.PROVCIUDAD equals c.MUNICODIGO
                         select new ProveedorDatosBasicos
                         {
                             CodigoProveedor = (int)p.PROVPROVEEDOR,
                             Nombre = p.PROVRAZONSOCIAL,
                             TipoPersona = t.CLVAVALOR,
-                            TipoIdentificacion = ti.CLVAVALOR,
+                            TipoIdentificacion = (from ti in cx.PONEVTIPOIDENTIFICACIONs
+                                                     where ti.CLVACLASEVALOR == p.CLASTIPOIDENTIFICACION2
+                                                     select ti.CLVAVALOR).FirstOrDefault(),
                             Documento = p.PROVIDENTIFICACION,
                             Ciudad = cx.POGEMUNICIPIOs.Where(m => m.MUNICODIGO == p.PROVCIUDAD).Select(m => m.MUNINOMBRE).SingleOrDefault(),  //c.MUNINOMBRE,
                             Direccion = p.PROVDIRECCIONPRINCIAL,
