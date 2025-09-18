@@ -10,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Negocio.Business;
 using Negocio.Model;
 using Org.BouncyCastle.Utilities.Collections;
-using RedisManager.Cache;
 
 
 namespace SWNegocio.Controllers

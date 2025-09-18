@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Server.HttpSys;
 using Negocio.Business;
 using Negocio.Model;
-using RedisManager.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;

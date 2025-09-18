@@ -117,19 +117,19 @@ namespace SWNegocio.Controllers
 
         [HttpPost]
         [Route("actualizar")]
-        public IActionResult ActualizarProveedor(Proveedor request)
+        public async Task<IActionResult> ActualizarProveedor(Proveedor request)
         {
 
             //Actualiza el proveedor, si es exitoso el registro del proveedor, crea el usuario del sistema
-            string result = _proveedorBusiness.ActualizarProveedor(request);
-            if (result == "OK")
+            await _proveedorBusiness.ActualizarProveedor(request);
+           // if (result == "OK")
             {
                 return Ok();
             }
-            else
+           /* else
             {
                 return Content(HttpStatusCode.BadRequest.ToString(), result);
-            }
+            }*/
 
         }
 

@@ -232,118 +232,115 @@ namespace Negocio.Business
         /// </summary>
         /// <param name="request">Objeto complejo proveedor</param>
         /// <returns>OK si todo esta bien o el mensaje de error</returns>
-        public string ActualizarProveedor(Proveedor request)
+        public async Task ActualizarProveedor(Proveedor request)
         {
             using (PORTALNEGOCIODataContext cx = new())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
-                {
-                    try
+                {                   
+                    bool personaNatural = request.TipoPersona == 1;
+
+                    //Proveedor
+                    var tblProveedor = (from p in cx.PONEPROVEEDORs
+                                        where p.PROVPROVEEDOR == request.CodigoProveedor
+                                        select p).FirstOrDefault();
+                    if (tblProveedor == null)
                     {
-                        bool personaNatural = request.TipoPersona == 1;
-
-                        //Proveedor
-                        var tblProveedor = (from p in cx.PONEPROVEEDORs
-                                            where p.PROVPROVEEDOR == request.CodigoProveedor
-                                            select p).FirstOrDefault();
-
-                        if(tblProveedor != null)
-                        {
-                            tblProveedor.CLASTIPOPERSONAL1 = request.TipoPersona;
-                            tblProveedor.CLASTIPOIDENTIFICACION2 = personaNatural ? request.TipoDocumento : 4; //TODO: Revisar para que no quede quemado
-                            tblProveedor.PROVIDENTIFICACION = personaNatural ? request.Documento : request.Nit;
-                            tblProveedor.PROVLUGAREXPEDICION = request.LugarExpedicion;
-                            tblProveedor.PROVRAZONSOCIAL = personaNatural ? request.Nombre : request.NombreJuridica;
-                            tblProveedor.CLASTIPOIDENTREPRES2 = request.TipoDocumentoRep;
-                            tblProveedor.PROVIDENTREPRESENTANTE = request.DocumentoRep;
-                            tblProveedor.PROVREPRESENTANTELEGAL = request.NombreRep;
-                            tblProveedor.PROVFECEXPIDENTREPRESENTANTE = request.FechaExpedicionRep;
-                            tblProveedor.PROVLUGAREXPIDENTREPRESENT = request.LugarExpedicionRep;
-                            tblProveedor.PROVFECHANACIMIENTOREP = request.FechaNacimientoRep;
-                            tblProveedor.PROVLUGARNACIMIENTOREP = request.LugarNacimientoRep;
-                            tblProveedor.PROVFECHANACIMIENTO = request.FechaNacimiento;
-                            tblProveedor.PROVLUGARNACIMIENTO = request.LugarNacimiento;
-                            tblProveedor.PROVDIRECCIONPRINCIAL = personaNatural ? request.DireccionResidencia : request.DireccionJuridica;
-                            tblProveedor.PROVDIRECCIONCOMERCIAL = request.DireccionComercial;
-                            tblProveedor.PROVTELEFONO = request.Telefono;
-                            tblProveedor.PROVEMAIL = request.Email;
-                            //tblProveedor.ACECCODIGOACTIVIDAD = request.ActividadEconomica;
-                            tblProveedor.PROVPROFESION = request.Profesion;
-                            tblProveedor.PROVACTIVIDAD = request.Actividad;
-                            tblProveedor.PROVEMPRESATRABAJA = request.Empresa;
-                            tblProveedor.PROVCARGO = request.Cargo;
-                            tblProveedor.PROVFAX = request.Fax;
-                            tblProveedor.PROVCIUDAD = personaNatural ? request.Ciudad : request.CiudadJuridica;
-                            tblProveedor.PROVTELEFONOEMPRESA = request.TelefonoEmpresa;
-                            tblProveedor.PROVCIUDADEMPRESA = request.CiudadEmpresa;
-                            tblProveedor.PROVDIRECCIONCOMERCIAL = request.DireccionComercial;
-                            tblProveedor.PROVMANEJARECURSOPUBLICOS = ((request.ManejaRecursos != null) && (bool)request.ManejaRecursos) ? "S" : "N";
-                            tblProveedor.PROVRECONOCIMIENTOPUBLICO = ((request.ReconocimientoPublico != null) && (bool)request.ReconocimientoPublico) ? "S" : "N";
-                            tblProveedor.PROVPODERPUBLICO = ((request.PoderPublico != null) && (bool)request.PoderPublico) ? "S" : "N";
-                            tblProveedor.PROVOBSERVACION = request.RespuestaAfirmativa;
-                            tblProveedor.ACECCODIGOACTIVIDAD = request.ActividadEconomica;
-                            tblProveedor.CLASTIPOEMPRESA13 = request.TipoEmpresa;
-                            tblProveedor.CLASSECTORECONOMICO14 = request.SectorEconomia;
-                            tblProveedor.PROVNACIONALIDADREPRESENTANTE = request.NacionalidadRep;
-                            tblProveedor.PROVINGRESOSMENSUALES = request.IngresosMensuales;
-                            tblProveedor.PROVEGRESOSMENSUALES = request.EgresosMensuales;
-                            tblProveedor.PROVACTIVOS = request.Activos;
-                            tblProveedor.PROVPASIVOS = request.Pasivos;
-                            tblProveedor.PROVPATRIMONIO = request.Patrimonio;
-                            tblProveedor.PROVOTROSINGRESOS = request.OtrosIngresos;
-                            tblProveedor.PROVCONCEPTOOTROSINGRESOS = request.ConceptoOtrosIngresos;
-                            tblProveedor.PROVTRANSMONEDAEXT = request.MonedaExtranjera ? "S" : "N";
-                            tblProveedor.CLASTIPOMONEDA5 = request.TipoMonedaExtranjera;
-                            tblProveedor.PROVPRODFINANEXT = request.CuentasMonedaExtranjera ? "S" : "N";
-                            tblProveedor.PROVENTIDADESTATAL = request.EntidadEstatal != null ? request.EntidadEstatal == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
-                            tblProveedor.PROVENTIDADSINANILUCRO = request.EntidadSinLucro != null ? request.EntidadSinLucro == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO; 
-                            tblProveedor.PROVRESOLENTSINANILUCRO = request.ResolEntidadSinLucro;
-                            tblProveedor.PROVGRANCONTRIBUYENTE = request.GranContribuyente != null ? request.GranContribuyente == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO; 
-                            tblProveedor.PROVRESOLGRANCONTRIBUYENTE = request.ResolGranContribuyente;
-                            tblProveedor.PROVRESPONSABLEIVA = request.ResponsableIVA != null ? request.ResponsableIVA == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
-                            tblProveedor.PROVAUTORRETENEDOR = request.Autorretenedor != null ? request.Autorretenedor == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
-                            tblProveedor.PROVRESOLAUTORRETENEDOR = request.ResolAutorretenedor;
-                            tblProveedor.PROVCONTRIBUYENTERENTA = request.ContribuyenteRenta != null ? request.ContribuyenteRenta == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
-                            tblProveedor.PROVAGENTERETENEDORIVA = request.AgenteRetenedorIVA != null ? request.AgenteRetenedorIVA == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
-                            tblProveedor.PROVRESOLAGENTERETENEDORIVA = request.ResolAgenteRetenedorIVA;
-                            tblProveedor.PROVINDUSTRIAYCOMERCIO = request.ResponsableIndyComer != null ? request.ResponsableIndyComer == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
-                            //tblProveedor.PROVACTICOMERCIALOTROSMUNI = request.ResponsableOtros ? "S" : "N";
-                            tblProveedor.CLASENTIDADBANCARIA6 = request.EntidadBancaria;
-                            tblProveedor.PROVSUCURSALBANCO = request.Sucursal;
-                            tblProveedor.PROVCIUDADSUCURSAL = request.CiudadSucursal;
-                            tblProveedor.PROVTELEFONOSUCURSAL = request.TelefonoSucursal;
-                            tblProveedor.PROVDIRECCIONSUCURSAL = request.DireccionSucursal;
-                            tblProveedor.PROVNUMEROCUENTA = request.Cuenta;
-                            tblProveedor.CLASTIPOCUENTA7 = request.TipoCuenta;
-                            tblProveedor.PROVTITULARCUENTA = request.TitularCuenta;
-                            tblProveedor.PROVIDENTITULARCUENTA = request.IdentificacionCuenta;
-                            tblProveedor.CLASACTPEREIRA14 = request.ActEcoPereira;
-                            //tblProveedor.CLASACTOTROS14 = request.ActEcoOtros;
-                            tblProveedor.PROVCLASTAMANO = request.ClasificacionTamano;
-                            tblProveedor.PROVCLASSECTOR = request.ClasificacionSector;
-                            tblProveedor.PROVOPERMERCANTILES = request.OperacionesMercantiles ? "S" : "N";
-                            tblProveedor.PROVFECHAULTACT = DateTime.Now;
-                            tblProveedor.LOGSUSUARIO = request.LogsUsuario;
-                            cx.SubmitChanges();
-
-                            //Si no es persona natural y tiene accionistas, almacena los accionistas
-                            if (!personaNatural && request.Accionistas.Count > 0)
-                                CargarAccionista(request.Accionistas, cx, request.CodigoProveedor, request.LogsUsuario);
-
-                            //almacena las especialidades de la empresa
-                            ActualizarEspecialidades(request.Especialidades, cx, request.CodigoProveedor, request.LogsUsuario);
-
-                            dbContextTransaction.Commit();
-                        }
-
-                        return "OK";
+                        // Lanza una excepción clara si el proveedor no existe.
+                        throw new KeyNotFoundException($"No se encontró un proveedor con el código {request.CodigoProveedor}.");
                     }
-                    catch (Exception ex)
-                    {
-                        dbContextTransaction.Rollback();
-                        return ex.Message;
-                    }
+                                       
+                    tblProveedor.CLASTIPOPERSONAL1 = request.TipoPersona;
+                    tblProveedor.CLASTIPOIDENTIFICACION2 = personaNatural ? request.TipoDocumento : 4; //TODO: Revisar para que no quede quemado
+                    tblProveedor.PROVIDENTIFICACION = personaNatural ? request.Documento : request.Nit;
+                    tblProveedor.PROVLUGAREXPEDICION = request.LugarExpedicion;
+                    tblProveedor.PROVRAZONSOCIAL = personaNatural ? request.Nombre : request.NombreJuridica;
+                    tblProveedor.CLASTIPOIDENTREPRES2 = request.TipoDocumentoRep;
+                    tblProveedor.PROVIDENTREPRESENTANTE = request.DocumentoRep;
+                    tblProveedor.PROVREPRESENTANTELEGAL = request.NombreRep;
+                    tblProveedor.PROVFECEXPIDENTREPRESENTANTE = request.FechaExpedicionRep;
+                    tblProveedor.PROVLUGAREXPIDENTREPRESENT = request.LugarExpedicionRep;
+                    tblProveedor.PROVFECHANACIMIENTOREP = request.FechaNacimientoRep;
+                    tblProveedor.PROVLUGARNACIMIENTOREP = request.LugarNacimientoRep;
+                    tblProveedor.PROVFECHANACIMIENTO = request.FechaNacimiento;
+                    tblProveedor.PROVLUGARNACIMIENTO = request.LugarNacimiento;
+                    tblProveedor.PROVDIRECCIONPRINCIAL = personaNatural ? request.DireccionResidencia : request.DireccionJuridica;
+                    tblProveedor.PROVDIRECCIONCOMERCIAL = request.DireccionComercial;
+                    tblProveedor.PROVTELEFONO = request.Telefono;
+                    tblProveedor.PROVEMAIL = request.Email;
+                    //tblProveedor.ACECCODIGOACTIVIDAD = request.ActividadEconomica;
+                    tblProveedor.PROVPROFESION = request.Profesion;
+                    tblProveedor.PROVACTIVIDAD = request.Actividad;
+                    tblProveedor.PROVEMPRESATRABAJA = request.Empresa;
+                    tblProveedor.PROVCARGO = request.Cargo;
+                    tblProveedor.PROVFAX = request.Fax;
+                    tblProveedor.PROVCIUDAD = personaNatural ? request.Ciudad : request.CiudadJuridica;
+                    tblProveedor.PROVTELEFONOEMPRESA = request.TelefonoEmpresa;
+                    tblProveedor.PROVCIUDADEMPRESA = request.CiudadEmpresa;
+                    tblProveedor.PROVDIRECCIONCOMERCIAL = request.DireccionComercial;
+                    tblProveedor.PROVMANEJARECURSOPUBLICOS = ((request.ManejaRecursos != null) && (bool)request.ManejaRecursos) ? "S" : "N";
+                    tblProveedor.PROVRECONOCIMIENTOPUBLICO = ((request.ReconocimientoPublico != null) && (bool)request.ReconocimientoPublico) ? "S" : "N";
+                    tblProveedor.PROVPODERPUBLICO = ((request.PoderPublico != null) && (bool)request.PoderPublico) ? "S" : "N";
+                    tblProveedor.PROVOBSERVACION = request.RespuestaAfirmativa;
+                    tblProveedor.ACECCODIGOACTIVIDAD = request.ActividadEconomica;
+                    tblProveedor.CLASTIPOEMPRESA13 = request.TipoEmpresa;
+                    tblProveedor.CLASSECTORECONOMICO14 = request.SectorEconomia;
+                    tblProveedor.PROVNACIONALIDADREPRESENTANTE = request.NacionalidadRep;
+                    tblProveedor.PROVINGRESOSMENSUALES = request.IngresosMensuales;
+                    tblProveedor.PROVEGRESOSMENSUALES = request.EgresosMensuales;
+                    tblProveedor.PROVACTIVOS = request.Activos;
+                    tblProveedor.PROVPASIVOS = request.Pasivos;
+                    tblProveedor.PROVPATRIMONIO = request.Patrimonio;
+                    tblProveedor.PROVOTROSINGRESOS = request.OtrosIngresos;
+                    tblProveedor.PROVCONCEPTOOTROSINGRESOS = request.ConceptoOtrosIngresos;
+                    tblProveedor.PROVTRANSMONEDAEXT = request.MonedaExtranjera ? "S" : "N";
+                    tblProveedor.CLASTIPOMONEDA5 = request.TipoMonedaExtranjera;
+                    tblProveedor.PROVPRODFINANEXT = request.CuentasMonedaExtranjera ? "S" : "N";
+                    tblProveedor.PROVENTIDADESTATAL = request.EntidadEstatal != null ? request.EntidadEstatal == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
+                    tblProveedor.PROVENTIDADSINANILUCRO = request.EntidadSinLucro != null ? request.EntidadSinLucro == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO; 
+                    tblProveedor.PROVRESOLENTSINANILUCRO = request.ResolEntidadSinLucro;
+                    tblProveedor.PROVGRANCONTRIBUYENTE = request.GranContribuyente != null ? request.GranContribuyente == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO; 
+                    tblProveedor.PROVRESOLGRANCONTRIBUYENTE = request.ResolGranContribuyente;
+                    tblProveedor.PROVRESPONSABLEIVA = request.ResponsableIVA != null ? request.ResponsableIVA == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
+                    tblProveedor.PROVAUTORRETENEDOR = request.Autorretenedor != null ? request.Autorretenedor == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
+                    tblProveedor.PROVRESOLAUTORRETENEDOR = request.ResolAutorretenedor;
+                    tblProveedor.PROVCONTRIBUYENTERENTA = request.ContribuyenteRenta != null ? request.ContribuyenteRenta == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
+                    tblProveedor.PROVAGENTERETENEDORIVA = request.AgenteRetenedorIVA != null ? request.AgenteRetenedorIVA == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
+                    tblProveedor.PROVRESOLAGENTERETENEDORIVA = request.ResolAgenteRetenedorIVA;
+                    tblProveedor.PROVINDUSTRIAYCOMERCIO = request.ResponsableIndyComer != null ? request.ResponsableIndyComer == true ? Configuracion.ValorSI : Configuracion.ValorNO : Configuracion.ValorNO;
+                    //tblProveedor.PROVACTICOMERCIALOTROSMUNI = request.ResponsableOtros ? "S" : "N";
+                    tblProveedor.CLASENTIDADBANCARIA6 = request.EntidadBancaria;
+                    tblProveedor.PROVSUCURSALBANCO = request.Sucursal;
+                    tblProveedor.PROVCIUDADSUCURSAL = request.CiudadSucursal;
+                    tblProveedor.PROVTELEFONOSUCURSAL = request.TelefonoSucursal;
+                    tblProveedor.PROVDIRECCIONSUCURSAL = request.DireccionSucursal;
+                    tblProveedor.PROVNUMEROCUENTA = request.Cuenta;
+                    tblProveedor.CLASTIPOCUENTA7 = request.TipoCuenta;
+                    tblProveedor.PROVTITULARCUENTA = request.TitularCuenta;
+                    tblProveedor.PROVIDENTITULARCUENTA = request.IdentificacionCuenta;
+                    tblProveedor.CLASACTPEREIRA14 = request.ActEcoPereira;
+                    //tblProveedor.CLASACTOTROS14 = request.ActEcoOtros;
+                    tblProveedor.PROVCLASTAMANO = request.ClasificacionTamano;
+                    tblProveedor.PROVCLASSECTOR = request.ClasificacionSector;
+                    tblProveedor.PROVOPERMERCANTILES = request.OperacionesMercantiles ? "S" : "N";
+                    tblProveedor.PROVFECHAULTACT = DateTime.Now;
+                    tblProveedor.LOGSUSUARIO = request.LogsUsuario;
+                    cx.SubmitChanges();
+
+                    //Si no es persona natural y tiene accionistas, almacena los accionistas
+                    if (!personaNatural && request.Accionistas.Count > 0)
+                        CargarAccionista(request.Accionistas, cx, request.CodigoProveedor, request.LogsUsuario);
+
+                    //almacena las especialidades de la empresa
+                    ActualizarEspecialidades(request.Especialidades, cx, request.CodigoProveedor, request.LogsUsuario);
+
+                    dbContextTransaction.Commit();
+                        
+
+                        
+                    //return "OK";
+                   
                 }
             }
         }

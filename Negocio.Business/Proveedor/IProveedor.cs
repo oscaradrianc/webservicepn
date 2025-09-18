@@ -10,7 +10,7 @@ namespace Negocio.Business
     public interface IProveedor
     {
         Task<ResponseStatus> RegistrarProveedor(Proveedor request);
-        string ActualizarProveedor(Proveedor request);
+        Task ActualizarProveedor(Proveedor request);
         Task<List<Proveedor>> ObtenerProveedorXEstado(string estado);
         Task<string> ActualizarEstado(ActualizarEstadoProveedor estadoProveedor);
         List<ProveedorDatosBasicos> ConsultarDatosBasicosProveedor();

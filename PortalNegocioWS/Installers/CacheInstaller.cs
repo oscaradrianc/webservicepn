@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RedisManager.Cache;
-using RedisManager.Services;
+//using RedisManager.Cache;
+//using RedisManager.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace PortalNegocioWS.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            var redisCacheSettings = new RedisCacheSettings();
+            /*var redisCacheSettings = new RedisCacheSettings();
             configuration.GetSection(nameof(RedisCacheSettings)).Bind(redisCacheSettings);
             services.AddSingleton(redisCacheSettings);
 
@@ -23,7 +23,7 @@ namespace PortalNegocioWS.Installers
             }
 
             services.AddStackExchangeRedisCache(options => options.Configuration = redisCacheSettings.ConnectionString);
-            services.AddSingleton<IResponseCacheService, ResponseCacheService>();
+            services.AddSingleton<IResponseCacheService, ResponseCacheService>();*/
         }
     }
 }
