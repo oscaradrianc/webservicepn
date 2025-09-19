@@ -10,10 +10,10 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper"/>
-    <PackageReference Include="EntityFramework"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational"/>
-    <PackageReference Include="NPOI"/>
-    <PackageReference Include="Stubble.Core"/>
+    <PackageReference Include="EntityFramework" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="NPOI" />
+    <PackageReference Include="Stubble.Core" />
   </ItemGroup>
 
   <ItemGroup>

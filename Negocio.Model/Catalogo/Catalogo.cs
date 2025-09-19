@@ -12,6 +12,6 @@ namespace Negocio.Model
         public string Estado { get; set; }
         public string Medida { get; set; }
         public int LogsUsuario { get; set; }
-        public DateTime LogsFecha { get; set; }
+        public DateTime? LogsFecha { get; set; }
     }
 }
