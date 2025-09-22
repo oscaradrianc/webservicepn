@@ -77,10 +77,25 @@ namespace SWNegocio.Controllers
 
 
         [HttpPost]
-        [Route("actualizarestado")]
-        public async Task<IActionResult> ActualizarEstado(ActualizarEstadoProveedor estadoProveedor)
+        [Route("autorizar")]
+        public async Task<IActionResult> AutorizarProveedor(ActualizarEstadoProveedor estadoProveedor)
         {
-            string result = await _proveedorBusiness.ActualizarEstado(estadoProveedor);
+            string result = await _proveedorBusiness.AutorizarProveedor(estadoProveedor);
+            if (result == "OK")
+            {
+                return Ok();
+            }
+            else
+            {
+                return Content(HttpStatusCode.BadRequest.ToString(), result);
+            }
+        }
+
+        [HttpPost]
+        [Route("actualizarestado")]
+        public IActionResult ActualizarEstado(ActualizarEstadoProveedor estadoProveedor)
+        {
+            string result = _proveedorBusiness.CambiarEstadoProveedor(estadoProveedor);
             if (result == "OK")
             {
                 return Ok();

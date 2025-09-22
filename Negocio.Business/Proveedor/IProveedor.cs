@@ -12,7 +12,8 @@ namespace Negocio.Business
         Task<ResponseStatus> RegistrarProveedor(Proveedor request);
         Task ActualizarProveedor(Proveedor request);
         Task<List<Proveedor>> ObtenerProveedorXEstado(string estado);
-        Task<string> ActualizarEstado(ActualizarEstadoProveedor estadoProveedor);
+        Task<string> AutorizarProveedor(ActualizarEstadoProveedor estadoProveedor);
+        string CambiarEstadoProveedor(ActualizarEstadoProveedor estadoProveedor);        
         List<ProveedorDatosBasicos> ConsultarDatosBasicosProveedor();
         Proveedor ObtenerProveedor(int idProveedor);
         Task<ProveedorFormato> ObtenerProveedorFormato(int idProveedor);

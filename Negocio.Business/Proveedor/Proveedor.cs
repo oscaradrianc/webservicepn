@@ -548,11 +548,11 @@ namespace Negocio.Business
         }
 
         /// <summary>
-        /// Actualiza el estado del proveedor y del usuario
+        /// Autoriza registro de proveedor y crea usuario para el sistema
         /// </summary>
         /// <param name="estadoProveedor">estado actual del proveedor</param>
         /// <returns>OK si todo esta bien o el mensaje de error</returns>
-        public async Task<string> ActualizarEstado(ActualizarEstadoProveedor estadoProveedor)
+        public async Task<string> AutorizarProveedor(ActualizarEstadoProveedor estadoProveedor)
         {
 
             using (PORTALNEGOCIODataContext cx = new())
@@ -615,6 +615,49 @@ namespace Negocio.Business
                     }
                 }
                 
+            }
+        }
+
+        /// <summary>
+        /// Autoriza registro de proveedor y crea usuario para el sistema
+        /// </summary>
+        /// <param name="estadoProveedor">estado actual del proveedor</param>
+        /// <returns>OK si todo esta bien o el mensaje de error</returns>
+        public string CambiarEstadoProveedor(ActualizarEstadoProveedor estadoProveedor)
+        {
+
+            using (PORTALNEGOCIODataContext cx = new())
+            {
+                cx.Connection.Open();
+                using (var dbContextTransaction = cx.Connection.BeginTransaction())
+                {
+                    try
+                    {
+                        var tblProveedor = (from p in cx.PONEPROVEEDORs
+                                            where p.PROVPROVEEDOR == estadoProveedor.CodigoProveedor
+                                            select p).FirstOrDefault();
+
+                        var tblUsuario = (from u in cx.POGEUSUARIOs
+                                          where u.USUAIDENTIFICADOR == tblProveedor.PROVIDENTIFICACION
+                                          select u).FirstOrDefault();
+
+                        tblUsuario.USUAESTADO = estadoProveedor.Estado;                      
+                      
+                        tblProveedor.PROVESTADO = estadoProveedor.Estado;
+                        tblProveedor.PROVUSUARIOAUTORIZO = estadoProveedor.UsuarioAutoriza;                     
+                                               
+                        cx.SubmitChanges();
+
+                        dbContextTransaction.Commit();                    
+
+                        return "OK";
+                    }
+                    catch (Exception ex)
+                    {
+                        dbContextTransaction.Rollback();
+                        return ex.Message;
+                    }
+                }
             }
         }
 
