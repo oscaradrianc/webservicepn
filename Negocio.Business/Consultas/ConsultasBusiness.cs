@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Negocio.Data;
+using Negocio.Model;
+using Negocio.Model.Consultas;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Negocio.Model;
-using Negocio.Data;
 
 namespace Negocio.Business
 {
@@ -135,8 +136,59 @@ namespace Negocio.Business
             return resp;
         }
 
-            
+
+        public Response<List<SolicitudAnulado>> ObtenerSolicitudesAnuladas(string fechaInicial, string fechaFinal)
+        {
+            Response<List<SolicitudAnulado>> resp = new Response<List<SolicitudAnulado>>();
+
+            try
+            {
+                using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+                {                   
+                    var lta = (from s in cx.PONESOLICITUDCOMPRAs
+                               join e in cx.PONEESTADOSOLICITUDs on s.SOCOESTADO equals e.ESSOESTADO
+                               join u in cx.POGEUSUARIOs on s.LOGSUSUARIO equals u.USUAUSUARIO
+                               join a in cx.PONEVAREAs on s.CLASAREA9 equals a.CODAREA
+                               let nrocoti = (int)cx.PONECOTIZACIONs.Count(c => c.SOCOSOLICITUD == s.SOCOSOLICITUD)
+                               where s.SOCOESTADO == "1" //Estado Anulado                               
+                               select new SolicitudAnulado
+                               {
+                                   CodigoSolicitud = (int)s.SOCOSOLICITUD,
+                                   Descripcion = s.SOCODESCRIPCION,
+                                   FechaSolicitud = s.SOCOFECHA,                                   
+                                   FechaAnulacion = s.LOGSFECHA,                                  
+                                   Estado = s.SOCOESTADO,
+                                   EstadoNombre = e.ESSONOMBRE,
+                                   UsuarioAnulo = u.USUANOMBRE,
+                                   Valor = s.SOCOVALOR,
+                                   Area = a.NOMBRE,
+                                   MotivoAnulo = s.SOCOOBSERVACIONESRECHAZA
+                               });
+
+                    if (fechaInicial != null && fechaInicial != "null")
+                    {
+                        lta = lta.Where(p => Convert.ToDateTime(p.FechaSolicitud).Date >= Convert.ToDateTime(fechaInicial).Date);
+                    }
+                    if (fechaFinal != null && fechaFinal != "null")
+                    {
+                        lta = lta.Where(p => Convert.ToDateTime(p.FechaSolicitud).Date <= Convert.ToDateTime(fechaFinal).Date);
+                    }
+
+                    resp.Data = lta.ToList();
+                    resp.Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = string.Empty };
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.Status = new ResponseStatus { Status = Configuracion.StatusError, Message = ex.Message };
+                resp.Data = null;
+            }
+
+            return resp;
+        }
+
+
         #endregion
-        
+
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Data;
 using Negocio.Model;
+using Negocio.Model.Consultas;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -55,6 +56,10 @@ namespace SWNegocio.Controllers
             return _consultaBusiness.ObtenerEstadoProcesos(idSolicitud, fechaInicial, fechaFinal, estado);
         }
 
-
+        [HttpGet, Route("getsolicitudesanuladas")]
+        public Response<List<SolicitudAnulado>> GetSolicitudesAnuladas(string fechaInicial, string fechaFinal)
+        {
+            return _consultaBusiness.ObtenerSolicitudesAnuladas(fechaInicial, fechaFinal);
+        }
     }
 }
