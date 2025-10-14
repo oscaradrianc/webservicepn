@@ -49,7 +49,7 @@
         public const string NotificacionConfirmacionRegistroProveedor = "confregistroprov";
         public const string NotificacionRegistroCotizacion = "registrocotizacion";
         public const string NotificacionNuevoUsuario = "nuevousuario";
-        public const string NotificacionAjudicado = "ajudicacion";
+        public const string NotificacionAjudicado = "adjudicacion";
         public const string NotificacionDesierto = "desierta";
 
         #endregion

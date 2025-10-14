@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Negocio.Data;
 using Negocio.Model;
 using System;
@@ -35,16 +36,29 @@ namespace Negocio.Business
 
             //using (var cmd = dc.Connection.CreateCommand())
             //{
-                Usuario usr = new Usuario();
+            Usuario usr = new Usuario();
 
-                //dc.Connection.Open();
+            //dc.Connection.Open();
 
-                var usuario = (from u in dc.POGEUSUARIOs
-                               where u.USUAIDENTIFICADOR.ToUpper() == login.Username.ToUpper()
-                                  && ((login.Origen == Configuracion.TipoUsuarioProveedor) ? u.PROVPROVEEDOR != null : u.USUATIPO == login.Origen)
-                               select u).SingleOrDefault();
+            /*var usuario = (from u in dc.POGEUSUARIOs
+                            where u.USUAIDENTIFICADOR.ToUpper() == login.Username.ToUpper()
+                                && ((login.Origen == Configuracion.TipoUsuarioProveedor) ? u.PROVPROVEEDOR != null : u.USUATIPO == login.Origen)
+                            select u).SingleOrDefault();*/
 
-                if (usuario != null)
+            var usernameUp = (login.Username ?? string.Empty).Trim().ToUpperInvariant();
+            var origen = (login.Origen ?? string.Empty).Trim(); // ojo si es char en Oracle
+
+            var query = dc.POGEUSUARIOs
+                .AsNoTracking()
+                .Where(u =>
+                    u.USUAIDENTIFICADOR.ToUpper() == usernameUp &&
+                    (login.Origen == Configuracion.TipoUsuarioProveedor
+                        ? u.PROVPROVEEDOR != null
+                        : u.USUATIPO.Trim() == origen));
+
+            var usuario = query.SingleOrDefault();
+
+            if (usuario != null)
                 {
                     string claveEncriptada = _utilidades.Encriptar(login.Password, configuration.GetSection("EncryptedKey").Value);
                     if (usuario.USUACLAVE != claveEncriptada)
