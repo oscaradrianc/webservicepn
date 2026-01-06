@@ -348,10 +348,10 @@ namespace Negocio.Business
                         predicate = predicate.And(i => i.Estado == filtro.EstadoSolicitud.ToString());
                     }
 
-                    if ((filtro.FechaInicial != DateTime.MinValue) && (filtro.FechaFinal != DateTime.MinValue))
+                    if ((filtro.FechaInicial != DateTime.MinValue) && (filtro.FechaFinal != DateTime.MinValue) && filtro.FechaInicial != null && filtro.FechaFinal != null)
                     {
-                        predicate = predicate.And(i => (i.FechaSolicitud.Date >= filtro.FechaInicial.Date)
-                                                       && i.FechaSolicitud.Date <= filtro.FechaFinal.Date);
+                        predicate = predicate.And(i => (i.FechaSolicitud.Date >= Convert.ToDateTime(filtro.FechaInicial).Date)
+                                                       && i.FechaSolicitud.Date <= Convert.ToDateTime(filtro.FechaFinal).Date);
                     }
 
                     return lst_solicitud.Where(predicate).ToList();
