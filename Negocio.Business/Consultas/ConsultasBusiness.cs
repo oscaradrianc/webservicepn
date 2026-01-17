@@ -29,14 +29,33 @@ namespace Negocio.Business
                 return resp;
             }
         }*/
-        public List<FOBTENERPAGOResult> ObtenerPagos(int idEmpresa, decimal idProveedor, int periodoInicial, int periodoFinal)
+        public Response<List<FOBTENERPAGOResult>> ObtenerPagos(int idEmpresa, decimal idProveedor, int periodoInicial, int periodoFinal)
         {
+            Response<List<FOBTENERPAGOResult>> resp;
             using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
-            //PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
             {
-                var temp =  cx.FOBTENERPAGO(idEmpresa, idProveedor, periodoInicial, periodoFinal).ToList();
+                int periodoConbleActual = cx.PONEVPERIODOCONTABLEs
+                         .Select(p => p.ANOACTUAL * 100 + p.MESACTUAL).SingleOrDefault();
 
-                return temp;
+                if (periodoInicial >= periodoConbleActual && periodoFinal >= periodoConbleActual)
+                {
+                    resp = new Response<List<FOBTENERPAGOResult>>
+                    {
+                        Data = null,
+                        Status = new ResponseStatus { Status = Configuracion.StatusError, Message = "No se puede realizar la consulta, el periodo de consulta no está cerrado en contabilidad." }
+                    };
+
+                    return resp;
+                }
+
+
+                var listaPagos = cx.FOBTENERPAGO(idEmpresa, idProveedor, periodoInicial, periodoFinal).ToList();
+
+                return new Response<List<FOBTENERPAGOResult>>
+                {
+                    Data = listaPagos,
+                    Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = "" }
+                };
             }
         }
 
@@ -72,8 +91,34 @@ namespace Negocio.Business
             RetencionResponse retencion = new RetencionResponse();
             using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
             {
+                int periodoConbleActual = cx.PONEVPERIODOCONTABLEs
+                         .Select(p => p.ANOACTUAL * 100 + p.MESACTUAL).SingleOrDefault();
+
+                if(periodo1 >= periodoConbleActual && periodo2 >= periodoConbleActual)
+                {
+                    resp = new Response<RetencionResponse>
+                    {
+                        Data = null,
+                        Status = new ResponseStatus { Status = Configuracion.StatusError, Message = "No se puede realizar la consulta, el periodo de consulta no está cerrado en contabilidad." }
+                    };
+
+                    return resp;
+                }
+                
+
                 retencion.EncabezadoRetencion = cx.FENCABEZADORETENCION((int)periodo1, (int)periodo2, tipoRetencion, (int)idProveedor).SingleOrDefault();
                 retencion.DetalleRetencion = cx.FDETALLERETENCION((int)periodo1, (int)periodo2, tipoRetencion, (int)idProveedor).ToList();
+
+                if(retencion.EncabezadoRetencion == null)
+                {
+                    resp = new Response<RetencionResponse>
+                    {
+                        Data = null,
+                        Status = new ResponseStatus { Status = Configuracion.StatusError, Message = "La consulta no arrojo resultados." }
+                    };
+
+                    return resp;
+                }
 
                 resp = new Response<RetencionResponse>
                 {

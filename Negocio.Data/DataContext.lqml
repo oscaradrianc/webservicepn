@@ -2289,6 +2289,17 @@ D: Desierta</Summary>
       <Association Name="POGEUSUARIO_POGEAUTORIZADORGERENCIA" ed:AssociationGuid="bc4ba700-fbfb-4a14-9416-9e34d739bdab" Member="POGEUSUARIO" ed:Guid="5056e4a8-44fc-4899-abd6-5e873b2724ce" ThisKey="USUAUSUARIO" OtherKey="USUAUSUARIO" Type="POGEUSUARIO" DeleteRule="NO ACTION" IsForeignKey="true" />
     </Type>
   </Table>
+  <Table Name="PORTAL_NEGOCIOS.PONE_VPERIODOCONTABLE" Member="PONEVPERIODOCONTABLEs">
+    <Type Name="PONEVPERIODOCONTABLE" ed:Guid="8ceae478-98bd-426b-8d12-0f399abc5bd3">
+      <Column Name="EMPRESA" Type="System.Int32" DbType="NUMBER(4) NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="4" ed:ValidateRequired="true" ed:Guid="26301c74-3495-4c65-9f5c-7fee4c4d5d5a" />
+      <Column Name="DESCRIPCION" Type="System.String" DbType="VARCHAR2(300 CHAR) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="300" ed:ValidateMaxLength="300" ed:ValidateRequired="true" ed:Guid="249c5727-3e81-45c5-9885-fff9af7848c1" />
+      <Column Name="ABREVIATURA" Type="System.String" DbType="VARCHAR2(33 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="33" ed:ValidateMaxLength="33" ed:ValidateRequired="false" ed:Guid="0a948499-a3e0-4ec9-8326-315479de371f" />
+      <Column Name="ANO_CIERRE" Member="ANOCIERRE" Type="System.Int32" DbType="NUMBER(4) NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="4" ed:ValidateRequired="true" ed:Guid="3225b849-adc2-49d3-8049-ed4dbeaccc83" />
+      <Column Name="MES_CIERRE" Member="MESCIERRE" Type="System.Int32" DbType="NUMBER(2) NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="2" ed:ValidateRequired="true" ed:Guid="dab1e229-0158-494c-86fd-34350826f48d" />
+      <Column Name="ANO_ACTUAL" Member="ANOACTUAL" Type="System.Int32" DbType="NUMBER(4) NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="4" ed:ValidateRequired="true" ed:Guid="019bc62d-7fde-4046-8ddc-cabd4d59f5bf" />
+      <Column Name="MES_ACTUAL" Member="MESACTUAL" Type="System.Int32" DbType="NUMBER(2) NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="2" ed:ValidateRequired="true" ed:Guid="b7607517-357d-41df-87f2-ad28c69df6ef" />
+    </Type>
+  </Table>
   <Type Name="FOBTENERPAGOResult" ed:Guid="4cda9b2c-7b7b-457e-9f42-b838cee8204d">
     <Column Name="EMPRESA" Type="System.Decimal" DbType="NUMBER NULL" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="583abe5f-2709-4779-8bb6-5847ebf3aa56" />
     <Column Name="NIT" Type="System.Decimal" DbType="NUMBER NULL" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="480426d0-0fc4-4ee1-b7c9-0c3880425634" />

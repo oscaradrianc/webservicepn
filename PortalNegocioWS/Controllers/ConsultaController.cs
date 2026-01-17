@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Data;
 using Negocio.Model;
 using Negocio.Model.Consultas;
 using System.Collections.Generic;
-using System.Linq;
 
 
 namespace SWNegocio.Controllers
@@ -28,13 +24,7 @@ namespace SWNegocio.Controllers
         [HttpGet, Route("getpagos")]
         public Response<List<FOBTENERPAGOResult>> GetPagos(int idEmpresa, decimal idProveedor, int periodoInicial, int periodoFinal)
         {
-            var resp = new Response<List<FOBTENERPAGOResult>>
-            {
-                Data = _consultaBusiness.ObtenerPagos(idEmpresa, idProveedor, periodoInicial, periodoFinal),
-                Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = "" }
-            };
-
-            return resp;
+            return _consultaBusiness.ObtenerPagos(idEmpresa, idProveedor, periodoInicial, periodoFinal);
         }
 
         [HttpGet, Route("getdetallepago")]
