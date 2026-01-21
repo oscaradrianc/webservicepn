@@ -2338,6 +2338,8 @@ D: Desierta</Summary>
     <Column Name="D_AUXILIAR" Member="DAUXILIAR" Type="System.String" DbType="VARCHAR2(4000 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="4cef36cd-b62a-4cc4-adb6-f776216c5a5b" />
     <Column Name="PERIODO1" Type="System.Decimal" DbType="NUMBER NULL" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="48fd301c-8cd8-4281-a6d4-9dabc77f1441" />
     <Column Name="PERIODO2" Type="System.Decimal" DbType="NUMBER NULL" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="7aaa7e7f-17f3-4fc4-8a8a-ec7283976e93" />
+    <Column Name="TITULO_CUENTA" Member="TITULOCUENTA" Type="System.String" DbType="VARCHAR2(100 CHAR)" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="0a9857d3-c73b-4050-93e9-41bea0f8bc89" />
+    <Column Name="MUNICIPIO" Type="System.String" DbType="VARCHAR2(60 CHAR)" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="48a13e3e-b2c3-4a22-8f2a-c077710f1041" />
   </Type>
   <Type Name="FDETALLEPAGOResult" ed:Guid="57eb4d7d-3d18-486b-bc90-6d0366a9c955">
     <Column Name="EMPRESA" Type="System.Decimal" DbType="NUMBER NULL" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="7bbeb176-6e45-42f6-9a7e-1d819ebfba99" />
