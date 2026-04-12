@@ -123,3 +123,6 @@ Negocio.Data/appsettings__.json
 PortalNegocioWS/Logs/log.txt
 PortalNegocioWS/Logs/
 PortalNegocios.Presentation/obj/
+
+# Git worktrees
+.worktrees/
