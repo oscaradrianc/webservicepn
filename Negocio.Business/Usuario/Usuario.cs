@@ -269,7 +269,7 @@ namespace Negocio.Business
                     //Si la clave actual es igual a la clave almacenada
                     if (query.USUACLAVE == _utilidades.GetStringEncriptado(request.ClaveAnterior, _configuration.GetSection("EncryptedKey").Value))
                     {
-                        query.USUACLAVE = request.NuevaClave;
+                        query.USUACLAVE = _utilidades.GetStringEncriptado(request.NuevaClave, _configuration.GetSection("EncryptedKey").Value);
 
                         cx.SubmitChanges();
                         resp.Status = "OK";
@@ -281,9 +281,9 @@ namespace Negocio.Business
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
-                throw e;
+                throw;
             }
 
             return resp;
