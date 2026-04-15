@@ -67,7 +67,7 @@ namespace Negocio.Business
         /// <returns>Valor de la secuencia</returns>
         public static string GetConstante(string nombreConstante, PORTALNEGOCIODataContext ctx)
         {
-            return ctx.ExecuteQuery<string>(string.Format("SELECT CONS_VALOR FROM POGE_CONSTANTE WHERE CONS_REFERENCIA='{0}'", nombreConstante)).FirstOrDefault();
+            return ctx.POGECONSTANTEs.Where(x => x.CONSREFERENCIA == nombreConstante).Select(x => x.CONSVALOR).FirstOrDefault();
         }
 
         /// <summary>

@@ -183,9 +183,7 @@ namespace Negocio.Business
             {
                 try
                 {
-                    //return GetConstante(constante, cx);
-                    return cx.ExecuteQuery<string>(string.Format("SELECT CONS_VALOR FROM POGE_CONSTANTE WHERE CONS_REFERENCIA='{0}'", constante)).FirstOrDefault();
-
+                    return cx.POGECONSTANTEs.Where(x => x.CONSREFERENCIA == constante).Select(x => x.CONSVALOR).FirstOrDefault();
                 }
                 catch (Exception ex)
                 {
