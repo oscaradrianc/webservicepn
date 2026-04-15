@@ -93,11 +93,11 @@ namespace Negocio.Business
                     transaction.Commit();
 
                 }
-                catch (Exception ex)
+                catch
                 {
                     transaction.Rollback();
                     cx.Connection.Close();
-                    throw ex;
+                    throw;
                 }
 
             }
