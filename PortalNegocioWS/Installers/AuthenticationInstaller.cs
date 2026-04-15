@@ -24,8 +24,10 @@ namespace PortalNegocioWS.Installers
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateIssuer = true,
+                    ValidIssuer = configuration.GetValue<string>("JWT:Issuer"),
+                    ValidateAudience = true,
+                    ValidAudience = configuration.GetValue<string>("JWT:Audience")
                 };
             });
         }
