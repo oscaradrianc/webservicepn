@@ -207,7 +207,6 @@ namespace SWNegocio.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [AllowAnonymous]
         [Route("getadjuntos")]
         public Response<SolicitudCompra> GetAdjuntosSolicitud(int id)
         {

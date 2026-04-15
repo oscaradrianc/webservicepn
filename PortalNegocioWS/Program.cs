@@ -25,7 +25,7 @@ var installers = Assembly.GetExecutingAssembly().ExportedTypes
     .Cast<IInstaller>()
     .ToList();
 
-// Registrar servicios a través de los instaladores
+// Registrar servicios a travï¿½s de los instaladores
 installers.ForEach(installer => installer.InstallServices(builder.Services, builder.Configuration));
 
 /////
@@ -79,7 +79,7 @@ myMonitor.IsActive = true;
 
 var app = builder.Build();
 
-// Configuración de middleware (equivalente a `Configure` en `Startup.cs`)
+// Configuraciï¿½n de middleware (equivalente a `Configure` en `Startup.cs`)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -89,6 +89,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("OrigenLocal");
 
 //app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers(); // Mapea los controladores de la API
 
