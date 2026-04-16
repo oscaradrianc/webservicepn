@@ -11,9 +11,11 @@ namespace Negocio.Business
     public class CatalogoBusiness : ICatalogo
     {
         private readonly IUtilidades _utilidades;
-        public CatalogoBusiness(IUtilidades utilidades)
+        private readonly IDataContextFactory _factory;
+        public CatalogoBusiness(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
         #region Metodos Publicos
 
@@ -23,7 +25,7 @@ namespace Negocio.Business
         /// <returns>Lista de elementos del Catalogo</returns>
         public async Task<List<Catalogo>> GetCatalogo()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {                
                 return await Task.Run(() => (  
                                                 from p in cx.PONECATALOGOs
@@ -35,7 +37,7 @@ namespace Negocio.Business
 
         public async Task<List<Catalogo>> GetCatalogoConMedida()
         {            
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {                
                 return await Task.Run(() => (from p in cx.PONECATALOGOs
                                              join u in cx.POGECLASEVALORs on p.CLASUNIDADMEDIDA4 equals u.CLVACLASEVALOR
@@ -61,7 +63,7 @@ namespace Negocio.Business
         /// <returns>elemento de catalogo</returns>
         public List<Catalogo> GetCatalogo(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_catalogo = (from p in cx.PONECATALOGOs
                                     where p.CATACATALOGO == id
@@ -79,7 +81,7 @@ namespace Negocio.Business
         public async Task<ResponseStatus> UpdateCatalogo(decimal id, PONECATALOGO catalogo)
         {
             ResponseStatus resp = new ResponseStatus();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -135,7 +137,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -184,7 +186,7 @@ namespace Negocio.Business
         /// <returns>Elemento del Catalogo recientemente eliminado</returns>
         public Catalogo DeleteCatalogo(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())

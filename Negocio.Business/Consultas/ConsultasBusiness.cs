@@ -12,12 +12,17 @@ namespace Negocio.Business
 {
     public class ConsultasBusiness: IConsultas
     {
+        private readonly IDataContextFactory _factory;
+        public ConsultasBusiness(IDataContextFactory factory)
+        {
+            _factory = factory;
+        }
 
         #region Metodos Publicos
         /*public Response<IQueryable<FOBTENERPAGOResult>> ObtenerPagos(int idEmpresa, decimal idProveedor, int periodoInicial, int periodoFinal)
         {
             Response<IQueryable<FOBTENERPAGOResult>> resp = new Response<IQueryable<FOBTENERPAGOResult>>();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.DeferredLoadingEnabled = false;
                 resp = new Response<IQueryable<FOBTENERPAGOResult>>
@@ -32,7 +37,7 @@ namespace Negocio.Business
         public Response<List<FOBTENERPAGOResult>> ObtenerPagos(int idEmpresa, decimal idProveedor, int periodoInicial, int periodoFinal)
         {
             Response<List<FOBTENERPAGOResult>> resp;
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 int periodoConbleActual = cx.PONEVPERIODOCONTABLEs
                          .Select(p => p.ANOACTUAL * 100 + p.MESACTUAL).SingleOrDefault();
@@ -62,7 +67,7 @@ namespace Negocio.Business
         public Response<DetallePagoResponse> ObtenerDetallePago(int idEmpresa, int vigOrpa, int orpa, int nroAuxiliar )
         {
             Response<DetallePagoResponse> resp = new Response<DetallePagoResponse>();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 DetallePagoResponse detallePago = new DetallePagoResponse();
                 detallePago.DetallePago = cx.FDETALLEPAGO((decimal)idEmpresa, (decimal)vigOrpa, (decimal)orpa, (decimal)nroAuxiliar).SingleOrDefault();
@@ -89,7 +94,7 @@ namespace Negocio.Business
         {
             Response<RetencionResponse> resp = new Response<RetencionResponse>();
             RetencionResponse retencion = new RetencionResponse();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 int periodoConbleActual = cx.PONEVPERIODOCONTABLEs
                          .Select(p => p.ANOACTUAL * 100 + p.MESACTUAL).SingleOrDefault();
@@ -136,7 +141,7 @@ namespace Negocio.Business
 
             try
             {
-                using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+                using (var cx = _factory.Create())
                 {
                     string[] tipoEstados = { "5", "6", "7", "8" };
                     var lta = (from s in cx.PONESOLICITUDCOMPRAs
@@ -188,14 +193,14 @@ namespace Negocio.Business
 
             try
             {
-                using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
-                {                   
+                using (var cx = _factory.Create())
+                {
                     var lta = (from s in cx.PONESOLICITUDCOMPRAs
                                join e in cx.PONEESTADOSOLICITUDs on s.SOCOESTADO equals e.ESSOESTADO
                                join u in cx.POGEUSUARIOs on s.LOGSUSUARIO equals u.USUAUSUARIO
                                join a in cx.PONEVAREAs on s.CLASAREA9 equals a.CODAREA
                                let nrocoti = (int)cx.PONECOTIZACIONs.Count(c => c.SOCOSOLICITUD == s.SOCOSOLICITUD)
-                               where s.SOCOESTADO == "1" //Estado Anulado                               
+                               where s.SOCOESTADO == "1" //Estado Anulado
                                select new SolicitudAnulado
                                {
                                    CodigoSolicitud = (int)s.SOCOSOLICITUD,

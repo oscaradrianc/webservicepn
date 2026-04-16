@@ -18,13 +18,15 @@ namespace Negocio.Business
         private readonly ISolicitudCompra _solicitudCompra;
         private readonly IUtilidades _utilidades;
         private readonly IStorageService _storageService;
+        private readonly IDataContextFactory _factory;
 
-        public CotizacionBusiness(INotificacion notificacion, ISolicitudCompra solicitudCompra, IUtilidades utilidades, IStorageService storageService)
+        public CotizacionBusiness(INotificacion notificacion, ISolicitudCompra solicitudCompra, IUtilidades utilidades, IStorageService storageService, IDataContextFactory factory)
         {
             _notificacion = notificacion;
             _solicitudCompra = solicitudCompra;
             _utilidades = utilidades;
             _storageService = storageService;
+            _factory = factory;
         }
 
         #region Metodos Publicos
@@ -44,7 +46,7 @@ namespace Negocio.Business
                 return resp;
             }
 
-            using var cx = new PORTALNEGOCIODataContext();
+            using var cx = _factory.Create();
             
             cx.Connection.Open();
             using var dbContextTransaction = cx.Connection.BeginTransaction();
@@ -122,7 +124,7 @@ namespace Negocio.Business
         public List<CotizacionesPorSolicitud> ListarSolicitudesCotizacion()        
         {
             //var solicitudBusiness = new SolicitudBusiness();
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             var s = (from x in cx.PONESOLICITUDCOMPRAs
                      join j in cx.PONECOTIZACIONs on x.SOCOSOLICITUD equals j.SOCOSOLICITUD into solicitud
                      from j in solicitud.DefaultIfEmpty()
@@ -164,7 +166,7 @@ namespace Negocio.Business
         public List<SolicitudCotizacion> ListCotizacionProveedor(int idProveedor)
         {
             //var solicitudBusiness = new SolicitudBusiness();
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             var s = (from x in cx.PONESOLICITUDCOMPRAs
                      join j in cx.PONECOTIZACIONs
                      on x.SOCOSOLICITUD equals j.SOCOSOLICITUD
@@ -200,7 +202,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<CotizacionesEstado> ListCotizacionProveedorEstado(int idProveedor)
         {
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             var s = (from x in cx.PONESOLICITUDCOMPRAs
                      join j in cx.PONECOTIZACIONs on x.SOCOSOLICITUD equals j.SOCOSOLICITUD
                      join e in cx.PONEESTADOSOLICITUDs on x.SOCOESTADO equals e.ESSOESTADO
@@ -225,7 +227,7 @@ namespace Negocio.Business
         public List<CotizacionProveedor> ListarCotizacionesOfertadas(int codigoSolicitud, int estado)
         {
             //var solicitudBusiness = new SolicitudBusiness();
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             var query = (from s in cx.PONESOLICITUDCOMPRAs
                          join es in cx.PONEESTADOSOLICITUDs
                             on s.SOCOESTADO equals es.ESSOESTADO
@@ -275,7 +277,7 @@ namespace Negocio.Business
         public async Task<List<AdjuntoCotizacion>> ListarAdjuntosCotizacion(int solicitud, int codigoProveedor)
         {
             List<AdjuntoCotizacion> lst_cotizacion = new List<AdjuntoCotizacion>();
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             var cotizacion = (from p in cx.PONECOTIZACIONs
                               where p.SOCOSOLICITUD == solicitud && p.PROVPROVEEDOR == codigoProveedor
                               select p.COTICOTIZACION).FirstOrDefault();
@@ -330,7 +332,7 @@ namespace Negocio.Business
         public List<DocumentoInvitacion> GetDocumentosRequeridos(int codigoSolicitud)
         {
             List<DocumentoInvitacion> lst_documentos = new List<DocumentoInvitacion>();
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             lst_documentos = (from s in cx.PONEDOCSINVITACIONs
                               join t in cx.POGECLASEVALORs on s.DOCIDOCUMENTO18 equals t.CLVACLASEVALOR
                               where s.SOCOSOLICITUD == codigoSolicitud
@@ -354,7 +356,7 @@ namespace Negocio.Business
         public string Adjudicar(Adjudicacion request)
         {
             //var solicitudBusiness = new SolicitudBusiness();          
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             cx.Connection.Open();
             using var dbContextTransaction = cx.Connection.BeginTransaction();
             try
@@ -405,7 +407,7 @@ namespace Negocio.Business
                 {
                     string tipoNotificacion = string.Empty;
                     NotificacionAdjudicacion cuerpoNotificacion;
-                    using (PORTALNEGOCIODataContext cx1 = new PORTALNEGOCIODataContext())
+                    using (PORTALNEGOCIODataContext cx1 = _factory.Create())
                     {
                         if (request.EstadoSolicitud == Configuracion.TipoEstadoAdjudicado)
                         {
@@ -465,7 +467,7 @@ namespace Negocio.Business
         public Adjudicacion GetAdjudicadoXSolicitud(int codigoSolicitud)
         {
             Adjudicacion lst_adjudicados = new Adjudicacion();
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using PORTALNEGOCIODataContext cx = _factory.Create();
             lst_adjudicados = (from s in cx.PONEADJUDICACIONs
                               join t in cx.PONECOTIZACIONs on s.COTICOTIZACION equals t.COTICOTIZACION
                               join p in cx.PONEPROVEEDORs  on t.PROVPROVEEDOR equals p.PROVPROVEEDOR
@@ -483,7 +485,7 @@ namespace Negocio.Business
 
         public async Task<List<DocumentoFichaTecnica>> ObtenerListaFichasTecnicas(int idSolicitud, int idProveedor)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 List<DocumentoFichaTecnica> ltaFichas = new List<DocumentoFichaTecnica>();
                 var n = (from x in cx.PONECOTIZACIONs
@@ -722,7 +724,7 @@ namespace Negocio.Business
         {
             List<ValoresArchivo> valoresInvalidos = new List<ValoresArchivo>();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {                
                 const string columnaCodigoCatalogo = "A";
                 const string columnaCantidadRequerida = "D";
