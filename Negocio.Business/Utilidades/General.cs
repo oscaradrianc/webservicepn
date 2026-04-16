@@ -14,6 +14,13 @@ namespace Negocio.Business
 {
     public class UtilidadesBusiness: IUtilidades
     {
+        private readonly IDataContextFactory _factory;
+
+        public UtilidadesBusiness(IDataContextFactory factory)
+        {
+            _factory = factory;
+        }
+
         #region Metodos Publicos
 
         /// <summary>
@@ -22,7 +29,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<ActividadEconomica> ObtenerActividadEconomica()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lta = (from a in cx.POGEACTIVIDADECONOMICAs
                            select new ActividadEconomica
@@ -37,7 +44,7 @@ namespace Negocio.Business
 
         public async Task<ActividadEconomica> ObtenerActividadEconomica(string codigoCIIU)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(() => (from a in cx.POGEACTIVIDADECONOMICAs
                                              where a.ACECCODIGOACTIVIDAD == codigoCIIU
@@ -58,7 +65,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Catalogo> ObtenerCatalogo(string id = null)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lta = (from p in cx.PONECATALOGOs
                            join q in cx.POGECLASEVALORs on p.CLASUNIDADMEDIDA4 equals q.CLVACLASEVALOR
@@ -76,7 +83,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public async Task<List<ClaseValor>> ObtenerClaseValor(int idClase)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lta = (from c in cx.POGECLASEs
                            join v in cx.POGECLASEVALORs on c.CLASCLASE equals v.CLASCLASE
@@ -94,7 +101,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Municipio> ObtenerMunicipios()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
 
                 var lta = (from m in cx.POGEMUNICIPIOs
@@ -119,7 +126,7 @@ namespace Negocio.Business
         {
             try
             {
-                using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+                using (PORTALNEGOCIODataContext cx = _factory.Create())
                 {
                     return GetStringEncriptado(texto, machineKey);
                 }
@@ -145,7 +152,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Areas> ObtenerAreas()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return cx.PONEVAREAs.Select(x => new Areas {
                     CodArea = x.CODAREA,
@@ -163,7 +170,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Gerencias> ObtenerGerencias()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return cx.PONEVGERENCIAs.Select(x => new Gerencias
                 {
@@ -180,7 +187,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public string GetConstante(string constante)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 try
                 {
@@ -200,7 +207,7 @@ namespace Negocio.Business
         public List<DocumentosxPersona> ObtenerDocumentos()
         {
             
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 //List<DocumentosxPersona> ltaDocSarLaft = new List<DocumentosxPersona>();
                 //ltaDocSarLaft.Add(new DocumentosxPersona { CLASTIPODOCUMENTO8 = Configuracion.ClaveValorDocSarlaft, CLASTIPOPERSONA1 = Configuracion.TipoPersonaNatural, DOPEOBLIGATORIO = "N", DOPESECUENCIA = 30 });
@@ -226,7 +233,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Pais> ObtenerPais()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lta = cx.POGEPAIs.Select(x=> new Pais {
                     PAISCODIGO = x.PAISCODIGO,
@@ -244,7 +251,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Departamento> ObtenerDepartamento()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lta = cx.POGEDEPARTAMENTOs.Select(x => new Departamento
                 {
@@ -433,7 +440,7 @@ namespace Negocio.Business
 
         public List<string> ObtenerCorreosProveedor()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var q = (from p in cx.PONEPROVEEDORs
                          where p.PROVESTADO == Configuracion.EstadoActivo
@@ -445,7 +452,7 @@ namespace Negocio.Business
 
         public List<string> ObtenerCorreoProveedoresSolicitud(int codigoSolicitud)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var q = (from s in cx.PONESOLICITUDCOMPRAs
                          join c in cx.PONECOTIZACIONs on s.SOCOSOLICITUD equals c.SOCOSOLICITUD
@@ -460,7 +467,7 @@ namespace Negocio.Business
 
         public string ObtenerValorClaseValor(int idClaseValor)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var v = (from p in cx.POGECLASEVALORs
                          where p.CLVACLASEVALOR == idClaseValor                        
@@ -472,7 +479,7 @@ namespace Negocio.Business
 
         public async Task<Municipio> ObtenerMunicipio(int idMunicipio)
         {
-            using(PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using(PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(() => (from mu in cx.POGEMUNICIPIOs
                                          where mu.MUNICODIGO == idMunicipio
@@ -490,7 +497,7 @@ namespace Negocio.Business
 
         public async Task<PONEDOCUMENTO> ObtenerDocumentoxId(int idDocumento)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(() => (from doc in cx.PONEDOCUMENTOs
                                              where doc.DOCUDOCUMENTO == idDocumento

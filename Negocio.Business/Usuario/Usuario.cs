@@ -10,14 +10,16 @@ using Negocio.Model;
 namespace Negocio.Business
 {
     public class UsuarioBusiness : IUsuario
-    {   
+    {
         private readonly IConfiguration _configuration;
         private readonly IUtilidades _utilidades;
-        
-        public UsuarioBusiness(IConfiguration configuration, IUtilidades utilidades)
-        {            
+        private readonly IDataContextFactory _factory;
+
+        public UsuarioBusiness(IConfiguration configuration, IUtilidades utilidades, IDataContextFactory factory)
+        {
             _configuration = configuration;
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         #region Metodos Publicos
@@ -29,7 +31,7 @@ namespace Negocio.Business
         public async Task<List<Usuario>> GetUsuario()
         {
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(() => (from p in cx.POGEUSUARIOs
                                                          select GetModelObject(p)).ToList());                
@@ -45,7 +47,7 @@ namespace Negocio.Business
         public Usuario GetUsuario(decimal id)
         {
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var usuario = (from p in cx.POGEUSUARIOs
                                     where p.USUAUSUARIO == id
@@ -63,7 +65,7 @@ namespace Negocio.Business
         /// <param name="usuario">Objeto Usuario</param>
         public async Task UpdateUsuario(decimal id, POGEUSUARIO usuario)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -117,7 +119,7 @@ namespace Negocio.Business
             //int codigo = 0;
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
 
@@ -210,7 +212,7 @@ namespace Negocio.Business
         /// <returns>Usuario recientemente eliminado</returns>
         public Usuario DeleteUsuario(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -260,7 +262,7 @@ namespace Negocio.Business
 
             try
             {
-                using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+                using (PORTALNEGOCIODataContext cx = _factory.Create())
                 {
                     var query = (from p in cx.POGEUSUARIOs
                                  where p.USUAIDENTIFICADOR == request.Usuario
@@ -294,7 +296,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 POGEUSUARIO usu = cx.POGEUSUARIOs.Where(u => u.USUAUSUARIO == idUsuario).SingleOrDefault();
 

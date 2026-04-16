@@ -11,9 +11,11 @@ namespace Negocio.Business
     public class RolBusiness : IRol
     {
         private readonly IUtilidades _utilidades;
-        public RolBusiness(IUtilidades utilidades)
+        private readonly IDataContextFactory _factory;
+        public RolBusiness(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         #region Metodos Publicos
@@ -24,7 +26,7 @@ namespace Negocio.Business
         /// <returns>Lista de elementos del rol</returns>
         public async Task<List<POGEROL>> GetRol()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_rol = (from p in cx.POGEROLs
                                select p);
@@ -40,7 +42,7 @@ namespace Negocio.Business
         /// <returns>elemento de rol</returns>
         public List<Rol> GetRol(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_rol = (from p in cx.POGEROLs
                                         where p.ROLEROL == id
@@ -52,7 +54,7 @@ namespace Negocio.Business
 
         public async Task<List<POGEROL>> GetRoles()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(() => (from p in cx.POGEROLs
                                              select p).ToList()
@@ -67,7 +69,7 @@ namespace Negocio.Business
         /// <param name="rol">Objeto Rol</param>
         public void UpdateRol(decimal id, Rol rol)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -114,7 +116,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -154,7 +156,7 @@ namespace Negocio.Business
         /// <returns>Elemento del rol recientemente eliminado</returns>
         public Rol DeleteRol(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -196,7 +198,7 @@ namespace Negocio.Business
         #region Opciones x Rol
         public async Task<List<POGEOPCIONXROL>> GetOpcionRol()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_rol = (from p in cx.POGEOPCIONXROLs
                                select p);
@@ -206,7 +208,7 @@ namespace Negocio.Business
 
         public async Task<List<POGEOPCIONXROL>> GetOpcionRol(int idRol)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_rol = (from p in cx.POGEOPCIONXROLs
                                where p.ROLEROL == idRol
@@ -220,7 +222,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -287,7 +289,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())

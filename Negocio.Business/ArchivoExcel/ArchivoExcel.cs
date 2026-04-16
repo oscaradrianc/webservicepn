@@ -17,11 +17,13 @@ namespace Negocio.Business
     {
         private readonly IProveedor _proveedor;
         private readonly IUtilidades _utilidades;
+        private readonly IDataContextFactory _factory;
 
-        public ArchivoExcelBusiness(IProveedor proveedor, IUtilidades utilidades)
+        public ArchivoExcelBusiness(IProveedor proveedor, IUtilidades utilidades, IDataContextFactory factory)
         {
             _proveedor = proveedor;
             _utilidades = utilidades;
+            _factory = factory;
         }
         /// <summary>
         /// Valida y registra el Formato de excel configurado en la base de datos
@@ -30,7 +32,7 @@ namespace Negocio.Business
         public void RegistrarArchivo(ArchivoExcel request)
         {
             int codigoArchivo = 0;
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 var transaction = cx.Connection.BeginTransaction();
@@ -107,7 +109,7 @@ namespace Negocio.Business
         public async Task<string> ObtenerFormatoProveedor(int idProveedor)
         {
             // Obtener el blob de Base de datos
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 ProveedorFormato proveedorActual = await _proveedor.ObtenerProveedorFormato(idProveedor);
 
@@ -118,7 +120,7 @@ namespace Negocio.Business
         public async Task<string> ObtenerFormatoProveedorJson(Proveedor proveedor)
         {
             // Obtener el blob de Base de datos
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(async () =>
                 {
@@ -134,7 +136,7 @@ namespace Negocio.Business
 
         private async  Task<string> EscribirFormatoProveedor(ProveedorFormato proveedorActual)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(() =>
                 {
