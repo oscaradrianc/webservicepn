@@ -13,6 +13,7 @@
     <PackageReference Include="EntityFramework" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="NPOI" />
+    <PackageReference Include="Serilog" />
     <PackageReference Include="Stubble.Core" />
   </ItemGroup>
 
