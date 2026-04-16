@@ -78,6 +78,12 @@ builder.Services.AddCronJob<EnviarNotificacionInvitacionJob>(c =>
     c.CronExpression = builder.Configuration.GetSection("Settings").GetSection("CronEnviarInvitacion").Value;
 });
 
+builder.Services.AddCronJob<NotificacionActualizacionDatosJob>(c =>
+{
+    c.TimeZoneInfo = TimeZoneInfo.Local;
+    c.CronExpression = builder.Configuration.GetSection("Settings").GetSection("CronEnviarActualizacionDatos").Value;
+});
+
 // Replace bootstrap logger with config-driven logger from appsettings.json
 builder.Host.UseSerilog((ctx, cfg) =>
     cfg.ReadFrom.Configuration(ctx.Configuration));
