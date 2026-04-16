@@ -199,13 +199,13 @@ namespace Negocio.Business
                             {
                                 //////////////////Envia Correo indicando nuevo registro de proveedor//////////////////////////
                                 Thread t = new(() =>
-                                    (new NotificacionBusiness(_utilidades)).GenerarNotificacion("registroproveedor", prov)
+                                    (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("registroproveedor", prov)
                                 );
                                 t.Start();
                                 t.IsBackground = true;
 
                                 Thread t1 = new(() =>
-                                    (new NotificacionBusiness(_utilidades)).GenerarNotificacion("confregistroprov", request)
+                                    (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("confregistroprov", request)
                                 );
                                 t1.Start();
                                 t1.IsBackground = true;
@@ -601,11 +601,11 @@ namespace Negocio.Business
                         };
                         if (estadoProveedor.Estado == Configuracion.EstadoActivo)
                         {
-                            (new NotificacionBusiness(_utilidades)).GenerarNotificacion(Configuracion.NotificacionProvAutorizado, usr);
+                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion(Configuracion.NotificacionProvAutorizado, usr);
                         }
                         else
                         {
-                            (new NotificacionBusiness(_utilidades)).GenerarNotificacion(Configuracion.NotificacionProvRechazado, usr);
+                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion(Configuracion.NotificacionProvRechazado, usr);
                         }                       
 
                         return "OK";

@@ -87,11 +87,11 @@ Plans:
 Mapear todos los boundaries de transacciones en `Proveedor.cs` (1,240 líneas) y `SolicitudCompra.cs` (1,039 líneas): identificar cada bloque `BeginTransaction()` / `Commit()` / `Rollback()`, qué instancias de DataContext participan y si hay contextos anidados. Documentar el mapa antes de escribir tareas de migración para esos dos archivos.
 
 Plans:
-- [ ] 03-01: Copiar IDataContextFactory y DataContextFactory del worktree a Negocio.Data/
-- [ ] 03-02: Registrar DataContextFactory como Singleton en BusinessInstaller
-- [ ] 03-03: Migrar los 5 servicios más pequeños al factory (validación del patrón)
-- [ ] 03-04: Migrar los 10 servicios restantes de complejidad media al factory
-- [ ] 03-05: Fix LoginBusiness — IConfiguration por constructor + using en ResetPassword
+- [x] 03-01: Copiar IDataContextFactory y DataContextFactory del worktree a Negocio.Data/
+- [x] 03-02: Registrar DataContextFactory como Singleton en BusinessInstaller
+- [x] 03-03: Migrar los 5 servicios más pequeños al factory (validación del patrón)
+- [x] 03-04: Migrar los 10 servicios restantes de complejidad media al factory
+- [x] 03-05: Fix LoginBusiness — IConfiguration por constructor + using en ResetPassword
 - [ ] 03-06: Migrar Proveedor.cs al factory (requiere mapa de transacciones previo)
 - [ ] 03-07: Migrar SolicitudCompra.cs al factory (requiere mapa de transacciones previo)
 - [ ] 03-08: Migrar cron jobs al factory + registrar NotificacionActualizacionDatosJob

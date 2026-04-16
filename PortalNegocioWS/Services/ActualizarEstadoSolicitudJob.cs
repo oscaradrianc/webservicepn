@@ -11,12 +11,14 @@ namespace PortalNegocioWS.Services
     public class ActualizarEstadoSolicitudJob : CronJobService
     {
         private readonly ILogger<ActualizarEstadoSolicitudJob> _logger;
-        
+        private readonly IDataContextFactory _factory;
 
-        public ActualizarEstadoSolicitudJob(IScheduleConfig<ActualizarEstadoSolicitudJob> config, ILogger<ActualizarEstadoSolicitudJob> logger)
+
+        public ActualizarEstadoSolicitudJob(IScheduleConfig<ActualizarEstadoSolicitudJob> config, ILogger<ActualizarEstadoSolicitudJob> logger, IDataContextFactory factory)
             : base(config.CronExpression, config.TimeZoneInfo, logger)
         {
-            _logger = logger;        
+            _logger = logger;
+            _factory = factory;
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
@@ -30,14 +32,14 @@ namespace PortalNegocioWS.Services
             DateTime fechaEjecucion = DateTime.Now;
             _logger.LogInformation($"{fechaEjecucion:hh:mm:ss} JOB PN ESTA FUNCIONADO.");
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var q = from s in cx.PONESOLICITUDCOMPRAs
                         where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado
                           && Convert.ToDateTime(s.SOCOFECHACIERRE).Date < fechaEjecucion.Date
                         select s;
 
-                using (PORTALNEGOCIODataContext cx1 = new PORTALNEGOCIODataContext())
+                using (var cx1 = _factory.Create())
                 {
                     cx1.Connection.Open();
                     using (var dbContextTransaction = cx1.Connection.BeginTransaction())

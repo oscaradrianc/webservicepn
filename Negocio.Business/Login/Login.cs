@@ -328,7 +328,7 @@ namespace Negocio.Business
 
                     cx.SubmitChanges();
 
-                    (new NotificacionBusiness(_utilidades)).GenerarNotificacion(Configuracion.NotificacionResetPassword, usr);
+                    (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion(Configuracion.NotificacionResetPassword, usr);
 
                     resp.Status = Configuracion.StatusOk;
                     resp.Message = "Se envio correo electrónico para reestablecer la contraseña.";

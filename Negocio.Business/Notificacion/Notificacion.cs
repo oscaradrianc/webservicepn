@@ -12,10 +12,12 @@ namespace Negocio.Business
     public class NotificacionBusiness : INotificacion
     {
         private readonly IUtilidades _utilidades;
+        private readonly IDataContextFactory _factory;
         private readonly ProveedorBusiness _proveedor;
-        public NotificacionBusiness(IUtilidades utilidades, ProveedorBusiness proveedor = null)
+        public NotificacionBusiness(IUtilidades utilidades, IDataContextFactory factory, ProveedorBusiness proveedor = null)
         {
             _utilidades = utilidades;
+            _factory = factory;
             _proveedor = proveedor;
         }
         #region Metodos Publicos
@@ -27,7 +29,7 @@ namespace Negocio.Business
         public List<Notificacion> GetNotificacion()
         {
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_notificacion = (from p in cx.POGENOTIFICACIONs
                                     select GetModelObject(p)).ToList();
@@ -44,7 +46,7 @@ namespace Negocio.Business
         /// <returns>elemento de notificacion</returns>
         public List<Notificacion> GetNotificacion(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_notificacion = (from p in cx.POGENOTIFICACIONs
                                     where p.NOTINOTIFICACION == id
@@ -63,7 +65,7 @@ namespace Negocio.Business
         {
             ResponseStatus res = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -120,7 +122,7 @@ namespace Negocio.Business
         {
             int codigo = 0;
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -157,7 +159,7 @@ namespace Negocio.Business
         /// <returns>Elemento de la notificacion recientemente eliminado</returns>
         public Notificacion DeleteNotificacion(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -203,7 +205,7 @@ namespace Negocio.Business
         /// <param name="obj"></param>
         public void GenerarNotificacion(string referencia, object obj)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
 
                 Notificacion noti = ObtenerNotificacion(referencia, cx);

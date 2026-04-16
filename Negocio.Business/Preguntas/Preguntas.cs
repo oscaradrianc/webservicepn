@@ -78,7 +78,7 @@ namespace Negocio.Business
                         //////////////////Envia Correo a las personas parametrizadas cuando se realiza un pregunta//////////////////////////
                         Thread t = new Thread(() =>
 
-                            (new NotificacionBusiness(_utilidades)).GenerarNotificacion("registropregunta", request)
+                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("registropregunta", request)
                         );
                         t.Start();
                         t.IsBackground = true;
@@ -129,7 +129,7 @@ namespace Negocio.Business
                         //////////////////Envia Correo al proveedor que realizo la pregunta////////////////////////
                         Thread t = new Thread(() =>
 
-                            (new NotificacionBusiness(_utilidades)).GenerarNotificacion("registrorespuesta", request)
+                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("registrorespuesta", request)
                         );
                         t.Start();
                         t.IsBackground = true;

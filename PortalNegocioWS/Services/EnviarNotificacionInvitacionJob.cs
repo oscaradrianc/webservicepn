@@ -15,14 +15,16 @@ namespace PortalNegocioWS.Services
         private readonly ILogger<EnviarNotificacionInvitacionJob> _logger;
         //private readonly INotificacion _notificacion;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IDataContextFactory _factory;
 
 
         public EnviarNotificacionInvitacionJob(IScheduleConfig<EnviarNotificacionInvitacionJob> config, ILogger<EnviarNotificacionInvitacionJob> logger,
-            IServiceScopeFactory serviceScopeFactory)
+            IServiceScopeFactory serviceScopeFactory, IDataContextFactory factory)
             : base(config.CronExpression, config.TimeZoneInfo, logger)
         {
             _logger = logger;
             _serviceScopeFactory = serviceScopeFactory;
+            _factory = factory;
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
@@ -40,13 +42,13 @@ namespace PortalNegocioWS.Services
             {
                 var _notificacion = scope.ServiceProvider.GetRequiredService<INotificacion>();
 
-                using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+                using (var cx = _factory.Create())
                 {
                     var q = from s in cx.PONESOLICITUDCOMPRAs
                             where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado && s.SOCOENVIOPROV == "N"
                             select s;
 
-                    using (PORTALNEGOCIODataContext cx1 = new PORTALNEGOCIODataContext())
+                    using (var cx1 = _factory.Create())
                     {
                         cx1.Connection.Open();
                         //using (var dbContextTransaction = cx1.Connection.BeginTransaction())
