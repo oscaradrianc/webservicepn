@@ -20,11 +20,13 @@ namespace Negocio.Business
         private readonly INotificacion _notificacion;
         private readonly IUtilidades _utilidades;
         private readonly IStorageService _storageService;
-        public SolicitudBusiness(INotificacion notificacion, IUtilidades utilidades, IStorageService storageService)
+        private readonly IDataContextFactory _factory;
+        public SolicitudBusiness(INotificacion notificacion, IUtilidades utilidades, IStorageService storageService, IDataContextFactory factory)
         {
             _notificacion = notificacion;
             _utilidades = utilidades;
             _storageService = storageService;
+            _factory = factory;
         }
 
         #region Metodos Publicos
@@ -35,7 +37,7 @@ namespace Negocio.Business
         /// <returns>OK si todo esta bien o el mensaje de error</returns>
         public async Task<string> RegistrarSolicitud(SolicitudCompra request)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 //Valida ruta para almacenar archivos
                 if(!_storageService.ExistsDirectory())
@@ -134,7 +136,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public string ActualizarSolicitud(SolicitudCompra request)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -191,7 +193,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public string ActualizarFechasSolicitud(SolicitudCompra request)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -258,7 +260,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Saia> ObtenerSaia()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
 
                 var s = (from x in cx.PONEVSAIAs
@@ -275,7 +277,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public async Task<List<SolicitudCompra>> ListSolicitudPorAutorizador(string estado, int idUsuario)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
 
                 IQueryable<SolicitudCompra> lst_solicitud = (from x in cx.PONESOLICITUDCOMPRAs
@@ -307,7 +309,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<SolicitudCompra> ListSolicitud(int tipo, FiltroSolicitud filtro = null)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
 
                IQueryable<SolicitudCompra> lst_solicitud = (from x in cx.PONESOLICITUDCOMPRAs
@@ -367,7 +369,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<SolicitudCompra> ListInvitacion(string tipo)
         {   
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
 
                 var s = (from x in cx.PONESOLICITUDCOMPRAs
@@ -407,7 +409,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public SolicitudCompra GetAdjuntosSolicitud(int id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
 
                 var g = cx.PONESOLICITUDCOMPRAs.Where(x => x.SOCOSOLICITUD == id).Select(x => new SolicitudCompra()
@@ -460,7 +462,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public SolicitudCompra GetSolicitud(int id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var g = cx.PONESOLICITUDCOMPRAs.Where(x => x.SOCOSOLICITUD == id).Select(x => new SolicitudCompra()
                 {
@@ -511,7 +513,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public string AutorizarSolicitud(Autorizacion request)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 SolicitudCompra soli = new SolicitudCompra();
                 cx.Connection.Open();
@@ -571,7 +573,7 @@ namespace Negocio.Business
         /// <returns>Estado de la solicitud</returns>
         public List<EstadoSolicitud> GetEstadoSolicitud(string alias)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 return (from p in cx.PONEESTADOSOLICITUDs
                         where p.ESSOESTADOREGISTRO == "A" && p.ESSOALIAS == alias
@@ -590,7 +592,7 @@ namespace Negocio.Business
 
         public List<SolicitudAreaEstado> GetSolicitudesXEstadoYArea()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var sl = (from s in cx.PONESOLICITUDCOMPRAs
                           join e in cx.PONEESTADOSOLICITUDs on s.SOCOESTADO equals e.ESSOESTADO
@@ -612,7 +614,7 @@ namespace Negocio.Business
         public List<EstadoSolicitud> GetEstadosSolicitud()
         {
             List<EstadoSolicitud> lta = new List<EstadoSolicitud>();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
 
                 var e = (from es in cx.PONEESTADOSOLICITUDs
@@ -647,14 +649,14 @@ namespace Negocio.Business
         /// <returns></returns>
         public void CerrarInvitacion(DateTime fecha)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var q = from s in cx.PONESOLICITUDCOMPRAs
                         where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado
                           && Convert.ToDateTime(s.SOCOFECHACIERRE).Date < fecha
                         select s;
 
-                using (PORTALNEGOCIODataContext cx1 = new PORTALNEGOCIODataContext())
+                using (var cx1 = _factory.Create())
                 {
                     cx1.Connection.Open();
                     using (var dbContextTransaction = cx1.Connection.BeginTransaction())
@@ -682,7 +684,7 @@ namespace Negocio.Business
 
         public List<Usuario> ObtenerAutorizadoresArea(int idArea)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var q = from a in cx.POGEAUTORIZADORGERENCIAs
                         join u in cx.POGEUSUARIOs on a.USUAUSUARIO equals u.USUAUSUARIO
@@ -745,7 +747,7 @@ namespace Negocio.Business
         public async Task<List<CotizacionesPorSolicitud>> GetCotizacionesxSolicitud(int idSolicitud)
         {
             //var solicitudBusiness = new SolicitudBusiness();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var s = await Task.Run(() =>
                 {
@@ -776,7 +778,7 @@ namespace Negocio.Business
 
         #region Metodos Privados
         private List<ValoresArchivo>  ValidacionCargaMasiva(List<ValoresArchivo> valores, List<ConfiguracionArchivo> configuracion) { 
-                using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+                using (var cx = _factory.Create())
                 {
                     List<ValoresArchivo> valoresInvalidos = new List<ValoresArchivo>();
                     const string columnaCodigo = "A";
@@ -1003,7 +1005,7 @@ namespace Negocio.Business
 
         private List<PONEESTADOSOLICITUD> GetEstadoSolicitud(int estado)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 return (from p in cx.PONEESTADOSOLICITUDs
                         where p.ESSOESTADOREGISTRO == "A" && p.ESSOESTADO == estado.ToString()
