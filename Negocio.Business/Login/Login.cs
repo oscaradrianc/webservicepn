@@ -14,11 +14,15 @@ namespace Negocio.Business
 {
     public class LoginBusiness: ILogin
     {
-        private readonly IUtilidades _utilidades;        
+        private readonly IUtilidades _utilidades;
+        private readonly IConfiguration _configuration;
+        private readonly IDataContextFactory _factory;
 
-        public LoginBusiness(IUtilidades utilidades)
+        public LoginBusiness(IUtilidades utilidades, IConfiguration configuration, IDataContextFactory factory)
         {
-            _utilidades = utilidades;         
+            _utilidades = utilidades;
+            _configuration = configuration;
+            _factory = factory;
         }
 
         #region Metodos Publicos
@@ -27,13 +31,12 @@ namespace Negocio.Business
         /// Autentica el usuario por medio de token JWT
         /// </summary>
         /// <param name="login">Usuario y Password</param>
-        /// <param name="configuration"></param>
         /// <returns>Objeto Usuario con Token</returns>
-        public Response<Usuario> Authenticate(LoginRequest login, IConfiguration configuration)
+        public Response<Usuario> Authenticate(LoginRequest login)
         {
             Response<Usuario> resp = new Response<Usuario>();
-            PORTALNEGOCIODataContext dc = new PORTALNEGOCIODataContext();
-
+            using (var dc = _factory.Create())
+            {
             //using (var cmd = dc.Connection.CreateCommand())
             //{
             Usuario usr = new Usuario();
@@ -60,7 +63,7 @@ namespace Negocio.Business
 
             if (usuario != null)
                 {
-                    string claveEncriptada = _utilidades.Encriptar(login.Password, configuration.GetSection("EncryptedKey").Value);
+                    string claveEncriptada = _utilidades.Encriptar(login.Password, _configuration.GetSection("EncryptedKey").Value);
                     if (usuario.USUACLAVE != claveEncriptada)
                     {
                         usr.ResultadoLogin = -2; //Contrase;a invalida                        
@@ -122,7 +125,7 @@ namespace Negocio.Business
                             }
                             
                             //TODO generar token JWT
-                            usr.Token = TokenGenerator.GenerateTokenJwt(usr, configuration);
+                            usr.Token = TokenGenerator.GenerateTokenJwt(usr, _configuration);
                         }
                     }
                 }//Usuario no existe o no es del tipo correcto
@@ -137,6 +140,7 @@ namespace Negocio.Business
             resp.Status = new ResponseStatus { Status = HttpStatusCode.OK.ToString(), Message = "" };
 
             return resp;
+            } // end using (dc)
 
             /*
             cmd.CommandType = System.Data.CommandType.Text;
@@ -217,12 +221,13 @@ namespace Negocio.Business
         }
 
 
-        public ResponseStatus ChangePassword(ChangePasswordRequest changePassword, IConfiguration configuration)
+        public ResponseStatus ChangePassword(ChangePasswordRequest changePassword)
         {
             ResponseStatus resp = new ResponseStatus();
-            PORTALNEGOCIODataContext dc = new PORTALNEGOCIODataContext();
+            using (var dc = _factory.Create())
+            {
 
-            Response<Usuario> usua = Authenticate(new LoginRequest { Username = changePassword.Username, Password = changePassword.Password, Origen = changePassword.Origen }, configuration);
+            Response<Usuario> usua = Authenticate(new LoginRequest { Username = changePassword.Username, Password = changePassword.Password, Origen = changePassword.Origen });
 
             if(usua != null)
             {
@@ -231,8 +236,8 @@ namespace Negocio.Business
                 {
                     string resPolitica = PoliticasContrasena.Validar(changePassword.NewPassword, changePassword.Username);
                                         
-                    string nuevaClave = _utilidades.Encriptar(changePassword.NewPassword, configuration.GetSection("EncryptedKey").Value);
-                    string actualClave = _utilidades.Encriptar(changePassword.Password, configuration.GetSection("EncryptedKey").Value);
+                    string nuevaClave = _utilidades.Encriptar(changePassword.NewPassword, _configuration.GetSection("EncryptedKey").Value);
+                    string actualClave = _utilidades.Encriptar(changePassword.Password, _configuration.GetSection("EncryptedKey").Value);
                     //string nuevaClave = dc.FENCRIPTAR(changePassword.NewPassword);
                     //string actualClave = dc.FENCRIPTAR(changePassword.Password);
 
@@ -281,16 +286,18 @@ namespace Negocio.Business
             }
             
             return resp;
+            } // end using (dc)
         }
 
 
-        public ResponseStatus ResetPassword(ResetPassRequest req, IConfiguration configuration)
+        public ResponseStatus ResetPassword(ResetPassRequest req)
         {
             ResponseStatus resp = new ResponseStatus();
-            PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using (var cx = _factory.Create())
+            {
 
             var tblUsuario = (from u in cx.POGEUSUARIOs
-                              where u.USUAIDENTIFICADOR == req.Username && u.USUAESTADO == Configuracion.EstadoActivo                               
+                              where u.USUAIDENTIFICADOR == req.Username && u.USUAESTADO == Configuracion.EstadoActivo
                               select u).FirstOrDefault();
 
             if(tblUsuario == null)
@@ -305,12 +312,12 @@ namespace Negocio.Business
                     //string claveGenerada = cx.GENERARCLAVEALEATORIA();
                     //string claveEncriptada = cx.FENCRIPTAR(claveGenerada);
                     string claveGenerada = _utilidades.GetRandomKey();
-                    string claveEncriptada = _utilidades.Encriptar(claveGenerada, configuration.GetSection("EncryptedKey").Value);
+                    string claveEncriptada = _utilidades.Encriptar(claveGenerada, _configuration.GetSection("EncryptedKey").Value);
 
                     Usuario usr = new Usuario
                     {
                         Identificador = tblUsuario.USUAIDENTIFICADOR,
-                        Nombres = tblUsuario.USUANOMBRE,                       
+                        Nombres = tblUsuario.USUANOMBRE,
                         Clave = claveGenerada,
                         Email = tblUsuario.USUACORREO
                     };
@@ -334,6 +341,7 @@ namespace Negocio.Business
             }
 
             return resp;
+            } // end using (cx)
         }
 
         /// <summary>
