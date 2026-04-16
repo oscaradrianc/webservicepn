@@ -12,9 +12,11 @@ namespace Negocio.Business
     public class NotificacionBusiness : INotificacion
     {
         private readonly IUtilidades _utilidades;
-        public NotificacionBusiness(IUtilidades utilidades)
+        private readonly ProveedorBusiness _proveedor;
+        public NotificacionBusiness(IUtilidades utilidades, ProveedorBusiness proveedor = null)
         {
             _utilidades = utilidades;
+            _proveedor = proveedor;
         }
         #region Metodos Publicos
 
@@ -298,7 +300,7 @@ namespace Negocio.Business
                         case "autorizacionproveedo":
 
                             Usuario provAuto = obj as Usuario;
-                            correoProv = ProveedorBusiness.ObtenerEmailxProveedor((int)provAuto.IdProveedor);
+                            correoProv = _proveedor.ObtenerEmailxProveedor((int)provAuto.IdProveedor);
 
                             if (correoProv != null)
                             {
@@ -327,7 +329,7 @@ namespace Negocio.Business
                         case "registrorespuesta":
 
                             CrearRespuesta respuesta = obj as CrearRespuesta;
-                            correoProv = ProveedorBusiness.ObtenerEmailxProveedor(respuesta.CodigoProveedor);
+                            correoProv = _proveedor.ObtenerEmailxProveedor(respuesta.CodigoProveedor);
 
                             if (!string.IsNullOrEmpty(correoProv))
                             {
@@ -446,7 +448,7 @@ namespace Negocio.Business
         private void EnviarNotificacionProveedor(int codigoProveedor, Notificacion noti, object obj, PORTALNEGOCIODataContext cx)
         {
             var stubble = new StubbleBuilder().Build();
-            List<string> correos = new List<string> { ProveedorBusiness.ObtenerEmailxProveedor(codigoProveedor) };
+            List<string> correos = new List<string> { _proveedor.ObtenerEmailxProveedor(codigoProveedor) };
 
             if (correos.Count > 0)
             {

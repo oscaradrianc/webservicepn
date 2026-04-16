@@ -42,7 +42,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new();
 
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -236,7 +236,7 @@ namespace Negocio.Business
         /// <returns>OK si todo esta bien o el mensaje de error</returns>
         public async Task ActualizarProveedor(Proveedor request)
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -349,7 +349,7 @@ namespace Negocio.Business
 
         public string ActualizarDocsProveedor(Proveedor proveedor)
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -393,7 +393,7 @@ namespace Negocio.Business
 
             List<Proveedor> proveedores = new();
 
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 await Task.Run(() =>
                 {
@@ -557,7 +557,7 @@ namespace Negocio.Business
         public async Task<string> AutorizarProveedor(ActualizarEstadoProveedor estadoProveedor)
         {
 
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -628,7 +628,7 @@ namespace Negocio.Business
         public string CambiarEstadoProveedor(ActualizarEstadoProveedor estadoProveedor)
         {
 
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -671,7 +671,7 @@ namespace Negocio.Business
         {
             List<ProveedorDatosBasicos> prov = new();
 
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 /*prov = (from p in cx.PONEPROVEEDORs
                         select new ProveedorDatosBasicos { CodigoProveedor = (int)p.PROVPROVEEDOR, Documento = p.PROVIDENTIFICACION, TipoPersona = p.CLASTIPOPERSONAL1, Nombre = p.PROVRAZONSOCIAL }).ToList();*/
@@ -706,9 +706,9 @@ namespace Negocio.Business
             return prov;
         }
 
-        public static string ObtenerEmailxProveedor(int idProveedor)
+        public string ObtenerEmailxProveedor(int idProveedor)
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 string correo = (from p in cx.PONEPROVEEDORs
                                  where p.PROVPROVEEDOR == idProveedor
@@ -719,7 +719,7 @@ namespace Negocio.Business
 
         public Proveedor ObtenerProveedor(int idProveedor)
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 DataLoadOptions dlo = new();
                 dlo.LoadWith<PONEPROVEEDOR>(a => a.PONEDETALLEACCIONISTAs);
@@ -756,7 +756,7 @@ namespace Negocio.Business
 
         public async Task<ProveedorFormato> ObtenerProveedorFormato(int idProveedor)
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 return await
                     Task.Run(() =>
@@ -817,7 +817,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public async Task<ProveedorFormato> ObtenerProveedorFormatoJson(Proveedor proveedor)
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 return await Task.Run(async () =>
                 {
@@ -985,7 +985,7 @@ namespace Negocio.Business
 
         public async Task<List<ProveedorEstado>> ObtenerCantidadProveedorPorEstado()
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 var query = from p in cx.PONEPROVEEDORs
                             group p by p.PROVESTADO into g
@@ -1001,7 +1001,7 @@ namespace Negocio.Business
 
         public async Task<List<FPROVEEDORESREGISTRADOSMEResult>> ObtenerNroProveedoresRegistradoPorMes(int vigencia)
         {
-            using (PORTALNEGOCIODataContext cx = new())
+            using (var cx = _factory.Create())
             {
                 var query = from p in cx.FPROVEEDORESREGISTRADOSME(vigencia) select p;
 
