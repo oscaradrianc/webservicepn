@@ -10,15 +10,18 @@ namespace Negocio.Business
     public class NotificacionUsuarioBusiness : INotificacionUsuario
     {
         private readonly IUtilidades _utilidades;
-        public NotificacionUsuarioBusiness(IUtilidades utilidades)
+        private readonly IDataContextFactory _factory;
+
+        public NotificacionUsuarioBusiness(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         //////Notificacion usuario
         public List<NotificacionUsuario> ObtenerNotificacionesxUsuario()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var lst_notiusuario = (from p in cx.POGENOTIFICACIONXUSUARIOs
                                        select GetModelObject(p)).ToList();
@@ -30,7 +33,7 @@ namespace Negocio.Business
 
         public List<NotificacionUsuario> ObtenerUsuarioxIdNotificacion(int idNotificacion)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var lst_notiusuario = (from p in cx.POGENOTIFICACIONXUSUARIOs
                                        where p.NOTINOTIFICACION == idNotificacion
@@ -44,7 +47,7 @@ namespace Negocio.Business
         {
             ResponseStatus result = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -92,7 +95,7 @@ namespace Negocio.Business
         {
             ResponseStatus result = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())

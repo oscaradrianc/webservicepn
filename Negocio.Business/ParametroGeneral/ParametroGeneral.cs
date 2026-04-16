@@ -11,14 +11,17 @@ namespace Negocio.Business
     public class ParametroGeneral : IParametroGeneral
     {
         private readonly IUtilidades _utilidades;
-        public ParametroGeneral(IUtilidades utilidades)
+        private readonly IDataContextFactory _factory;
+
+        public ParametroGeneral(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         public async Task<List<POGECLASE>> ObtenerClases()
         {
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using var cx = _factory.Create();
             var query = from c in cx.POGECLASEs
                         select c;
 
@@ -27,14 +30,14 @@ namespace Negocio.Business
 
         public async Task<POGECLASEVALOR> ObtenerClaseValor(int idClaseValor)
         {
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using var cx = _factory.Create();
 
             return await Task.FromResult((from c in cx.POGECLASEVALORs select c).Where(c => c.CLVACLASEVALOR == idClaseValor).SingleOrDefault());
         }
 
         public async Task<List<POGECLASEVALOR>> ObtenerClaseValorPorClase(int idClase)
         {
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using var cx = _factory.Create();
 
             return await Task.FromResult((from c in cx.POGECLASEVALORs select c).Where(c => c.CLASCLASE == idClase).ToList());
         }
@@ -43,7 +46,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
 
@@ -89,7 +92,7 @@ namespace Negocio.Business
         public async Task<ResponseStatus> ActualizarClaseValor(int id, POGECLASEVALOR claseValor)
         {
             ResponseStatus resp = new ResponseStatus();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())

@@ -13,16 +13,18 @@ namespace Negocio.Business
     {
         private readonly IConfiguration _configuration;
         private readonly IUtilidades _utilidades;
+        private readonly IDataContextFactory _factory;
 
-        public ConstanteBusiness(IConfiguration configuracion, IUtilidades utilidades)
+        public ConstanteBusiness(IConfiguration configuracion, IUtilidades utilidades, IDataContextFactory factory)
         {
             _configuration = configuracion;
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         public async Task<List<POGECONSTANTE>> GetConstante()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 return await Task.Run(() => (from p in cx.POGECONSTANTEs select p).ToList());
             }
@@ -30,7 +32,7 @@ namespace Negocio.Business
 
         public async Task<POGECONSTANTE> GetConstante(int IdConstante)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 return await Task.Run(() => (from p in cx.POGECONSTANTEs
                                              where p.CONSCONSTANTE == IdConstante
@@ -43,7 +45,7 @@ namespace Negocio.Business
             //int codigo = 0;
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
 
@@ -85,7 +87,7 @@ namespace Negocio.Business
 
         public async Task UpdateConstante(int id, POGECONSTANTE constante)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
