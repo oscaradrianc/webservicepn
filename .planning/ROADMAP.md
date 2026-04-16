@@ -92,9 +92,9 @@ Plans:
 - [x] 03-03: Migrar los 5 servicios más pequeños al factory (validación del patrón)
 - [x] 03-04: Migrar los 10 servicios restantes de complejidad media al factory
 - [x] 03-05: Fix LoginBusiness — IConfiguration por constructor + using en ResetPassword
-- [ ] 03-06: Migrar Proveedor.cs al factory (requiere mapa de transacciones previo)
-- [ ] 03-07: Migrar SolicitudCompra.cs al factory (requiere mapa de transacciones previo)
-- [ ] 03-08: Migrar cron jobs al factory + registrar NotificacionActualizacionDatosJob
+- [x] 03-06: Migrar Proveedor.cs al factory (requiere mapa de transacciones previo)
+- [x] 03-07: Migrar SolicitudCompra.cs al factory (requiere mapa de transacciones previo)
+- [x] 03-08: Migrar cron jobs al factory + registrar NotificacionActualizacionDatosJob
 
 ---
 
