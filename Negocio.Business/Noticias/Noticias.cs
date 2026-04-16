@@ -11,15 +11,17 @@ namespace Negocio.Business
     public class NoticiasBusiness: INoticias
     {
         private readonly IUtilidades _utilidades;
+        private readonly IDataContextFactory _factory;
 
-        public NoticiasBusiness(IUtilidades utilidades)
+        public NoticiasBusiness(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         public async Task<List<Noticias>> ListNoticias()
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
 
                 var s = (from x in cx.PONENOTICIAs
@@ -41,7 +43,7 @@ namespace Negocio.Business
 
         public async Task<Noticias> ConsultarNoticiaPorId(int id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 var n = (from x in cx.PONENOTICIAs
                          where x.NOTINOTICIA == id
@@ -61,7 +63,7 @@ namespace Negocio.Business
         public async Task<ResponseStatus> ActualizarNoticia(decimal id, Noticias noticia)
         {
             ResponseStatus resp = new ResponseStatus();
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())

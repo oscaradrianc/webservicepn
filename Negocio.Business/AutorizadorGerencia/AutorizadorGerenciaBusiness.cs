@@ -11,14 +11,17 @@ namespace Negocio.Business
     public class AutorizadorGerenciaBusiness : IAutorizadorGerencia
     {
         private readonly IUtilidades _utilidades;
-        public AutorizadorGerenciaBusiness(IUtilidades utilidades)
+        private readonly IDataContextFactory _factory;
+
+        public AutorizadorGerenciaBusiness(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         public async Task<List<POGEAUTORIZADORGERENCIA>> ObtenerAutorizadores()
         {
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using var cx = _factory.Create();
             var query = from c in cx.POGEAUTORIZADORGERENCIAs
                         select c;
 
@@ -27,7 +30,7 @@ namespace Negocio.Business
 
         public async Task<List<POGEAUTORIZADORGERENCIA>> ObtenerAutorizadores(int idGerencia)
         {
-            using PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext();
+            using var cx = _factory.Create();
             var query = from c in cx.POGEAUTORIZADORGERENCIAs
                         where c.IDGERENCIA == idGerencia
                         select c;
@@ -39,7 +42,7 @@ namespace Negocio.Business
         {
             ResponseStatus resp = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
 
@@ -86,7 +89,7 @@ namespace Negocio.Business
         {
             ResponseStatus result = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
