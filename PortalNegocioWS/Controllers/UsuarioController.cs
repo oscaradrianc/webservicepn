@@ -210,7 +210,7 @@ namespace SWNegocio.Controllers
             else
             {
                 ChangePasswordRequest newRequest = new ChangePasswordRequest { Username = request.Usuario, Password = request.ClaveAnterior, NewPassword = request.NuevaClave };
-                resp = _loginBusiness.ChangePassword(newRequest, _configuration);
+                resp = _loginBusiness.ChangePassword(newRequest);
             }
 
             return resp;

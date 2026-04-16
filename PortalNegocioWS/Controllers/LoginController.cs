@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Server.HttpSys;
-using Microsoft.Extensions.Configuration;
 using Negocio.Business;
 using Negocio.Model;
 using System.Net;
@@ -14,12 +13,10 @@ namespace SWNegocio.Controllers
     [Route("api/[controller]")]
     public class LoginController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogin _loginBusiness;
 
-        public LoginController(IConfiguration configuration, ILogin login)
+        public LoginController(ILogin login)
         {
-            _configuration = configuration;
             _loginBusiness = login;
         }
 
@@ -41,7 +38,7 @@ namespace SWNegocio.Controllers
             else
             {
 
-                resp = _loginBusiness.Authenticate(login, _configuration);
+                resp = _loginBusiness.Authenticate(login);
             }
 
             return resp;
@@ -64,7 +61,7 @@ namespace SWNegocio.Controllers
             else
             {
 
-                resp = _loginBusiness.ChangePassword (credentials, _configuration);
+                resp = _loginBusiness.ChangePassword(credentials);
             }
 
             return resp;
@@ -85,7 +82,7 @@ namespace SWNegocio.Controllers
             else
             {
 
-                resp = _loginBusiness.ResetPassword (request, _configuration);
+                resp = _loginBusiness.ResetPassword(request);
             }
 
             return resp;
