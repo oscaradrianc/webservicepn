@@ -19,14 +19,16 @@ namespace Negocio.Business
         private readonly IUsuario _usuario;
         private readonly IParametroGeneral _parametroGeneral;
         private readonly IStorageService _storageService;
+        private readonly IDataContextFactory _factory;
 
-        public ProveedorBusiness(IUtilidades utilidades, IConfiguration configuration, IUsuario usuario, IParametroGeneral parametroGeneral, IStorageService storageService)
+        public ProveedorBusiness(IUtilidades utilidades, IConfiguration configuration, IUsuario usuario, IParametroGeneral parametroGeneral, IStorageService storageService, IDataContextFactory factory)
         {
             _utilidades = utilidades;
             _configuration = configuration;
             _usuario = usuario;
             _parametroGeneral = parametroGeneral;
             _storageService = storageService;
+            _factory = factory;
         }
 
         #region Metodos Publicos
