@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
     <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" />
     <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
     <PackageReference Include="Serilog.Sinks.Oracle" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
