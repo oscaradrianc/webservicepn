@@ -84,8 +84,11 @@ builder.Host.UseSerilog((ctx, cfg) =>
 
 var app = builder.Build();
 
-OracleMonitor myMonitor = new OracleMonitor();
-myMonitor.IsActive = true;
+if (app.Environment.IsDevelopment())
+{
+    OracleMonitor myMonitor = new OracleMonitor();
+    myMonitor.IsActive = true;
+}
 
 app.UseSerilogRequestLogging(); // Registra m�todo, ruta, status code y duraci�n de cada request HTTP
 

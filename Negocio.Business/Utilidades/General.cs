@@ -8,6 +8,7 @@ using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Negocio.Business
 {
@@ -370,7 +371,10 @@ namespace Negocio.Business
             }
             catch (Exception ex)
             {
-                
+                Log.Error(ex,
+                    "SendMail failed. Recipients: {Recipients}, Subject: {Subject}",
+                    listaCorreos,
+                    asunto);
             }
         }
 
