@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Negocio.Business;
 using Negocio.Business.Utilidades;
+using Negocio.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace PortalNegocioWS.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSingleton<IDataContextFactory, DataContextFactory>();
+
             services.AddScoped<ISolicitudCompra, SolicitudBusiness>();
             services.AddScoped<ICatalogo, CatalogoBusiness>();
             services.AddScoped<IOpcion, OpcionBusiness>();
