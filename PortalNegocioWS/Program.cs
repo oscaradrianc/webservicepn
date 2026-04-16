@@ -16,6 +16,11 @@ using System.Net;
 using Negocio.Business;
 
 
+// Bootstrap logger: captura errores durante el startup del host (Oracle conn fail, config load fail)
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Obtener todos los instaladores
@@ -73,11 +78,16 @@ builder.Services.AddCronJob<EnviarNotificacionInvitacionJob>(c =>
     c.CronExpression = builder.Configuration.GetSection("Settings").GetSection("CronEnviarInvitacion").Value;
 });
 
+// Replace bootstrap logger with config-driven logger from appsettings.json
+builder.Host.UseSerilog((ctx, cfg) =>
+    cfg.ReadFrom.Configuration(ctx.Configuration));
+
+var app = builder.Build();
+
 OracleMonitor myMonitor = new OracleMonitor();
 myMonitor.IsActive = true;
 
-
-var app = builder.Build();
+app.UseSerilogRequestLogging(); // Registra m�todo, ruta, status code y duraci�n de cada request HTTP
 
 // Configuraci�n de middleware (equivalente a `Configure` en `Startup.cs`)
 if (app.Environment.IsDevelopment())
@@ -93,47 +103,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers(); // Mapea los controladores de la API
 
-app.Run();
-
-/*public class Program
+try
 {
-    public static void Main(string[] args)
-    {
-        var configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        Log.Logger = new LoggerConfiguration()
-            //.ReadFrom.Configuration(configuration)
-            .MinimumLevel.Error()
-            .WriteTo.File(@"Logs/log.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:t4}] {Message:j}{NewLine}")
-            /*.WriteTo.Oracle(cfg => 
-                            cfg.WithSettings(configuration.GetConnectionString("PORTALNEGOCIODataContextConnectionString"))
-                            .UseBurstBatch()
-                            .CreateSink())*/
-/*      .CreateLogger();
-
-  try
-  {
-      Log.Debug ("Inicia el WS PN");
-      CreateHostBuilder(args).Build().Run();
-  }
-
-  catch (Exception ex)
-  {
-      Log.Fatal($"Error iniciando el WS PN: { ex.Message }");
-  }
-  finally
-  {
-      Log.CloseAndFlush();
-  }
+    app.Run();
 }
-
-public static IHostBuilder CreateHostBuilder(string[] args) =>
-  Host.CreateDefaultBuilder(args)
-      .UseSerilog()
-      .ConfigureWebHostDefaults(webBuilder =>
-      {
-          webBuilder.UseStartup<Startup>();
-      });
-}*/
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
