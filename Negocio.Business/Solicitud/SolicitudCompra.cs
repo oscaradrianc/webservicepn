@@ -20,11 +20,13 @@ namespace Negocio.Business
         private readonly INotificacion _notificacion;
         private readonly IUtilidades _utilidades;
         private readonly IStorageService _storageService;
-        public SolicitudBusiness(INotificacion notificacion, IUtilidades utilidades, IStorageService storageService)
+        private readonly IDataContextFactory _factory;
+        public SolicitudBusiness(INotificacion notificacion, IUtilidades utilidades, IStorageService storageService, IDataContextFactory factory)
         {
             _notificacion = notificacion;
             _utilidades = utilidades;
             _storageService = storageService;
+            _factory = factory;
         }
 
         #region Metodos Publicos
