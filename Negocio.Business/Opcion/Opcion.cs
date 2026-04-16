@@ -11,9 +11,11 @@ namespace Negocio.Business
     public class OpcionBusiness: IOpcion
     {
         private readonly IUtilidades _utilidades;
-        public OpcionBusiness(IUtilidades utilidades)
+        private readonly IDataContextFactory _factory;
+        public OpcionBusiness(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         #region Metodos Publicos
@@ -25,7 +27,7 @@ namespace Negocio.Business
         public List<Opcion> GetOpcion()
         {
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_opcion = (from p in cx.POGEOPCIONs
                                   select GetModelObject(p)).ToList();
@@ -43,7 +45,7 @@ namespace Negocio.Business
         public List<Opcion> GetOpcion(decimal id)
         {
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var lst_opcion = (from p in cx.POGEOPCIONs
                                   where p.OPCIOPCION == id
@@ -63,7 +65,7 @@ namespace Negocio.Business
         {
             ResponseStatus res = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -118,7 +120,7 @@ namespace Negocio.Business
             int codigo = 0;
             ResponseStatus res = new ResponseStatus();
 
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())
@@ -158,7 +160,7 @@ namespace Negocio.Business
         /// <returns>Elemento del Catalogo recientemente eliminado</returns>
         public Opcion DeleteOpcion(decimal id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 cx.Connection.Open();
                 using (var dbContextTransaction = cx.Connection.BeginTransaction())

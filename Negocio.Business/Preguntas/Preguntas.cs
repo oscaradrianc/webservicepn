@@ -12,9 +12,11 @@ namespace Negocio.Business
     public class PreguntasBusiness : IPreguntas
     {
         private readonly IUtilidades _utilidades;
-        public PreguntasBusiness(IUtilidades utilidades)
+        private readonly IDataContextFactory _factory;
+        public PreguntasBusiness(IUtilidades utilidades, IDataContextFactory factory)
         {
             _utilidades = utilidades;
+            _factory = factory;
         }
 
         #region Metodos Publicos
@@ -26,7 +28,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Preguntas> ListPreguntas(int id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 return ListarPreguntasAll(id, cx);
             }
@@ -39,7 +41,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<Preguntas> ListPreguntasSinRespuesta(int id)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 return ListarPreguntasAll(id, cx).Where(x=> x.FechaRespuesta == null).ToList();
             }
@@ -53,7 +55,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public string CrearPregunta(CrearPregunta request)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
 
@@ -105,7 +107,7 @@ namespace Negocio.Business
         /// <returns></returns>
         public string CrearRespuesta(CrearRespuesta request)
         {
-            using (PORTALNEGOCIODataContext cx = new PORTALNEGOCIODataContext())
+            using (var cx = _factory.Create())
             {
                 cx.Connection.Open();
 
