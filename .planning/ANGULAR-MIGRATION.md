@@ -178,20 +178,122 @@ this.http.post('/api/Proveedor/autorizar', request).pipe(
 
 ## CotizacionController
 
-*Filled by Plan 04-05*
+**POST /api/Cotizacion/registrar** — HTTP code change for system errors
+- Before: Unhandled exception returned HTTP 500 with ResponseStatus body ( StatusCode bug)
+- After: Unhandled exception → HTTP 500 ProblemDetails
+- Angular change: Catch `error.status === 500` — error.error now has consistent structure
 
----
+**POST /api/Cotizacion/adjudicar** — HTTP code correction for business errors
+- Before: Business error returned HTTP 500 with string body (misuse of 500 for business error)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Update to catch `error.status === 400` instead of 500 for this endpoint
+
+**POST /api/Cotizacion/cargamasiva** — HTTP code change for system errors
+- Before: Unhandled exception returned HTTP 200 with body = exception message (Content bug)
+- After: Unhandled exception → HTTP 500 ProblemDetails
+- Angular change: Catch `error.status === 500` instead of parsing response body
+
+**GET /api/Cotizacion/listarfichatecnica** — HTTP code change for system errors
+- Before: Unhandled exception returned HTTP 200 with body = exception message (Content bug)
+- After: Unhandled exception → HTTP 500 ProblemDetails
+- Angular change: Catch `error.status === 500` instead of parsing response body
+
+**IMPORTANT note for Adjudicar:** This endpoint previously returned HTTP 500 for business errors. It now correctly returns HTTP 400. Angular code checking `error.status === 500` for this endpoint must be updated to `error.status === 400`.
+
+**Angular pattern for CotizacionController:**
+```typescript
+// Example for CotizacionController endpoints
+this.http.post('/api/Cotizacion/adjudicar', request).pipe(
+  catchError(err => {
+    if (err.status === 400) {
+      // Business error (adjudication failed)
+      return throwError(() => new Error(err.error?.detail));
+    }
+    if (err.status === 500) {
+      // System error
+      return throwError(() => new Error('Error del servidor'));
+    }
+    return throwError(() => err);
+  })
+);
+```
 
 ## PreguntasController
 
-*Filled by Plan 04-05*
+**POST /api/Preguntas/preguntar** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body
+
+**POST /api/Preguntas/responder** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body
+
+**Angular pattern for PreguntasController:**
+```typescript
+// Example for PreguntasController endpoints
+this.http.post('/api/Preguntas/preguntar', request).pipe(
+  catchError(err => {
+    if (err.status === 400) {
+      // Business error
+      return throwError(() => new Error(err.error?.detail));
+    }
+    return throwError(() => err);
+  })
+);
+```
 
 ---
 
-## Remaining Controllers (ApiControllerBase migration)
+## Remaining Controllers (ApiControllerBase migration — Plan 04-08)
 
-*Filled by Plan 04-07*
+The following 7 controllers have been migrated to inherit from `ApiControllerBase` (no breaking changes to endpoints):
+
+1. **AutorizadorGerenciaController** — GET/POST/DELETE endpoints for authorization managers. Uses Response<T> wrapper. Exceptions return HTTP 500 ProblemDetails.
+2. **ParametroGeneralController** — GET/POST/PUT endpoints for general parameters (classes and values). Uses Response<T> wrapper. Exceptions return HTTP 500 ProblemDetails.
+3. **ConstanteController** — GET/POST/PUT endpoints for constants. Uses Response<T> wrapper. Exceptions return HTTP 500 ProblemDetails or BadRequest.
+4. **NoticiasController** — GET/PUT endpoints for news (AllowAnonymous). Uses Response<T> wrapper. Exceptions return BadRequest.
+5. **NotificacionController** — GET/PUT/POST/DELETE endpoints for notifications. Uses ResponseStatus wrapper. Exceptions return BadRequest.
+6. **NotificacionUsuarioController** — GET/POST/DELETE endpoints for user notifications. Uses ResponseStatus wrapper. Exceptions return BadRequest.
+7. **OpcionesRolController** — GET/POST/DELETE endpoints for role options. Uses Response<T> wrapper. Exceptions return HTTP 500 ProblemDetails.
+
+**Migration changes applied to all 7:**
+- Removed `ControllerBase` inheritance, now inherit from `ApiControllerBase`
+- Removed redundant `[ApiController]` attributes (inherited from `ApiControllerBase`)
+- For controllers in namespace `SWNegocio.Controllers`, added `using PortalNegocioWS.Controllers;` to access `ApiControllerBase`
+
+**No endpoint behavior changes:** All success responses (HTTP 200) and request models remain identical. Error handling is centralized via GlobalExceptionHandler as per Phase 4 design.
 
 ---
 
-*Last updated: Phase 4, Plan 01 (infrastructure stub)*
+## Summary
+
+**Phase 4 (API Contract Standardization) Completion Status:**
+
+All 12 controllers have been standardized:
+- ✓ LoginController (04-03)
+- ✓ SolicitudController (04-04)
+- ✓ ProveedorController (04-04)
+- ✓ CotizacionController (04-05)
+- ✓ PreguntasController (04-06)
+- ✓ ApiControllerBase base class (04-02)
+- ✓ AutorizadorGerenciaController (04-08)
+- ✓ ParametroGeneralController (04-08)
+- ✓ ConstanteController (04-08)
+- ✓ NoticiasController (04-08)
+- ✓ NotificacionController (04-08)
+- ✓ NotificacionUsuarioController (04-08)
+- ✓ OpcionesRolController (04-08)
+
+**Infrastructure Changes Applied:**
+- GlobalExceptionHandler centralized unhandled exceptions → HTTP 500 ProblemDetails
+- InvalidModelStateResponseFactory enforces HTTP 422 for validation errors
+- All controllers inherit ApiControllerBase (enforces [ApiController] attribute and proper HTTP response patterns)
+
+**Angular Migration Guidance:**
+- Update error handlers to check HTTP status codes (400, 401, 404, 422, 500) instead of parsing response body for error flags
+- HTTP 422 errors have per-field error details in `error.error.errors`
+- HTTP 500 errors have consistent ProblemDetails structure with `detail`, `title`, `traceId`
+
+*Last updated: Phase 4, Plan 08 (final controller migrations)*
