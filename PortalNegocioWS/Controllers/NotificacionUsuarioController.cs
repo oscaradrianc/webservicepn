@@ -12,11 +12,10 @@ using Negocio.Model;
 
 namespace PortalNegocioWS.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    
-    public class NotificacionUsuarioController : ControllerBase
+
+    public class NotificacionUsuarioController : ApiControllerBase
     {
         private readonly INotificacionUsuario _notificacionUsuarioBusiness;
 

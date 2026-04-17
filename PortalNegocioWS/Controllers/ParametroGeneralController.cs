@@ -17,9 +17,8 @@ using Microsoft.AspNetCore.Authorization;
 namespace PortalNegocioWS.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ParametroGeneralController : ControllerBase
+    public class ParametroGeneralController : ApiControllerBase
     {
         private readonly IParametroGeneral _parametroGeneral;
         private readonly IMapper _mapper;

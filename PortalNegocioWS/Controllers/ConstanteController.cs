@@ -19,8 +19,7 @@ namespace PortalNegocioWS.Controllers
 {
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [ApiController]
-    public class ConstanteController : ControllerBase
+    public class ConstanteController : ApiControllerBase
     {
         private readonly IConstante _constanteBusiness;
         private readonly IConfiguration _configuration;

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Server.HttpSys;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,8 @@ namespace SWNegocio.Controllers
     /// Controlador para manejo de noticias
     /// </summary>
     [AllowAnonymous]
-    [ApiController]
     [Route("api/[controller]")]
-    public class NoticiasController : ControllerBase
+    public class NoticiasController : ApiControllerBase
     {
 
         private readonly INoticias _noticiasBusiness;

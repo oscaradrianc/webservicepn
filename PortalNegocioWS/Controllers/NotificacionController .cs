@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -9,10 +10,9 @@ using System.Threading.Tasks;
 
 namespace SWNegocio.Controllers
 {
-    [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class NotificacionController : ControllerBase
+    public class NotificacionController : ApiControllerBase
     {
 
         private readonly INotificacion _notificacionBusiness;

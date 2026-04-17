@@ -15,9 +15,8 @@ using Negocio.Data;
 namespace PortalNegocioWS.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]    
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class OpcionesRolController : ControllerBase
+    public class OpcionesRolController : ApiControllerBase
     {
         private readonly IRol _rol;
         private readonly IMapper _mapper;

@@ -17,9 +17,8 @@ using System.Threading.Tasks;
 namespace PortalNegocioWS.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class AutorizadorGerenciaController : ControllerBase
+    public class AutorizadorGerenciaController : ApiControllerBase
     {
         private readonly IAutorizadorGerencia _autorizadorGerencia;
         private readonly IMapper _mapper;
