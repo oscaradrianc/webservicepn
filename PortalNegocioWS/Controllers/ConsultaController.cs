@@ -3,6 +3,7 @@ using Negocio.Business;
 using Negocio.Data;
 using Negocio.Model;
 using Negocio.Model.Consultas;
+using PortalNegocioWS.Controllers;
 using System.Collections.Generic;
 
 
@@ -11,7 +12,7 @@ namespace SWNegocio.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ConsultaController : ControllerBase
+    public class ConsultaController : ApiControllerBase
     {
 
         private readonly IConsultas _consultaBusiness;
