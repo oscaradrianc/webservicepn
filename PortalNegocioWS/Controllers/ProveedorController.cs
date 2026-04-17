@@ -7,9 +7,10 @@ using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.Extensions.Logging;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
+using PortalNegocioWS.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace SWNegocio.Controllers
@@ -17,7 +18,7 @@ namespace SWNegocio.Controllers
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class ProveedorController : ControllerBase
+    public class ProveedorController : ApiControllerBase
     {
         private readonly IProveedor _proveedorBusiness;
         private readonly IMapper _mapper;
@@ -35,16 +36,9 @@ namespace SWNegocio.Controllers
         [Route("registrar")]
         public async Task<IActionResult> RegistrarProveedor(Proveedor request)
         {
-            try
-            {
-                //Registra el proveedor, si es exitoso el registro del proveedor, crea el usuario del sistema
-                var result = await _proveedorBusiness.RegistrarProveedor(request);                
-                return Ok(result);                
-            }
-            catch(Exception e)
-            {
-                return Content(HttpStatusCode.InternalServerError.ToString(), e.Message);
-            }            
+            //Registra el proveedor, si es exitoso el registro del proveedor, crea el usuario del sistema
+            var result = await _proveedorBusiness.RegistrarProveedor(request);
+            return Ok(result);
         }
 
 
@@ -87,7 +81,7 @@ namespace SWNegocio.Controllers
             }
             else
             {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
+                throw new BusinessException(result);
             }
         }
 
@@ -102,7 +96,7 @@ namespace SWNegocio.Controllers
             }
             else
             {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
+                throw new BusinessException(result);
             }
         }
 
@@ -137,14 +131,7 @@ namespace SWNegocio.Controllers
 
             //Actualiza el proveedor, si es exitoso el registro del proveedor, crea el usuario del sistema
             await _proveedorBusiness.ActualizarProveedor(request);
-           // if (result == "OK")
-            {
-                return Ok();
-            }
-           /* else
-            {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
-            }*/
+            return Ok();
 
         }
 
@@ -161,7 +148,7 @@ namespace SWNegocio.Controllers
             }
             else
             {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
+                throw new BusinessException(result);
             }
 
         }
@@ -171,17 +158,9 @@ namespace SWNegocio.Controllers
         public async Task<IActionResult> ObtenerProveedoresPorEstado()
         {
             Response<List<ProveedorEstado>> res = new Response<List<ProveedorEstado>>();
-
-            try
-            {
-                res.Data = await _proveedorBusiness.ObtenerCantidadProveedorPorEstado();
-                res.Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = "" };
-                return Ok(res);
-            }
-            catch(Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }            
+            res.Data = await _proveedorBusiness.ObtenerCantidadProveedorPorEstado();
+            res.Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = "" };
+            return Ok(res);
         }
 
         [HttpGet]
@@ -189,20 +168,11 @@ namespace SWNegocio.Controllers
         public async Task<IActionResult> ObtenerProveedoresRegistradosPorMes(int vigencia)
         {
             Response<List<ProveedoresPorMes>> res = new Response<List<ProveedoresPorMes>>();
+            var r = await _proveedorBusiness.ObtenerNroProveedoresRegistradoPorMes(vigencia);
+            res.Data = _mapper.Map<List<ProveedoresPorMes>>(r);
+            res.Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = "" };
 
-            try
-            {
-                var r = await _proveedorBusiness.ObtenerNroProveedoresRegistradoPorMes(vigencia);
-                res.Data = _mapper.Map<List<ProveedoresPorMes>>(r);
-                res.Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = "" };
-
-                return Ok(res);
-            }
-            catch(Exception e)
-            {
-                _logger.LogError($"ERRRO PN - ObtenerProveedoresRegistradosPorMes: { e.Message } ");
-                return StatusCode(500, e.Message);
-            }
+            return Ok(res);
         }
     }
 }

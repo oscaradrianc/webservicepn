@@ -7,19 +7,19 @@ using Microsoft.Extensions.Logging;
 using Negocio.Business;
 using Negocio.Model;
 using Newtonsoft.Json;
+using PortalNegocioWS.Controllers;
+using PortalNegocioWS.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace SWNegocio.Controllers
 {
-    [ApiController]    
+    [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class SolicitudController : ControllerBase
+    public class SolicitudController : ApiControllerBase
     {
         private readonly ISolicitudCompra _solicitudBusiness;
         private readonly ILogger<SolicitudController> _logger;
@@ -33,7 +33,7 @@ namespace SWNegocio.Controllers
 
         [HttpPost]
         [Route("registrar")]
-        public async Task<IActionResult> RegistrarSolicitud(SolicitudCompra request) 
+        public async Task<IActionResult> RegistrarSolicitud(SolicitudCompra request)
         {
 
             //Registra el proveedor, si es exitoso el registro del proveedor, crea el usuario del sistema
@@ -42,7 +42,7 @@ namespace SWNegocio.Controllers
                 return Ok();
             } else
             {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
+                throw new BusinessException(result);
             }
 
         }
@@ -51,22 +51,14 @@ namespace SWNegocio.Controllers
         [Route("actualizar")]
         public IActionResult ActualizarSolicitud(SolicitudCompra request)
         {
-            try
+            string result = _solicitudBusiness.ActualizarSolicitud(request);
+            if (result == "OK")
             {
-                string result = _solicitudBusiness.ActualizarSolicitud(request);
-                if (result == "OK")
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return Content(HttpStatusCode.BadRequest.ToString(), result);
-                }
+                return Ok();
             }
-            catch(Exception e)
+            else
             {
-                _logger.LogError($"Error al insertar clase valor: { JsonConvert.SerializeObject(request) } :: { e.Message } ");
-                return Content(HttpStatusCode.BadRequest.ToString(), e.Message);
+                throw new BusinessException(result);
             }
         }
 
@@ -189,7 +181,7 @@ namespace SWNegocio.Controllers
         [Route("Autorizar")]
         public IActionResult AutorizarSolicitud(Autorizacion request)
         {
-            
+
             string result = _solicitudBusiness.AutorizarSolicitud(request);
             if (result == "OK")
             {
@@ -197,7 +189,7 @@ namespace SWNegocio.Controllers
             }
             else
             {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
+                throw new BusinessException(result);
             }
         }
 
@@ -228,23 +220,14 @@ namespace SWNegocio.Controllers
         [Route("actualizarfechas")]
         public IActionResult ActualizarFechas(SolicitudCompra request)
         {
-            try
+            string result = _solicitudBusiness.ActualizarFechasSolicitud(request);
+            if (result == "OK")
             {
-                string result = _solicitudBusiness.ActualizarFechasSolicitud(request);
-                if (result == "OK")
-                {
-                    return Ok();
-                }
-                else
-                {
-                    _logger.LogError($"Error al insertar clase valor: { JsonConvert.SerializeObject(request) } :: { result } ");
-                    return Content(HttpStatusCode.BadRequest.ToString(), result);
-                }
+                return Ok();
             }
-            catch(Exception e)
+            else
             {
-                _logger.LogError($"Error al insertar clase valor: { JsonConvert.SerializeObject(request) } :: { e.Message } ");
-                return Content(HttpStatusCode.BadRequest.ToString(), e.Message);
+                throw new BusinessException(result);
             }
         }
 
@@ -297,10 +280,10 @@ namespace SWNegocio.Controllers
 
                 return Ok(result);
             }
-            catch(Exception ex)
+            catch
             {
-                return Content(HttpStatusCode.InternalServerError.ToString(), ex.Message);
-            }     
+                throw;
+            }
 
         }
 

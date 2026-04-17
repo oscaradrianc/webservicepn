@@ -81,13 +81,98 @@ Note for ResultadoLogin codes 2 and 3: Angular code that reads `response.data.Re
 
 ## SolicitudController
 
-*Filled by Plan 04-04*
+**POST /api/Solicitud/registrar** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails `{ "title": "Bad Request", "status": 400, "detail": "error message", "traceId": "..." }`. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body for "BadRequest"
 
----
+**POST /api/Solicitud/actualizar** — HTTP code changes for business and system errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug). Unhandled exceptions returned HTTP 200 with body = exception message
+- After: Business error → HTTP 400 ProblemDetails. Unhandled exceptions → HTTP 500 ProblemDetails
+- Angular change: Catch both 400 and 500 errors instead of parsing response body
+
+**POST /api/Solicitud/Autorizar** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body
+
+**POST /api/Solicitud/actualizarfechas** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body
+
+**POST /api/Solicitud/cargamasiva** — HTTP code change for system errors
+- Before: Unhandled exception returned HTTP 200 with body = exception message
+- After: Unhandled exception → HTTP 500 ProblemDetails
+- Angular change: Catch `error.status === 500` instead of parsing response body
+
+**Angular pattern for business and system errors:**
+```typescript
+// Example for SolicitudController endpoints
+this.http.post('/api/Solicitud/registrar', request).pipe(
+  catchError(err => {
+    if (err.status === 400) {
+      // Business error: err.error is { title: "Bad Request", status: 400, detail: "error message", traceId: "..." }
+      return throwError(() => new Error(err.error?.detail));
+    }
+    if (err.status === 500) {
+      // System error: err.error is { title: "Internal Server Error", status: 500, detail: "An unexpected error occurred.", traceId: "..." }
+      return throwError(() => new Error('Error del servidor'));
+    }
+    return throwError(() => err);
+  })
+);
+```
 
 ## ProveedorController
 
-*Filled by Plan 04-04*
+**POST /api/Proveedor/registrar** — HTTP code change for system errors
+- Before: Unhandled exception returned HTTP 200 with body = exception message (Content bug)
+- After: Unhandled exception → HTTP 500 ProblemDetails
+- Angular change: Catch `error.status === 500` instead of parsing response body
+
+**POST /api/Proveedor/autorizar** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body
+
+**POST /api/Proveedor/actualizarestado** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body
+
+**POST /api/Proveedor/actualizardocs** — HTTP code change for business errors
+- Before: Business error returned HTTP 200 with body = "BadRequest" (Content bug)
+- After: Business error → HTTP 400 ProblemDetails. Success → HTTP 200 + empty body
+- Angular change: Catch `error.status === 400` instead of checking response body
+
+**GET /api/Proveedor/proveedorporestado** — HTTP code change for system errors
+- Before: Unhandled exception returned HTTP 500 with plain text body ( StatusCode bug)
+- After: Unhandled exception → HTTP 500 ProblemDetails
+- Angular change: Catch `error.status === 500` — error.error now has consistent structure
+
+**GET /api/Proveedor/proveedorpormes** — HTTP code change for system errors
+- Before: Unhandled exception returned HTTP 500 with plain text body ( StatusCode bug)
+- After: Unhandled exception → HTTP 500 ProblemDetails
+- Angular change: Catch `error.status === 500` — error.error now has consistent structure
+
+**Angular pattern for ProveedorController:**
+```typescript
+// Example for ProveedorController endpoints
+this.http.post('/api/Proveedor/autorizar', request).pipe(
+  catchError(err => {
+    if (err.status === 400) {
+      // Business error
+      return throwError(() => new Error(err.error?.detail));
+    }
+    if (err.status === 500) {
+      // System error
+      return throwError(() => new Error('Error del servidor'));
+    }
+    return throwError(() => err);
+  })
+);
+```
 
 ---
 
