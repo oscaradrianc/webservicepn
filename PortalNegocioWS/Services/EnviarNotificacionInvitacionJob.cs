@@ -44,40 +44,26 @@ namespace PortalNegocioWS.Services
 
                 using (var cx = _factory.Create())
                 {
-                    var q = from s in cx.PONESOLICITUDCOMPRAs
-                            where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado && s.SOCOENVIOPROV == "N"
-                            select s;
-
-                    using (var cx1 = _factory.Create())
+                    cx.Connection.Open();
+                    // Transaction remains disabled (same as original)
+                    try
                     {
-                        cx1.Connection.Open();
-                        //using (var dbContextTransaction = cx1.Connection.BeginTransaction())
-                        //{
-                        try
+                        var solicitudes = (from s in cx.PONESOLICITUDCOMPRAs
+                                           where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado && s.SOCOENVIOPROV == "N"
+                                           select s).ToList();
+
+                        foreach (var soli in solicitudes)
                         {
-                            foreach (var solicitud in q)
-                            {
-                                var soli = cx1.PONESOLICITUDCOMPRAs.Where(s => s.SOCOSOLICITUD == solicitud.SOCOSOLICITUD).SingleOrDefault();
+                            var infoSolicitud = new SolicitudCompra { CodigoSolicitud = (int)soli.SOCOSOLICITUD, Descripcion = soli.SOCODESCRIPCION };
+                            _notificacion.GenerarNotificacion(Configuracion.NotificacionPublicacionInvitacion, infoSolicitud);
 
-                                if (soli != null)
-                                {
-                                    var infoSolicitud = new SolicitudCompra { CodigoSolicitud = (int)soli.SOCOSOLICITUD, Descripcion = soli.SOCODESCRIPCION };
-                                    _notificacion.GenerarNotificacion(Configuracion.NotificacionPublicacionInvitacion, infoSolicitud);
-
-                                    soli.SOCOENVIOPROV = Configuracion.ValorSI;
-                                    cx1.SubmitChanges();
-                                }
-                            }
+                            soli.SOCOENVIOPROV = Configuracion.ValorSI;
+                            cx.SubmitChanges();
                         }
-                        catch (Exception e)
-                        {
-                            _logger.LogInformation($"ERROR JOB ENVIAR INVITACION: { e.StackTrace }");
-                        }
-
-
-                        //  dbContextTransaction.Commit();
-                        //}
-
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogInformation($"ERROR JOB ENVIAR INVITACION: { e.StackTrace }");
                     }
                 }
             }

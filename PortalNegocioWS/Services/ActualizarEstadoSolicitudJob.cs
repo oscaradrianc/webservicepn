@@ -34,33 +34,22 @@ namespace PortalNegocioWS.Services
 
             using (var cx = _factory.Create())
             {
-                var q = from s in cx.PONESOLICITUDCOMPRAs
-                        where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado
-                          && Convert.ToDateTime(s.SOCOFECHACIERRE).Date < fechaEjecucion.Date
-                        select s;
-
-                using (var cx1 = _factory.Create())
+                cx.Connection.Open();
+                using (var dbContextTransaction = cx.Connection.BeginTransaction())
                 {
-                    cx1.Connection.Open();
-                    using (var dbContextTransaction = cx1.Connection.BeginTransaction())
+                    var solicitudes = (from s in cx.PONESOLICITUDCOMPRAs
+                                       where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado
+                                         && Convert.ToDateTime(s.SOCOFECHACIERRE).Date < fechaEjecucion.Date
+                                       select s).ToList();
+
+                    foreach (var soli in solicitudes)
                     {
-
-                        foreach (var solicitud in q)
-                        {
-                            var soli = cx1.PONESOLICITUDCOMPRAs.Where(s => s.SOCOSOLICITUD == solicitud.SOCOSOLICITUD).SingleOrDefault();
-
-                            if (soli != null)
-                            {
-                                soli.SOCOESTADO = Configuracion.EstadoSolicitudCerrado;
-                                soli.USUAUSUARIO = -1;
-
-                                cx1.SubmitChanges();
-
-                            }
-                        }
-
-                        dbContextTransaction.Commit();
+                        soli.SOCOESTADO = Configuracion.EstadoSolicitudCerrado;
+                        soli.USUAUSUARIO = -1;
+                        cx.SubmitChanges();
                     }
+
+                    dbContextTransaction.Commit();
                 }
             }
 
