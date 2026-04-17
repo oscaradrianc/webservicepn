@@ -8,6 +8,7 @@ using Devart.Data.Linq;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using Negocio.Business.Utilidades;
+using Negocio.Business.Email;
 using System.IO;
 
 namespace Negocio.Business
@@ -73,7 +74,8 @@ namespace Negocio.Business
                             int codigoProveedor = _utilidades.GetSecuencia("SECU_PONEPROVEEDOR", cx);
                             tblProveedor.PROVPROVEEDOR = codigoProveedor;
                             tblProveedor.CLASTIPOPERSONAL1 = request.TipoPersona;
-                            tblProveedor.CLASTIPOIDENTIFICACION2 = personaNatural ? request.TipoDocumento : 4; //TODO: Revisar para que no quede quemado
+                            int tipoIdentificacionJuridica = Convert.ToInt32(_configuration["Settings:TipoIdentificacionJuridica"]);
+                            tblProveedor.CLASTIPOIDENTIFICACION2 = personaNatural ? request.TipoDocumento : tipoIdentificacionJuridica;
                             tblProveedor.PROVIDENTIFICACION = personaNatural ? request.Documento : request.Nit;
                             tblProveedor.PROVLUGAREXPEDICION = request.LugarExpedicion;
                             tblProveedor.PROVRAZONSOCIAL = personaNatural ? request.Nombre : request.NombreJuridica;
@@ -199,13 +201,13 @@ namespace Negocio.Business
                             {
                                 //////////////////Envia Correo indicando nuevo registro de proveedor//////////////////////////
                                 Thread t = new(() =>
-                                    (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("registroproveedor", prov)
+                                    (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion("registroproveedor", prov)
                                 );
                                 t.Start();
                                 t.IsBackground = true;
 
                                 Thread t1 = new(() =>
-                                    (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("confregistroprov", request)
+                                    (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion("confregistroprov", request)
                                 );
                                 t1.Start();
                                 t1.IsBackground = true;
@@ -254,7 +256,8 @@ namespace Negocio.Business
                     }
                                        
                     tblProveedor.CLASTIPOPERSONAL1 = request.TipoPersona;
-                    tblProveedor.CLASTIPOIDENTIFICACION2 = personaNatural ? request.TipoDocumento : 4; //TODO: Revisar para que no quede quemado
+                    int tipoIdentificacionJuridica = Convert.ToInt32(_configuration["Settings:TipoIdentificacionJuridica"]);
+                    tblProveedor.CLASTIPOIDENTIFICACION2 = personaNatural ? request.TipoDocumento : tipoIdentificacionJuridica;
                     tblProveedor.PROVIDENTIFICACION = personaNatural ? request.Documento : request.Nit;
                     tblProveedor.PROVLUGAREXPEDICION = request.LugarExpedicion;
                     tblProveedor.PROVRAZONSOCIAL = personaNatural ? request.Nombre : request.NombreJuridica;
@@ -601,11 +604,11 @@ namespace Negocio.Business
                         };
                         if (estadoProveedor.Estado == Configuracion.EstadoActivo)
                         {
-                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion(Configuracion.NotificacionProvAutorizado, usr);
+                            (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion(Configuracion.NotificacionProvAutorizado, usr);
                         }
                         else
                         {
-                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion(Configuracion.NotificacionProvRechazado, usr);
+                            (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion(Configuracion.NotificacionProvRechazado, usr);
                         }                       
 
                         return "OK";

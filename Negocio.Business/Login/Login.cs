@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Negocio.Business.Email;
 using Negocio.Data;
 using Negocio.Model;
 using System;
@@ -328,7 +329,7 @@ namespace Negocio.Business
 
                     cx.SubmitChanges();
 
-                    (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion(Configuracion.NotificacionResetPassword, usr);
+                    (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion(Configuracion.NotificacionResetPassword, usr);
 
                     resp.Status = Configuracion.StatusOk;
                     resp.Message = "Se envio correo electrónico para reestablecer la contraseña.";

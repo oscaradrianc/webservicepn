@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Negocio.Business
@@ -90,17 +89,8 @@ namespace Negocio.Business
                     CargarDetalleCotizacion(request.ElementosCotizacion, cx, codigoCotizacion, request.CodigoUsuario);
 
                     //////////////////Envia Correo indicando a las personas parametrizadas que el proveedor registro una cotizacion//////////////////////////
-                    Thread t = new Thread(() =>
-                        _notificacion.GenerarNotificacion("registrocotizacion", request)
-                    ) ;
-                    t.Start();
-                    t.IsBackground = true;
-
-                    Thread t1 = new Thread(() =>
-                        _notificacion.GenerarNotificacion("confirmacioncotizaci", request)
-                    );
-                    t1.Start();
-                    t1.IsBackground = true;
+                    _notificacion.GenerarNotificacion("registrocotizacion", request);
+                    _notificacion.GenerarNotificacion("confirmacioncotizaci", request);
                     //////////////////////////////////////////////////////////////////////////////////////////
 
                     dbContextTransaction.Commit();
@@ -403,15 +393,13 @@ namespace Negocio.Business
                 cx.SubmitChanges();
                 dbContextTransaction.Commit();
 
-                Thread t = new Thread(() =>
-                {
-                    string tipoNotificacion = string.Empty;
-                    NotificacionAdjudicacion cuerpoNotificacion;
+                 string tipoNotificacion = string.Empty;
+                NotificacionAdjudicacion cuerpoNotificacion;
                     using (PORTALNEGOCIODataContext cx1 = _factory.Create())
-                    {
+                {
                         if (request.EstadoSolicitud == Configuracion.TipoEstadoAdjudicado)
-                        {
-                            tipoNotificacion = Configuracion.NotificacionAjudicado;
+                {
+                    tipoNotificacion = Configuracion.NotificacionAjudicado;
 
                             cuerpoNotificacion = (from s in cx1.PONESOLICITUDCOMPRAs
                                                   where s.SOCOSOLICITUD == request.CodigoSolicitud
@@ -448,11 +436,6 @@ namespace Negocio.Business
                     }
 
                     _notificacion.GenerarNotificacion(tipoNotificacion, cuerpoNotificacion);
-                
-                });
-
-                t.Start();
-                t.IsBackground = true;
 
                 return ("OK");
             }
