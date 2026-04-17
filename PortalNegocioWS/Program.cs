@@ -125,3 +125,6 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+// Required for WebApplicationFactory<Program> visibility from PortalNegocioWS.Tests
+public partial class Program { }
