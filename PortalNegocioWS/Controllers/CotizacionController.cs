@@ -3,18 +3,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
+using PortalNegocioWS.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace SWNegocio.Controllers
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [ApiController]
     [Route("api/[controller]")]
-    public class CotizacionController : ControllerBase
+    public class CotizacionController : ApiControllerBase
     {
 
         
@@ -27,21 +27,11 @@ namespace SWNegocio.Controllers
 
         [HttpPost]
         [Route("registrar")]
-        public async Task<IActionResult> RegistrarCotizacion(Cotizacion request) 
+        public async Task<IActionResult> RegistrarCotizacion(Cotizacion request)
         {
-            ResponseStatus result = new ResponseStatus();
-            try
-            {
-                //Registra la cotizacion, si es exitoso el registro , crea la cotizacion en el sistema
-                result = await _cotizacionoBusiness.RegistrarCotizacion(request);
-                return Ok(result);
-            }
-            catch(Exception e)
-            {
-                result.Status = Configuracion.StatusError;
-                result.Message = e.Message;
-                return StatusCode(500, result);
-            }
+            //Registra la cotizacion, si es exitoso el registro , crea la cotizacion en el sistema
+            var result = await _cotizacionoBusiness.RegistrarCotizacion(request);
+            return Ok(result);
         }
 
 
@@ -112,7 +102,7 @@ namespace SWNegocio.Controllers
             }
             else
             {
-                return StatusCode(500, result);
+                throw new BusinessException(result);
             }
         }
 
@@ -148,41 +138,27 @@ namespace SWNegocio.Controllers
         [Route("cargamasiva")]
         public IActionResult CargaMasiva([FromBody] CotizacionMasiva request)
         {
-            try
-            {
-                if (request is null) return BadRequest();
-                // Valida el archivo
-                var validaciones = _cotizacionoBusiness.ValidarCargaMasiva(request);
+            if (request is null) return BadRequest();
+            // Valida el archivo
+            var validaciones = _cotizacionoBusiness.ValidarCargaMasiva(request);
 
-                if (validaciones.Any(x => !string.IsNullOrEmpty(x.error))) return BadRequest(validaciones);
+            if (validaciones.Any(x => !string.IsNullOrEmpty(x.error))) return BadRequest(validaciones);
 
-                // Transforma el archivo en detalle de solicitud
-                var result = _cotizacionoBusiness.TransformarArchivo(validaciones);
+            // Transforma el archivo en detalle de solicitud
+            var result = _cotizacionoBusiness.TransformarArchivo(validaciones);
 
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.InternalServerError.ToString(), ex.Message);
-            }
+            return Ok(result);
         }
 
         [HttpGet]
         [Route("listarfichatecnica")]
         public async Task<IActionResult> ListarFichaTecnica(int idSolicitud, int idProveedor)
         {
-            try
-            {
-                Response<List<DocumentoFichaTecnica>> r = new Response<List<DocumentoFichaTecnica>>();
-                r.Data = await _cotizacionoBusiness.ObtenerListaFichasTecnicas(idSolicitud, idProveedor);
-                r.Status = new ResponseStatus { Status = "OK", Message = "" };
+            Response<List<DocumentoFichaTecnica>> r = new Response<List<DocumentoFichaTecnica>>();
+            r.Data = await _cotizacionoBusiness.ObtenerListaFichasTecnicas(idSolicitud, idProveedor);
+            r.Status = new ResponseStatus { Status = "OK", Message = "" };
 
-                return Ok(r);
-            }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.InternalServerError.ToString(), ex.Message);
-            }
+            return Ok(r);
         }
 
     }

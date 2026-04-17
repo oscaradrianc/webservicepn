@@ -3,21 +3,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
+using PortalNegocioWS.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
-using System.Web;
 
 
 namespace SWNegocio.Controllers
 {
-
-    [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class PreguntasController : ControllerBase
+    public class PreguntasController : ApiControllerBase
     {
         private readonly IPreguntas _preguntasBusiness;
 
@@ -49,7 +47,7 @@ namespace SWNegocio.Controllers
             }
             else
             {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
+                throw new BusinessException(result);
             }
         }
 
@@ -76,7 +74,7 @@ namespace SWNegocio.Controllers
             }
             else
             {
-                return Content(HttpStatusCode.BadRequest.ToString(), result);
+                throw new BusinessException(result);
             }
         }
 
