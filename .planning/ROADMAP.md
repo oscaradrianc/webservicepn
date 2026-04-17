@@ -109,20 +109,21 @@ Plans:
   3. `LoginController` devuelve HTTP 401 cuando las credenciales son incorrectas (actualmente devuelve HTTP 200 con mensaje de error en el body)
   4. Las rutas de SUCCESS de todos los endpoints siguen devolviendo `Response<T>` con HTTP 200 — el contrato Angular de success paths no cambia
   5. La guía de migración Angular existe en `.planning/ANGULAR-MIGRATION.md` con una entrada por cada endpoint cuyo contrato de error cambió
-**Plans:** 7 plans
+**Plans:** 8 plans
 
 **Constraint crítico:** `Response<T>` en rutas de SUCCESS no se toca — Angular depende de ese envelope. Solo las rutas de ERROR migran a ProblemDetails. `LoginController` retorna `Response<T>` directamente (no `IActionResult`) — cambiar esa firma es breaking change que requiere coordinación Angular.
 
 **Nota Angular:** La guía de migración (API-09) es un documento vivo actualizado en cada plan de esta fase, no una tarea final.
 
 Plans:
-- [ ] 04-01: Implementar GlobalExceptionHandler + AddProblemDetails() en Program.cs
-- [ ] 04-02: Crear ApiControllerBase con helpers BusinessError() / NotFoundError() / Unauthorized()
-- [ ] 04-03: Refactorizar LoginController para retornar IActionResult + actualizar guía Angular
-- [ ] 04-04: Migrar 3 controladores prioritarios a ApiControllerBase con HTTP codes correctos + actualizar guía Angular
-- [ ] 04-05: Migrar controladores restantes a ApiControllerBase + actualizar guía Angular
-- [ ] 04-06: Agregar DataAnnotations ([Required], [MaxLength], [Range]) a modelos de request críticos
-- [ ] 04-07: Agregar [ApiController] a todos los controladores + verificar ModelState automático
+- [x] 04-01-PLAN.md — Implementar GlobalExceptionHandler + InvalidModelStateResponseFactory (HTTP 422) + AddProblemDetails()
+- [x] 04-02-PLAN.md — Crear ApiControllerBase con helpers BusinessError() / NotFoundError() / Unauthorized()
+- [x] 04-03-PLAN.md — Refactorizar LoginController para retornar IActionResult + actualizar guía Angular
+- [x] 04-04-PLAN.md — Migrar 3 controladores prioritarios a ApiControllerBase con HTTP codes correctos + actualizar guía Angular
+- [x] 04-05-PLAN.md — Migrar controladores restantes a ApiControllerBase + actualizar guía Angular
+- [x] 04-06-PLAN.md — Agregar DataAnnotations ([Required], [MaxLength], [Range]) a modelos de request críticos
+- [x] 04-07-PLAN.md — Migrar 7 SWNegocio.Controllers controllers a ApiControllerBase
+- [x] 04-08-PLAN.md — Migrar 7 PortalNegocioWS.Controllers controllers a ApiControllerBase + finalizar ANGULAR-MIGRATION.md
 
 **UI hint**: yes
 
@@ -144,13 +145,13 @@ Plans:
 **Constraint de orden:** HYG-01 (consolidar Utilidades) debe completarse ANTES de BGD-02 (reemplazar threads), porque `BGD-02` depende de que `IUtilidades.SendMailAsync` exista como método async.
 
 Plans:
-- [ ] 05-01: Consolidar General.cs y Utilidades.cs en UtilidadesBusiness (+ IUtilidades)
-- [ ] 05-02: Auditar y estandarizar SHA-512 (HYG-02) + mover hardcoded tipo identificacion a config (HYG-10)
-- [ ] 05-03: Eliminar Program.cs dead code block (líneas 97-138) + HYG-07 throw fix residual
-- [ ] 05-04: Implementar IBackgroundEmailQueue + EmailQueueProcessor con System.Threading.Channels
-- [ ] 05-05: Reemplazar los 8 new Thread(...) por _emailQueue.QueueAsync(...)
-- [ ] 05-06: Corregir dual-context en cron jobs + cachear config SMTP en IMemoryCache
-- [ ] 05-07: Dividir MappingProfile.cs en ~7 perfiles por dominio + implementar GetAdjudicadoXSolicitud
+- [ ] 05-01-PLAN.md — Eliminar Utilidades.cs estático + remover SendMail de IUtilidades + HYG-10 hardcoded tipo identificacion
+- [ ] 05-02-PLAN.md — Verificar HYG-03 (StartupCopia.cs), HYG-04 (Program.cs dead blocks), HYG-07 (throw e)
+- [ ] 05-03-PLAN.md — Crear IEmailQueue + EmailMessage + EmailQueueService con Channel + IMemoryCache SMTP cache
+- [ ] 05-04-PLAN.md — Inyectar IEmailQueue en NotificacionBusiness + fix PreguntasBusiness (INotificacion)
+- [ ] 05-05-PLAN.md — Remover 10 new Thread(...) de Cotizacion, SolicitudCompra, UsuarioController
+- [ ] 05-06-PLAN.md — Fix dual-context en cron jobs (.ToList) + implementar GetAdjudicadoXSolicitud
+- [ ] 05-07-PLAN.md — Dividir MappingProfile.cs en 5 perfiles por dominio + actualizar AutoMapperInstaller
 
 ---
 
@@ -186,7 +187,7 @@ Note: Phase 5 can begin in parallel with Phase 4 once Phase 3 is complete, since
 | 1. Security Triage | 0/5 | Not started | - |
 | 2. Observability Foundation | 0/4 | Not started | - |
 | 3. Structural Foundation | 0/8 | Not started | - |
-| 4. API Contract Standardization | 0/7 | Not started | - |
+| 4. API Contract Standardization | 0/8 | Not started | - |
 | 5. Code Hygiene & Background Jobs | 0/7 | Not started | - |
 | 6. Testing Safety Net | 0/5 | Not started | - |
 
