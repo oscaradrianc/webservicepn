@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -19,7 +20,7 @@ namespace SWNegocio.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class RolController : ControllerBase
+    public class RolController : ApiControllerBase
     {
         private readonly IRol _rolBusiness;
         private readonly IMapper _mapper;
@@ -47,8 +48,8 @@ namespace SWNegocio.Controllers
             }
             catch (Exception e)
             {
-
-                return StatusCode(500, e.Message);
+                _logger.LogError(e, "Error al obtener catálogo de roles");
+                throw;
             }
         }
 
