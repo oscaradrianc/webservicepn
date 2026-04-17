@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Data;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace SWNegocio.Controllers
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class CatalogoController : ControllerBase
+    public class CatalogoController : ApiControllerBase
     {
 
         private readonly ICatalogo _catalogoBusiness;
