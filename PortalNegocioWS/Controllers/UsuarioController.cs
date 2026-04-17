@@ -13,13 +13,14 @@ using Negocio.Business;
 using Negocio.Data;
 using Negocio.Model;
 using Newtonsoft.Json;
+using PortalNegocioWS.Controllers;
 
 namespace SWNegocio.Controllers
 {
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class UsuarioController : ControllerBase
+    public class UsuarioController : ApiControllerBase
     {
 
         private readonly IUsuario _usuarioBusiness;
@@ -103,7 +104,7 @@ namespace SWNegocio.Controllers
             catch(Exception e)
             {
                 _logger.LogError($"PN - Error al actualizar el usuario: { JsonConvert.SerializeObject(usuario) } :: { e.Message }");
-                return StatusCode(500, e.Message);
+                throw;
             }
         }
 
