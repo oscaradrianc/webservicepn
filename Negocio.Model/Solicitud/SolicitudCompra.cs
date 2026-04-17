@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Negocio.Model
 {
@@ -8,6 +9,7 @@ namespace Negocio.Model
         public int CodigoSolicitud { get; set; }
         public DateTime FechaSolicitud { get; set; }
         public int Usuario { get; set; }
+        [Required(ErrorMessage = "La descripcion es requerida")]
         public string Descripcion { get; set; }
         public string Estado { get; set; }
         public string EstadoNombre { get; set; }
@@ -24,6 +26,7 @@ namespace Negocio.Model
         public string NumeroSAIA { get; set; }
         public int? ProyectoSAIA { get; set; }
         public DateTime? FechaSAIA { get; set; }
+        [Required(ErrorMessage = "El tipo de solicitud es requerido")]
         public string TipoSolicitud { get; set;  }
         public string Presupuesto { get; set; }
         public long ValorSAIA { get; set; }
