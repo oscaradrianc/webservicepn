@@ -46,7 +46,36 @@ if (error.status === 422) {
 
 ## LoginController (BREAKING CHANGE — D-07, D-08)
 
-*Filled by Plan 04-03*
+**POST /api/Login/authenticate** — Breaking Change
+- Before: Always HTTP 200. Authentication failures returned `{ "status": { "Status": "ERROR", "Message": "BadRequest" }, "data": { ..., "ResultadoLogin": -2 } }`
+- After: Wrong credentials or inactive user → HTTP 401 (empty body or `{}`). Success → HTTP 200 + `{ "status": { "Status": "OK", "Message": "" }, "data": { ..., "ResultadoLogin": 1 } }`. "Must change password" (code 2) and "Expired password" (code 3) remain HTTP 200.
+- Angular change: Update error handling in the login service to check for 401 instead of checking `response.status.Status === 'ERROR'`
+
+**POST /api/Login/changepassword** — HTTP code change for errors
+- Before: Always HTTP 200. Errors returned `{ "Status": "ERROR", "Message": "..." }`
+- After: Business error → HTTP 400 ProblemDetails `{ "title": "Bad Request", "status": 400, "detail": "error message", "traceId": "..." }`. Success → HTTP 200 + `{ "Status": "OK", "Message": "" }`
+- Angular change: Catch `error.status === 400` instead of checking `response.Status === 'ERROR'`
+
+**POST /api/Login/resetpassword** — Same as changepassword
+
+Include Angular interceptor snippet showing how to handle 401 from authenticate:
+```typescript
+// In Angular login service (example):
+login(credentials: LoginRequest): Observable<Response<Usuario>> {
+  return this.http.post<Response<Usuario>>('/api/Login/authenticate', credentials).pipe(
+    catchError(err => {
+      if (err.status === 401) {
+        // Was: checking err.error?.data?.ResultadoLogin === -2
+        // Now: HTTP 401 means bad credentials or inactive user
+        return throwError(() => new Error('Credenciales incorrectas'));
+      }
+      return throwError(() => err);
+    })
+  );
+}
+```
+
+Note for ResultadoLogin codes 2 and 3: Angular code that reads `response.data.ResultadoLogin` to redirect to password-change flow continues to work unchanged (still HTTP 200).
 
 ---
 

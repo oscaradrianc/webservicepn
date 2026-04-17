@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Server.HttpSys;
 using Negocio.Business;
 using Negocio.Model;
-using System.Net;
-using System.Threading;
+using PortalNegocioWS.Controllers;
+using PortalNegocioWS.Exceptions;
 
 namespace SWNegocio.Controllers
 {
-
-    [ApiController]
     [Route("api/[controller]")]
-    public class LoginController : ControllerBase
+    public class LoginController : ApiControllerBase
     {
         private readonly ILogin _loginBusiness;
 
@@ -20,74 +17,43 @@ namespace SWNegocio.Controllers
             _loginBusiness = login;
         }
 
-
         [HttpPost]
         [EnableCors]
         [Route("authenticate")]
-        public Response<Usuario> Authenticate(LoginRequest login)
+        public IActionResult Authenticate(LoginRequest login)
         {
-            Response<Usuario> resp = new Response<Usuario>();
+            var resp = _loginBusiness.Authenticate(login);
 
+            if (resp.Data?.ResultadoLogin == -2 || resp.Data?.ResultadoLogin == -1)
+                return Unauthorized();
 
-            if (login == null)
-            {
-                resp.Status = new ResponseStatus { Status = Configuracion.StatusError, Message = HttpStatusCode.BadRequest.ToString() };
-                resp.Data = null;
-                
-            }
-            else
-            {
-
-                resp = _loginBusiness.Authenticate(login);
-            }
-
-            return resp;
-
+            return Ok(resp);
         }
-
-
 
         [HttpPost]
         [EnableCors]
         [Route("changepassword")]
-        public ResponseStatus ChangePassword(ChangePasswordRequest credentials)
+        public IActionResult ChangePassword(ChangePasswordRequest credentials)
         {
-            ResponseStatus resp = new ResponseStatus();
+            var resp = _loginBusiness.ChangePassword(credentials);
 
-            if (credentials == null)
-            {
-                resp = new ResponseStatus { Status = Configuracion.StatusError, Message = HttpStatusCode.BadRequest.ToString() };                
-            }
-            else
-            {
+            if (resp.Status == Configuracion.StatusError)
+                throw new BusinessException(resp.Message);
 
-                resp = _loginBusiness.ChangePassword(credentials);
-            }
-
-            return resp;
-
+            return Ok(resp);
         }
 
         [HttpPost]
         [EnableCors]
         [Route("resetpassword")]
-        public ResponseStatus ResetPassword(ResetPassRequest request)
+        public IActionResult ResetPassword(ResetPassRequest request)
         {
-            ResponseStatus resp = new ResponseStatus();
+            var resp = _loginBusiness.ResetPassword(request);
 
-            if (request == null)
-            {
-                resp = new ResponseStatus { Status = Configuracion.StatusError, Message = HttpStatusCode.BadRequest.ToString() };
-            }
-            else
-            {
+            if (resp.Status == Configuracion.StatusError)
+                throw new BusinessException(resp.Message);
 
-                resp = _loginBusiness.ResetPassword(request);
-            }
-
-            return resp;
-
+            return Ok(resp);
         }
-
     }
 }
