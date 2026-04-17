@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Negocio.Business;
 using Negocio.Model;
 using Org.BouncyCastle.Utilities.Collections;
+using PortalNegocioWS.Controllers;
 
 
 namespace SWNegocio.Controllers
@@ -17,7 +18,7 @@ namespace SWNegocio.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    public class UtilidadesController : ControllerBase
+    public class UtilidadesController : ApiControllerBase
     {
         private readonly IUtilidades _utilidadesBusiness;
         private readonly IConfiguration _configuration;
