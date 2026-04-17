@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 
 namespace PortalNegocioWS.Installers
@@ -10,7 +9,7 @@ namespace PortalNegocioWS.Installers
         {
             var config = new AutoMapper.MapperConfiguration(c =>
             {
-                c.AddProfile(new Mappings.MappingProfile());
+                c.AddMaps(typeof(AutoMapperInstaller).Assembly);
             });
 
             config.AssertConfigurationIsValid();
