@@ -145,13 +145,13 @@ Plans:
 **Constraint de orden:** HYG-01 (consolidar Utilidades) debe completarse ANTES de BGD-02 (reemplazar threads), porque `BGD-02` depende de que `IUtilidades.SendMailAsync` exista como método async.
 
 Plans:
-- [ ] 05-01-PLAN.md — Eliminar Utilidades.cs estático + remover SendMail de IUtilidades + HYG-10 hardcoded tipo identificacion
-- [ ] 05-02-PLAN.md — Verificar HYG-03 (StartupCopia.cs), HYG-04 (Program.cs dead blocks), HYG-07 (throw e)
-- [ ] 05-03-PLAN.md — Crear IEmailQueue + EmailMessage + EmailQueueService con Channel + IMemoryCache SMTP cache
-- [ ] 05-04-PLAN.md — Inyectar IEmailQueue en NotificacionBusiness + fix PreguntasBusiness (INotificacion)
-- [ ] 05-05-PLAN.md — Remover 10 new Thread(...) de Cotizacion, SolicitudCompra, UsuarioController
-- [ ] 05-06-PLAN.md — Fix dual-context en cron jobs (.ToList) + implementar GetAdjudicadoXSolicitud
-- [ ] 05-07-PLAN.md — Dividir MappingProfile.cs en 5 perfiles por dominio + actualizar AutoMapperInstaller
+- [x] 05-01-PLAN.md — Eliminar Utilidades.cs estático + remover SendMail de IUtilidades + HYG-10 hardcoded tipo identificacion
+- [x] 05-02-PLAN.md — Verificar HYG-03 (StartupCopia.cs), HYG-04 (Program.cs dead blocks), HYG-07 (throw e)
+- [x] 05-03-PLAN.md — Crear IEmailQueue + EmailMessage + EmailQueueService con Channel + IMemoryCache SMTP cache
+- [x] 05-04-PLAN.md — Inyectar IEmailQueue en NotificacionBusiness + fix PreguntasBusiness (INotificacion)
+- [x] 05-05-PLAN.md — Remover 10 new Thread(...) de Cotizacion, SolicitudCompra, UsuarioController
+- [x] 05-06-PLAN.md — Fix dual-context en cron jobs (.ToList) + implementar GetAdjudicadoXSolicitud
+- [x] 05-07-PLAN.md — Dividir MappingProfile.cs en 5 perfiles por dominio + actualizar AutoMapperInstaller
 
 ---
 
@@ -169,11 +169,11 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 06-01: Crear proyecto PortalNegocioWS.Tests con xUnit + WebApplicationFactory fixture
-- [ ] 06-02: Tests de integración para flujo de autenticación (login OK, token inválido, sin token)
-- [ ] 06-03: Tests para AutorizarSolicitud y RegistrarSolicitud
-- [ ] 06-04: Test de AssertConfigurationIsValid() para los 80+ AutoMapper mappings
-- [ ] 06-05: Tests para cron jobs DoWork con mock IDataContextFactory
+- [ ] 06-01-PLAN.md — Crear PortalNegocioWS.Tests: csproj (Sdk.Web), sln add, CustomWebApplicationFactory, JwtTokenHelper, public partial class Program
+- [ ] 06-02-PLAN.md — Tests de auth boundary: 401 sin token, no-401 con token, login 200/401 con mock ILogin
+- [ ] 06-03-PLAN.md — Tests para AutorizarSolicitud y RegistrarSolicitud con mock ISolicitudCompra
+- [ ] 06-04-PLAN.md — Test AssertConfigurationIsValid() para los 80+ AutoMapper mappings (pure unit test)
+- [ ] 06-05-PLAN.md — Fix try/catch en ActualizarEstadoSolicitudJob.DoWork + tests para 3 cron jobs con mock factory
 
 ---
 
