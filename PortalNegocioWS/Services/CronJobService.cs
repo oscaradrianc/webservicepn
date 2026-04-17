@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Cronos;
@@ -9,9 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace PortalNegocioWS.Services
 {
-    public abstract class CronJobService : IHostedService, IDisposable
+    public abstract class CronJobService : BackgroundService
     {
-        private System.Timers.Timer _timer;
         private readonly CronExpression _expression;
         private readonly TimeZoneInfo _timeZoneInfo;
         private readonly ILogger _logger;
@@ -23,65 +22,72 @@ namespace PortalNegocioWS.Services
             _logger = logger;
         }
 
-        public virtual async Task StartAsync(CancellationToken cancellationToken)
+        public override Task StartAsync(CancellationToken cancellationToken)
         {
-            await ScheduleJob(cancellationToken);
+            return base.StartAsync(cancellationToken);
         }
 
-        protected virtual async Task ScheduleJob(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var next = _expression.GetNextOccurrence(DateTimeOffset.Now, _timeZoneInfo);
-                if (next.HasValue)
+                try
                 {
+                    var next = _expression.GetNextOccurrence(DateTimeOffset.Now, _timeZoneInfo);
+                    if (!next.HasValue)
+                        return;
+
                     var delay = next.Value - DateTimeOffset.Now;
-                    if (delay.TotalMilliseconds <= 0)   // prevent non-positive values from being passed into Timer
-                    {
-                        await ScheduleJob(cancellationToken);
-                    }
-                    _timer = new System.Timers.Timer(delay.TotalMilliseconds);
-                    _timer.Elapsed += async (sender, args) =>
-                    {
-                        _timer.Dispose();  // reset and dispose timer
-                        _timer = null;
+                    if (delay.TotalMilliseconds <= 0)
+                        continue;
 
-                        if (!cancellationToken.IsCancellationRequested)
-                        {
-                            await DoWork(cancellationToken);
-                        }
+                    await LongDelay(delay, stoppingToken);
 
-                        if (!cancellationToken.IsCancellationRequested)
-                        {
-                            await ScheduleJob(cancellationToken);    // reschedule next
-                        }
-                    };
-                    _timer.Start();
+                    if (stoppingToken.IsCancellationRequested)
+                        return;
+
+                    await DoWork(stoppingToken);
                 }
-                await Task.CompletedTask;
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "CronJob error in {Job}", GetType().Name);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+                }
             }
-            catch(CronFormatException ex)
+        }
+
+        private static async Task LongDelay(TimeSpan delay, CancellationToken cancellationToken)
+        {
+            var remaining = delay;
+            while (remaining > TimeSpan.Zero)
             {
-                _logger.LogError($"ERROR JOB ENVIAR ACTUALIZACION DE DATOS: { ex.StackTrace }");
+                var chunk = remaining > TimeSpan.FromMilliseconds(int.MaxValue - 1)
+                    ? TimeSpan.FromMilliseconds(int.MaxValue - 1)
+                    : remaining;
+                await Task.Delay(chunk, cancellationToken);
+                remaining -= chunk;
             }
-            
         }
 
         public virtual async Task DoWork(CancellationToken cancellationToken)
         {
-            await Task.Delay(5000, cancellationToken);  // do the work
+            await Task.Delay(5000, cancellationToken);
         }
 
-        public virtual async Task StopAsync(CancellationToken cancellationToken)
+        public override Task StopAsync(CancellationToken cancellationToken)
         {
-            _timer?.Stop();
-            await Task.CompletedTask;
-        }
-
-        public virtual void Dispose()
-        {
-            _timer?.Dispose();
-            GC.SuppressFinalize(this);
+            return base.StopAsync(cancellationToken);
         }
     }
 
@@ -113,7 +119,7 @@ namespace PortalNegocioWS.Services
             }
 
             services.AddSingleton<IScheduleConfig<T>>(config);
-            services.AddHostedService<T>();            
+            services.AddHostedService<T>();
             return services;
         }
     }

@@ -17,9 +17,13 @@ using Negocio.Business;
 
 
 // Bootstrap logger: captura errores durante el startup del host (Oracle conn fail, config load fail)
+// Use non-reloadable logger in test runs to avoid "logger already frozen" across multiple factory instances.
+bool isTest = AppDomain.CurrentDomain.GetAssemblies()
+    .Any(a => a.FullName?.StartsWith("Microsoft.AspNetCore.Mvc.Testing") == true);
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .CreateBootstrapLogger();
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 

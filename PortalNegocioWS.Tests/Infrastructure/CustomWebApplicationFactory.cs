@@ -17,6 +17,14 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
             "TestSecretKey_MustBe32CharactersOrLonger!"));
 
+    private Action<IServiceCollection>? _extraServices;
+
+    public CustomWebApplicationFactory WithExtraServices(Action<IServiceCollection> configure)
+    {
+        _extraServices = configure;
+        return this;
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -48,6 +56,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                         ValidateLifetime = false
                     };
                 });
+
+            _extraServices?.Invoke(services);
         });
     }
 }

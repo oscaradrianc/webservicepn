@@ -26,6 +26,10 @@ namespace PortalNegocioWS.Mappings.Profiles
                 .ForMember(d => d.VenceClave, opt => opt.MapFrom(src => src.USUAVENCECLAVE))
                 .ForMember(d => d.FechaVence, opt => opt.MapFrom(src => src.USUAFECHAVENCE))
                 .ForMember(d => d.CambiarClave, opt => opt.MapFrom(src => src.USUACAMBIARCLAVE))
+                .ForMember(d => d.ResultadoLogin, opt => opt.Ignore())
+                .ForMember(d => d.Token, opt => opt.Ignore())
+                .ForMember(d => d.Proveedor, opt => opt.Ignore())
+                .ForMember(d => d.Opciones, opt => opt.Ignore())
                 .ReverseMap();
 
             CreateMap<POGEROL, Rol>()
@@ -34,6 +38,7 @@ namespace PortalNegocioWS.Mappings.Profiles
                 .ForMember(d => d.Estado, opt => opt.MapFrom(src => src.ROLEESTADO))
                 .ForMember(d => d.Observacion, opt => opt.MapFrom(src => src.ROLEOBSERVACION))
                 .ForMember(d => d.LogsUsuario, opt => opt.MapFrom(src => src.LOGSUSUARIO))
+                .ForMember(d => d.ListaOpciones, opt => opt.Ignore())
                 .ReverseMap();
 
             CreateMap<POGEOPCIONXROL, OpcionxRol>()

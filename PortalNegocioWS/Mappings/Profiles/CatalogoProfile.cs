@@ -17,6 +17,7 @@ namespace PortalNegocioWS.Mappings.Profiles
                 .ForMember(d => d.Tipo, opt => opt.MapFrom(src => src.CATATIPO))
                 .ForMember(d => d.LogsFecha, opt => opt.MapFrom(src => src.LOGSFECHA))
                 .ForMember(d => d.LogsUsuario, opt => opt.MapFrom(src => src.LOGSUSUARIO))
+                .ForMember(d => d.Medida, opt => opt.Ignore())
                 .ReverseMap();
 
             CreateMap<POGECLASE, Clases>()

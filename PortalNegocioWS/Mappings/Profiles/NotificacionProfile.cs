@@ -15,7 +15,9 @@ namespace PortalNegocioWS.Mappings.Profiles
                 .ForMember(d => d.Contenido, opt => opt.MapFrom(src => src.NOTICONTENIDO))
                 .ForMember(d => d.Estado, opt => opt.MapFrom(src => src.NOTIESTADO))
                 .ForMember(d => d.URL, opt => opt.MapFrom(src => src.NOTIURL))
-                .ForMember(d => d.FotoB64, opt => opt.MapFrom(src => src.PONEBLOB))
+                .ForMember(d => d.CorreoNotificacion, opt => opt.Ignore())
+                .ForMember(d => d.ArchivoB64, opt => opt.Ignore())
+                .ForMember(d => d.FotoB64, opt => opt.Ignore())
                 .ReverseMap();
         }
     }
