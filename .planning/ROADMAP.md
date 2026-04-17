@@ -169,7 +169,7 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Crear PortalNegocioWS.Tests: csproj (Sdk.Web), sln add, CustomWebApplicationFactory, JwtTokenHelper, public partial class Program
+- [x] 06-01-PLAN.md — Crear PortalNegocioWS.Tests: csproj (Sdk.Web), sln add, CustomWebApplicationFactory, JwtTokenHelper, public partial class Program
 - [ ] 06-02-PLAN.md — Tests de auth boundary: 401 sin token, no-401 con token, login 200/401 con mock ILogin
 - [ ] 06-03-PLAN.md — Tests para AutorizarSolicitud y RegistrarSolicitud con mock ISolicitudCompra
 - [ ] 06-04-PLAN.md — Test AssertConfigurationIsValid() para los 80+ AutoMapper mappings (pure unit test)
