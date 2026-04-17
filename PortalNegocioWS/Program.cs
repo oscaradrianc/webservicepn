@@ -97,6 +97,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging(); // Registra m�todo, ruta, status code y duraci�n de cada request HTTP
+app.UseExceptionHandler();
 
 // Configuraci�n de middleware (equivalente a `Configure` en `Startup.cs`)
 if (app.Environment.IsDevelopment())
