@@ -466,21 +466,40 @@ namespace Negocio.Business
 
         public Adjudicacion GetAdjudicadoXSolicitud(int codigoSolicitud)
         {
-            Adjudicacion lst_adjudicados = new Adjudicacion();
-            using PORTALNEGOCIODataContext cx = _factory.Create();
-            lst_adjudicados = (from s in cx.PONEADJUDICACIONs
-                              join t in cx.PONECOTIZACIONs on s.COTICOTIZACION equals t.COTICOTIZACION
-                              join p in cx.PONEPROVEEDORs  on t.PROVPROVEEDOR equals p.PROVPROVEEDOR
-                              where t.SOCOSOLICITUD == codigoSolicitud
-                              select new Adjudicacion
-                              {
-                                  //TODO: Revisar ya que la fecha de adjudicacion debe salir del historco
-                                 //FechaAdjudicacion = DateTime.Now, // s.ADJUFECHA,
-                                 //CodigoCotizacion = (int)t.COTICOTIZACION,
-                                 //NombreProveedor = p.PROVRAZONSOCIAL
-                              }).FirstOrDefault();
+            using (var cx = _factory.Create())
+            {
+                // Get solicitud state and observation for adjudication context
+                var soli = cx.PONESOLICITUDCOMPRAs
+                    .Where(s => s.SOCOSOLICITUD == codigoSolicitud)
+                    .Select(s => new { s.SOCOESTADO, s.SOCOOBSERVACIONADJUDICACION, s.LOGSUSUARIO })
+                    .FirstOrDefault();
 
-            return lst_adjudicados;
+                if (soli == null) return new Adjudicacion();
+
+                // Get the primary adjudication record for CodigoAdjudicacion
+                var adjuPrimary = cx.PONEADJUDICACIONs
+                    .Where(a => a.SOCOSOLICITUD == codigoSolicitud)
+                    .FirstOrDefault();
+
+                // Get all adjudicated cotizaciones for the Adjudicados list
+                var adjudicados = (from a in cx.PONEADJUDICACIONs
+                                   where a.SOCOSOLICITUD == codigoSolicitud
+                                   select new Adjudicados
+                                   {
+                                       CodigoCotizacion = (int)a.COTICOTIZACION,
+                                       CodigoSolicitud   = (int)a.SOCOSOLICITUD
+                                   }).ToList();
+
+                return new Adjudicacion
+                {
+                    CodigoAdjudicacion = adjuPrimary != null ? (int)adjuPrimary.ADJUADJUDICACION : 0,
+                    CodigoSolicitud    = codigoSolicitud,
+                    EstadoSolicitud    = soli.SOCOESTADO,
+                    Observacion        = soli.SOCOOBSERVACIONADJUDICACION,
+                    CodigoUsuario      = (int)soli.LOGSUSUARIO,
+                    Adjudicados        = adjudicados
+                };
+            }
         }
 
         public async Task<List<DocumentoFichaTecnica>> ObtenerListaFichasTecnicas(int idSolicitud, int idProveedor)
