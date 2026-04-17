@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace SWNegocio.Controllers
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class OpcionController : ControllerBase
+    public class OpcionController : ApiControllerBase
     {
 
         private readonly IOpcion _opcionBusiness;
