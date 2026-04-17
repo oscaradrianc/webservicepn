@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Negocio.Business;
 using Negocio.Model;
+using PortalNegocioWS.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -15,7 +16,7 @@ namespace SWNegocio.Controllers
     [ApiController]
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class FormatoController : ControllerBase
+    public class FormatoController : ApiControllerBase
     {
         private readonly IArchivoExcel _excelBusiness;
         public FormatoController(IArchivoExcel formatoFinanciero)
