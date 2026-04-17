@@ -42,12 +42,12 @@ namespace PortalNegocioWS.Services
             {
                 var _notificacion = scope.ServiceProvider.GetRequiredService<INotificacion>();
 
-                using (var cx = _factory.Create())
+                try
                 {
-                    cx.Connection.Open();
-                    // Transaction remains disabled (same as original)
-                    try
+                    using (var cx = _factory.Create())
                     {
+                        cx.Connection.Open();
+                        // Transaction remains disabled (same as original)
                         var solicitudes = (from s in cx.PONESOLICITUDCOMPRAs
                                            where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado && s.SOCOENVIOPROV == "N"
                                            select s).ToList();
@@ -61,10 +61,10 @@ namespace PortalNegocioWS.Services
                             cx.SubmitChanges();
                         }
                     }
-                    catch (Exception e)
-                    {
-                        _logger.LogInformation($"ERROR JOB ENVIAR INVITACION: { e.StackTrace }");
-                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "ERROR JOB ENVIAR INVITACION: {Message}", e.Message);
                 }
             }
 

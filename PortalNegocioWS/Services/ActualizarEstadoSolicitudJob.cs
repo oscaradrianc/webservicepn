@@ -32,25 +32,32 @@ namespace PortalNegocioWS.Services
             DateTime fechaEjecucion = DateTime.Now;
             _logger.LogInformation($"{fechaEjecucion:hh:mm:ss} JOB PN ESTA FUNCIONADO.");
 
-            using (var cx = _factory.Create())
+            try
             {
-                cx.Connection.Open();
-                using (var dbContextTransaction = cx.Connection.BeginTransaction())
+                using (var cx = _factory.Create())
                 {
-                    var solicitudes = (from s in cx.PONESOLICITUDCOMPRAs
-                                       where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado
-                                         && Convert.ToDateTime(s.SOCOFECHACIERRE).Date < fechaEjecucion.Date
-                                       select s).ToList();
-
-                    foreach (var soli in solicitudes)
+                    cx.Connection.Open();
+                    using (var dbContextTransaction = cx.Connection.BeginTransaction())
                     {
-                        soli.SOCOESTADO = Configuracion.EstadoSolicitudCerrado;
-                        soli.USUAUSUARIO = -1;
-                        cx.SubmitChanges();
-                    }
+                        var solicitudes = (from s in cx.PONESOLICITUDCOMPRAs
+                                           where s.SOCOESTADO == Configuracion.EstadoSolicitudPublicado
+                                             && Convert.ToDateTime(s.SOCOFECHACIERRE).Date < fechaEjecucion.Date
+                                           select s).ToList();
 
-                    dbContextTransaction.Commit();
+                        foreach (var soli in solicitudes)
+                        {
+                            soli.SOCOESTADO = Configuracion.EstadoSolicitudCerrado;
+                            soli.USUAUSUARIO = -1;
+                            cx.SubmitChanges();
+                        }
+
+                        dbContextTransaction.Commit();
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "ERROR JOB ACTUALIZAR ESTADO SOLICITUD: {Message}", e.Message);
             }
 
             return Task.CompletedTask;
