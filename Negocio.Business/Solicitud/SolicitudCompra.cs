@@ -10,7 +10,6 @@ using System.Data.Entity.Core.Objects;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Negocio.Business
@@ -98,23 +97,11 @@ namespace Negocio.Business
                         //Enviar notificacion segun sea el caso
                         if(request.NumeroSAIA == null)//Notificacion gerencia
                         {
-                            Thread t = new Thread(() =>
-                            {
-                                _notificacion.GenerarNotificacion("autorizagerencia", request);
-                            });
-
-                            t.Start();
-                            t.IsBackground = true;
+                            _notificacion.GenerarNotificacion("autorizagerencia", request);
                         }
                         else //Notificacion compras
                         {
-                            Thread t = new Thread(() =>
-                            {
-                                _notificacion.GenerarNotificacion("autorizacompras", request);
-                            });
-
-                            t.Start();
-                            t.IsBackground = true;
+                            _notificacion.GenerarNotificacion("autorizacompras", request);
                         }
 
 
@@ -544,16 +531,10 @@ namespace Negocio.Business
                         dbContextTransaction.Commit();
 
                         if(request.EstadoAutorizacion == Configuracion.EstadoActivo && request.TipoAutorizacion != Configuracion.TipoAutorizacionGerencia)
-                        {                            
-                            Thread t = new Thread(() =>
-                            {
-                                string tipoNotificacion = Configuracion.NotificacionAutoCompras;
-                                //string tipoNotificacion = request.TipoAutorizacion == Configuracion.TipoAutorizacionCompras ? Configuracion.NotificacionPublicacionInvitacion : Configuracion.NotificacionAutoCompras;
-                                _notificacion.GenerarNotificacion(tipoNotificacion, soli);
-                            });
-
-                            t.Start();
-                            t.IsBackground = true;
+                        {
+                            string tipoNotificacion = Configuracion.NotificacionAutoCompras;
+                            //string tipoNotificacion = request.TipoAutorizacion == Configuracion.TipoAutorizacionCompras ? Configuracion.NotificacionPublicacionInvitacion : Configuracion.NotificacionAutoCompras;
+                            _notificacion.GenerarNotificacion(tipoNotificacion, soli);
                         }
                         return ("OK");
                     }

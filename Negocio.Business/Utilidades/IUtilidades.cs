@@ -1,4 +1,4 @@
-﻿using Negocio.Data;
+using Negocio.Data;
 using Negocio.Model;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,6 @@ namespace Negocio.Business
         int GetSecuencia(string nombreSecuencia, PORTALNEGOCIODataContext ctx);
         byte[] DecodificarArchivo(string b64);
         //string GetConstante(string nombreConstante, PORTALNEGOCIODataContext ctx);
-        void SendMail(List<string> listaCorreos, string asunto, string mensaje, bool bcc = false);
         string ConvertirMensaje(string mensaje, string parametros);
         string ObtenerBlob(int idBlob, PORTALNEGOCIODataContext cx);
         decimal? IsDecimal(string strNumber);

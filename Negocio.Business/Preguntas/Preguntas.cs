@@ -13,10 +13,12 @@ namespace Negocio.Business
     {
         private readonly IUtilidades _utilidades;
         private readonly IDataContextFactory _factory;
-        public PreguntasBusiness(IUtilidades utilidades, IDataContextFactory factory)
+        private readonly INotificacion _notificacion;
+        public PreguntasBusiness(IUtilidades utilidades, IDataContextFactory factory, INotificacion notificacion)
         {
             _utilidades = utilidades;
             _factory = factory;
+            _notificacion = notificacion;
         }
 
         #region Metodos Publicos
@@ -78,7 +80,7 @@ namespace Negocio.Business
                         //////////////////Envia Correo a las personas parametrizadas cuando se realiza un pregunta//////////////////////////
                         Thread t = new Thread(() =>
 
-                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("registropregunta", request)
+                            _notificacion.GenerarNotificacion("registropregunta", request)
                         );
                         t.Start();
                         t.IsBackground = true;
@@ -129,7 +131,7 @@ namespace Negocio.Business
                         //////////////////Envia Correo al proveedor que realizo la pregunta////////////////////////
                         Thread t = new Thread(() =>
 
-                            (new NotificacionBusiness(_utilidades, _factory)).GenerarNotificacion("registrorespuesta", request)
+                            _notificacion.GenerarNotificacion("registrorespuesta", request)
                         );
                         t.Start();
                         t.IsBackground = true;

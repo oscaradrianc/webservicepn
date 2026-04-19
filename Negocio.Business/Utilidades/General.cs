@@ -1,10 +1,9 @@
-﻿using Negocio.Data;
+using Negocio.Data;
 using Negocio.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,9 +52,8 @@ namespace Negocio.Business
                                                    CodigoActividad = a.ACECCODIGOACTIVIDAD,
                                                    Nombre = a.ACECNOMBRE,
                                                    Estado = a.ACECESTADO
-                                               }).SingleOrDefault());                
+                                               }).SingleOrDefault());
             }
-
         }
 
         /// <summary>
@@ -91,7 +89,7 @@ namespace Negocio.Business
                            orderby v.CLVAVALOR
                            select new ClaseValor { Clase = (int)c.CLASCLASE, IdClaseValor = (int)v.CLVACLASEVALOR, CodigoValor = (int)v.CLVACODIGOVALOR, Valor = v.CLVAVALOR, Estado = v.CLVAESTADO, Descripcion = v.CLVADESCRIPCION }).ToList();
 
-                return await Task.Run(() => lta );               
+                return await Task.Run(() => lta );
             }
         }
 
@@ -134,7 +132,7 @@ namespace Negocio.Business
             catch (Exception ex)
             {
                 throw new Exception("Error al encriptar: " + ex.Message);
-            }            
+            }
         }
 
         /// <summary>
@@ -174,7 +172,7 @@ namespace Negocio.Business
             {
                 return cx.PONEVGERENCIAs.Select(x => new Gerencias
                 {
-                    CodGerencia = x.ID,                  
+                    CodGerencia = x.ID,
                     Nombre = x.NOMBRE
                 }).ToList();
             }
@@ -206,14 +204,14 @@ namespace Negocio.Business
         /// <returns></returns>
         public List<DocumentosxPersona> ObtenerDocumentos()
         {
-            
+
             using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 //List<DocumentosxPersona> ltaDocSarLaft = new List<DocumentosxPersona>();
                 //ltaDocSarLaft.Add(new DocumentosxPersona { CLASTIPODOCUMENTO8 = Configuracion.ClaveValorDocSarlaft, CLASTIPOPERSONA1 = Configuracion.TipoPersonaNatural, DOPEOBLIGATORIO = "N", DOPESECUENCIA = 30 });
                 //ltaDocSarLaft.Add(new DocumentosxPersona { CLASTIPODOCUMENTO8 = Configuracion.ClaveValorDocSarlaft, CLASTIPOPERSONA1 = Configuracion.TipoPersonaJuridica, DOPEOBLIGATORIO = "N", DOPESECUENCIA = 31 });
-                
-                var lta = cx.PONEDOCUMENTOXPERSONAs.Select(x=> new DocumentosxPersona { 
+
+                var lta = cx.PONEDOCUMENTOXPERSONAs.Select(x=> new DocumentosxPersona {
                         CLASTIPODOCUMENTO8 = x.CLASTIPODOCUMENTO8,
                         CLASTIPOPERSONA1 = x.CLASTIPOPERSONA1,
                         DOPEOBLIGATORIO = x.DOPEOBLIGATORIO,
@@ -259,7 +257,7 @@ namespace Negocio.Business
                     DEPACODIGO = x.DEPACODIGO,
                     DEPANOMBRE = x.DEPANOMBRE,
                     PAISCODIGO = x.PAISCODIGO
-                    
+
                 }).ToList();
                 return lta;
             }
@@ -286,10 +284,12 @@ namespace Negocio.Business
 
 
         public static string CreateSHA512(byte[] strData)
-        { 
-            using var alg = SHA512.Create(); 
+        {
+            // SHA-512 double-hash: hash(hash(input)). Standardized on this implementation (HYG-02).
+            // The old Utilidades.GetStringEncriptado (single-hash, SHA512Managed) was deleted — had no callers.
+            using var alg = SHA512.Create();
             var hashValue = alg.ComputeHash(strData);
-            return Convert.ToBase64String(alg.ComputeHash(hashValue));          
+            return Convert.ToBase64String(alg.ComputeHash(hashValue));
         }
 
         /// <summary>
@@ -326,64 +326,6 @@ namespace Negocio.Business
         {
             return ctx.ExecuteQuery<string>(string.Format("SELECT CONS_VALOR FROM POGE_CONSTANTE WHERE CONS_REFERENCIA='{0}'", nombreConstante)).FirstOrDefault();
         }*/
-
-        /// <summary>
-        /// Envia los correos
-        /// </summary>
-        /// <param name="listaCorreos"></param>
-        /// <param name="asunto"></param>
-        /// <param name="mensaje"></param>
-        /// <param name="ctx"></param>
-        public void SendMail(List<string> listaCorreos, string asunto, string mensaje, bool bcc = false)
-        {
-            try
-            {
-                MailMessage mail = new MailMessage();
-                string servidorMail = GetConstante("serv_mail");
-                string sslMail = GetConstante("ssl_mail");
-                string pwdMail = GetConstante("pwd_mail");
-                string usrMail = GetConstante("usr_mail");
-                string sendMail = GetConstante("send_mail");
-                int portMail = Convert.ToInt32(GetConstante("port_mail"));
-
-                SmtpClient SmtpServer = new SmtpClient(servidorMail);
-
-                mail.From = new MailAddress(sendMail);
-
-                if (bcc)
-                {
-                    listaCorreos.ForEach(delegate (string correo)
-                    {
-                        mail.Bcc.Add(correo);
-                    });
-                }
-                else
-                {
-                    listaCorreos.ForEach(delegate (string correo)
-                    {
-                        mail.To.Add(correo);
-                    });
-                }
-
-                mail.Subject = asunto;
-                mail.Body = mensaje;
-                mail.IsBodyHtml = true;
-
-                SmtpServer.Port = portMail;
-                SmtpServer.Credentials = new System.Net.NetworkCredential(usrMail, pwdMail);
-                SmtpServer.EnableSsl = Convert.ToBoolean(sslMail);
-
-                SmtpServer.Send(mail);
-
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex,
-                    "SendMail failed. Recipients: {Recipients}, Subject: {Subject}",
-                    listaCorreos,
-                    asunto);
-            }
-        }
 
         /// <summary>
         /// Recibe la plantilla del mensaje y una cadena con los parametros y remplaza los valores de las variables
@@ -457,7 +399,7 @@ namespace Negocio.Business
                 var q = (from s in cx.PONESOLICITUDCOMPRAs
                          join c in cx.PONECOTIZACIONs on s.SOCOSOLICITUD equals c.SOCOSOLICITUD
                          join p in cx.PONEPROVEEDORs on c.PROVPROVEEDOR equals p.PROVPROVEEDOR
-                         where s.SOCOSOLICITUD == codigoSolicitud                           
+                         where s.SOCOSOLICITUD == codigoSolicitud
                          select p.PROVEMAIL).ToList();
                 return q;
             }
@@ -470,7 +412,7 @@ namespace Negocio.Business
             using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 var v = (from p in cx.POGECLASEVALORs
-                         where p.CLVACLASEVALOR == idClaseValor                        
+                         where p.CLVACLASEVALOR == idClaseValor
                          select p.CLVAVALOR).SingleOrDefault();
 
                 return v != null ? v.ToString() : string.Empty;
@@ -491,7 +433,7 @@ namespace Negocio.Business
                                              Codigodepto = (int)mu.DEPACODIGO
                                          }).SingleOrDefault());
 
-                
+
             }
         }
 

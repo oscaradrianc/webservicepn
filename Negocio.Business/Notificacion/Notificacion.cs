@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using Negocio.Model;
 using Negocio.Data;
+using Negocio.Business.Email;
 using Stubble.Core.Builders;
 using System.Threading.Tasks;
 
@@ -14,10 +15,12 @@ namespace Negocio.Business
         private readonly IUtilidades _utilidades;
         private readonly IDataContextFactory _factory;
         private readonly ProveedorBusiness _proveedor;
-        public NotificacionBusiness(IUtilidades utilidades, IDataContextFactory factory, ProveedorBusiness proveedor = null)
+        private readonly IEmailQueue _emailQueue;
+        public NotificacionBusiness(IUtilidades utilidades, IDataContextFactory factory, IEmailQueue emailQueue, ProveedorBusiness proveedor = null)
         {
             _utilidades = utilidades;
             _factory = factory;
+            _emailQueue = emailQueue;
             _proveedor = proveedor;
         }
         #region Metodos Publicos
@@ -226,7 +229,7 @@ namespace Negocio.Business
 
                             correos.Add(user.Email);
                             mensaje = stubble.Render(noti.Plantilla, user);
-                            _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                            _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
 
                             break;
                         case "resetpassword":
@@ -235,7 +238,7 @@ namespace Negocio.Business
 
                             correos.Add(userReset.Email);
                             mensaje = stubble.Render(noti.Plantilla, userReset);
-                            _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                            _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
 
                             break;
                         case "registroproveedor":
@@ -250,7 +253,7 @@ namespace Negocio.Business
                                 Proveedor prov = obj as Proveedor;
 
                                 mensaje = stubble.Render(noti.Plantilla, prov);
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
                             }
                             break;
                         case "confregistroprov":
@@ -262,7 +265,7 @@ namespace Negocio.Business
                                 correos.Add(provConf.Email);
 
                                 mensaje = stubble.Render(noti.Plantilla, provConf);
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
                             }
 
                             break;
@@ -279,7 +282,7 @@ namespace Negocio.Business
 
                             if (correos.Count > 0)
                             {
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
                             }
 
                             break;
@@ -295,7 +298,7 @@ namespace Negocio.Business
                                 SolicitudCompra sCG = obj as SolicitudCompra;
                                 mensaje = stubble.Render(noti.Plantilla, sCG);
 
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
                             }
 
                             break;
@@ -308,7 +311,7 @@ namespace Negocio.Business
                             {
                                 mensaje = stubble.Render(noti.Plantilla, provAuto);
                                 correos.Add(correoProv);
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
                             }
                             break;
                         case "registropregunta":
@@ -323,7 +326,7 @@ namespace Negocio.Business
                                 CrearPregunta preg = obj as CrearPregunta;
                                 mensaje = stubble.Render(noti.Plantilla, preg);
 
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
                             }
 
                             break;
@@ -337,7 +340,7 @@ namespace Negocio.Business
                             {
                                 mensaje = stubble.Render(noti.Plantilla, respuesta);
                                 correos.Add(correoProv);
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
                             }
                             break;
                         case "confirmacioncotizaci":
@@ -362,7 +365,7 @@ namespace Negocio.Business
                                 SolicitudCompra sPub = obj as SolicitudCompra;
                                 mensaje = stubble.Render(noti.Plantilla, sPub);
 
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje, true);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje, Bcc: true));
                             }
 
                             break;
@@ -375,7 +378,7 @@ namespace Negocio.Business
                             {
                                 mensaje = stubble.Render(noti.Plantilla, notiAdj);
 
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje, true);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje, Bcc: true));
                             }
 
                             break;
@@ -388,7 +391,7 @@ namespace Negocio.Business
                             {
                                 mensaje = stubble.Render(noti.Plantilla, notiDesierto);
 
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje, true);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje, Bcc: true));
                             }
 
                             break;
@@ -401,7 +404,7 @@ namespace Negocio.Business
                                 //SolicitudCompra sPub = obj as SolicitudCompra;
                                 mensaje = noti.Plantilla; //stubble.Render(noti.Plantilla, sPub);
 
-                                _utilidades.SendMail(correos, noti.Asunto, mensaje, true);
+                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje, Bcc: true));
                             }
 
                             break; ;
@@ -436,7 +439,7 @@ namespace Negocio.Business
             {
                 string mensaje = stubble.Render(noti.Plantilla, obj);
 
-                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
             }
         }
 
@@ -455,7 +458,7 @@ namespace Negocio.Business
             if (correos.Count > 0)
             {
                 string mensaje = stubble.Render(noti.Plantilla, obj);                
-                _utilidades.SendMail(correos, noti.Asunto, mensaje);
+                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
             }
         }
 

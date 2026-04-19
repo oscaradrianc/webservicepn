@@ -126,3 +126,12 @@ PortalNegocios.Presentation/obj/
 
 # Git worktrees
 .worktrees/
+PortalNegocioWS.Tests/bin/
+PortalNegocioWS.Tests/obj/
+.planning/
+.opencode/
+.claude/
+.agent/
+.agents/
+CLAUDE.md
+skills-lock.json

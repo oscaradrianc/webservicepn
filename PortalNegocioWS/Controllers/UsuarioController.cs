@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -140,13 +139,8 @@ namespace SWNegocio.Controllers
                     usuario.Clave = claveAleatoria;
 
                     //////////////////Envia Correo indicando nuevo registro de usuario//////////////////////////
-                    Thread t = new Thread(() =>
-                    {
-                        _notificacion.GenerarNotificacion("nuevousuario", usuario);
-                    });
-
-                    t.Start();
-                    t.IsBackground = true;
+                    _notificacion.GenerarNotificacion("nuevousuario", usuario);
+                    //////////////////////////////////////////////////////////////////////////////////////////
                 }
 
                 return Ok(resp);
@@ -237,13 +231,8 @@ namespace SWNegocio.Controllers
                     Usuario usu = _usuarioBusiness.GetUsuario(idUsuario);
                     usu.Clave = resp.Message;
                     //////////////////Envia Correo indicando nuevo registro de usuario//////////////////////////
-                    Thread t = new Thread(() =>
-                    {
-                        _notificacion.GenerarNotificacion("resetpassword", usu);
-                    });
-
-                    t.Start();
-                    t.IsBackground = true;
+                    _notificacion.GenerarNotificacion("resetpassword", usu);
+                    //////////////////////////////////////////////////////////////////////////////////////////
 
                     resp.Message = string.Empty;
                 }

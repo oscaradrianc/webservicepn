@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Negocio.Business;
+using Negocio.Business.Email;
 using Negocio.Business.Utilidades;
 using Negocio.Data;
+using PortalNegocioWS.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +35,15 @@ namespace PortalNegocioWS.Installers
             services.AddScoped<INotificacionUsuario, NotificacionUsuarioBusiness>();
             services.AddScoped<IParametroGeneral, ParametroGeneral>();
             services.AddScoped<IAutorizadorGerencia, AutorizadorGerenciaBusiness>();
-            services.AddScoped<IConstante, ConstanteBusiness>();   
+            services.AddScoped<IConstante, ConstanteBusiness>();
+
+            // IMemoryCache — needed by EmailQueueService for SMTP config caching
+            services.AddMemoryCache();
+
+            // EmailQueueService: registered as singleton, exposed as both IEmailQueue and IHostedService
+            services.AddSingleton<EmailQueueService>();
+            services.AddSingleton<IEmailQueue>(sp => sp.GetRequiredService<EmailQueueService>());
+            services.AddHostedService(sp => sp.GetRequiredService<EmailQueueService>());
         }
     }
 }
