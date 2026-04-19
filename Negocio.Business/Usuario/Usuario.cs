@@ -335,7 +335,7 @@ namespace Negocio.Business
         }
 
         /// <summary>
-        /// Obtiene el objeto del modelo dado el objeto tabla
+        /// Obtiene el objeto del modelo dado el objeto tabla   
         /// </summary>
         /// <param name="obj">Objeto tabla</param>
         /// <returns>Objeto Modelo</returns>
