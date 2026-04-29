@@ -5,5 +5,6 @@
         public int IdNotificacionUsuario { get; set; }
         public int IdNotificacion { get; set; }
         public int IdUsuario { get; set; }
+        public int LogsUsuario { get; set; }
     }
 }

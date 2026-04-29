@@ -91,7 +91,7 @@ namespace Negocio.Business
         }
 
 
-        public ResponseStatus EliminarNotificacionUsuario(int idNotificacionUsuario, int idUsuario)
+        public ResponseStatus EliminarNotificacionUsuario(int idNotificacionUsuario)
         {
             ResponseStatus result = new ResponseStatus();
 
@@ -106,12 +106,6 @@ namespace Negocio.Business
 
                         if(notiUsua != null)
                         {
-                            //Primero actualizo el campo logsusuario con el valor del usuario que esta borrando
-                            //Para que la auditoria tome en id del usuario que esta realizando la accion.
-                            notiUsua.LOGSUSUARIO = idUsuario;
-                            cx.SubmitChanges();
-
-
                             cx.POGENOTIFICACIONXUSUARIOs.DeleteOnSubmit(notiUsua);
                             cx.SubmitChanges();
                             result.Status = Configuracion.StatusOk;
@@ -121,9 +115,9 @@ namespace Negocio.Business
                             result.Status = Configuracion.StatusError;
                             result.Message = "No existe el registro indicado";
                         }
-                                                
+
                         dbContextTransaction.Commit();
-                    }                    
+                    }
                     catch (Exception ex)
                     {
                         dbContextTransaction.Rollback();

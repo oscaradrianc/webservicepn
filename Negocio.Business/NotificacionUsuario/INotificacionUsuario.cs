@@ -10,7 +10,7 @@ namespace Negocio.Business
         List<NotificacionUsuario> ObtenerNotificacionesxUsuario();
         List<NotificacionUsuario> ObtenerUsuarioxIdNotificacion(int idNotificacion);
         ResponseStatus InsertNotificacionUsuario(NotificacionUsuario notificacionUsuario);
-        ResponseStatus EliminarNotificacionUsuario(int idNotificacionUsuario, int idUsuario);
+        ResponseStatus EliminarNotificacionUsuario(int idNotificacionUsuario);
 
 
     }

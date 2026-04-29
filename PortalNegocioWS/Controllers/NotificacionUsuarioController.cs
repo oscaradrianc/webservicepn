@@ -86,23 +86,14 @@ namespace PortalNegocioWS.Controllers
 
         // DELETE api/<NotificacionUsuarioController>/5
         
-        [HttpDelete("{id1:int}/{id2:int}")]
-        //[Route("Delete")]
-        public IActionResult DeleteNotificacionUsuario(int id1, int id2)
+        [HttpDelete("{id:int}")]
+        public IActionResult DeleteNotificacionUsuario(int id)
         {
-            
             ResponseStatus response = new ResponseStatus();
-
-            if (!ModelState.IsValid)
-            {
-                response.Status = Configuracion.StatusError;
-                response.Message = Configuracion.MsjModeloInvalido;
-                return Ok(response);
-            }
 
             try
             {
-                response = _notificacionUsuarioBusiness.EliminarNotificacionUsuario(id1, id2);
+                response = _notificacionUsuarioBusiness.EliminarNotificacionUsuario(id);
             }
             catch
             {
