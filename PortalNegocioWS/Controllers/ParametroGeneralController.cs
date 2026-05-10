@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Mapster;
+using Microsoft.AspNetCore.Mvc;
 using Negocio.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Negocio.Business;
-using AutoMapper;
 using Negocio.Data;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
@@ -21,15 +21,12 @@ namespace PortalNegocioWS.Controllers
     public class ParametroGeneralController : ApiControllerBase
     {
         private readonly IParametroGeneral _parametroGeneral;
-        private readonly IMapper _mapper;
         private readonly ILogger<ParametroGeneralController> _logger;
 
-        public ParametroGeneralController(IParametroGeneral parametroGeneral, IMapper mapper, ILogger<ParametroGeneralController> logger)
+        public ParametroGeneralController(IParametroGeneral parametroGeneral, ILogger<ParametroGeneralController> logger)
         {
             _parametroGeneral = parametroGeneral;
-            _mapper = mapper;
             _logger = logger;
-            
         }
 
         // GET: api/<ParametroGeneralController>
@@ -41,15 +38,14 @@ namespace PortalNegocioWS.Controllers
             try
             {
                 var clases = await _parametroGeneral.ObtenerClases();
-                r.Data = _mapper.Map<List<Clases>>(clases);
+                r.Data = clases.Adapt<List<Clases>>();
                 r.Status = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
             }
             catch(Exception e)
             {
-               
                 return StatusCode(500, e.Message);
-            }            
+            }
         }
 
         // GET api/<ParametroGeneralController>/5
@@ -61,7 +57,7 @@ namespace PortalNegocioWS.Controllers
             try
             {
                 var claseValor = await _parametroGeneral.ObtenerClaseValorPorClase(id);
-                r.Data = _mapper.Map<List<ClaseValor>>(claseValor);
+                r.Data = claseValor.Adapt<List<ClaseValor>>();
                 r.Status = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
             }
@@ -77,8 +73,8 @@ namespace PortalNegocioWS.Controllers
         {
             try
             {
-                var resp = await _parametroGeneral.InsertarClaseValor(_mapper.Map<POGECLASEVALOR>(claseValor));                 
-                    
+                var resp = await _parametroGeneral.InsertarClaseValor(claseValor.Adapt<POGECLASEVALOR>());
+
                 return Ok(resp);
             }
             catch (Exception e)
@@ -106,7 +102,7 @@ namespace PortalNegocioWS.Controllers
                     return BadRequest("El objecto Clase Valor no es valido");
                 }
 
-                await _parametroGeneral.ActualizarClaseValor(id, _mapper.Map<POGECLASEVALOR>(claseValor));
+                await _parametroGeneral.ActualizarClaseValor(id, claseValor.Adapt<POGECLASEVALOR>());
                 var resp = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(resp);
             }

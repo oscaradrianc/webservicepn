@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,23 +26,20 @@ namespace SWNegocio.Controllers
         private readonly ILogin _loginBusiness;
         private readonly IConfiguration _configuration;
         private readonly IUtilidades _utilidades;
-        private readonly IMapper _mapper;
         private readonly ILogger<UsuarioController> _logger;
         private readonly INotificacion _notificacion;
-        public UsuarioController(IUsuario usuario, ILogin login, IConfiguration configuration, IUtilidades utilidades, IMapper mapper, ILogger<UsuarioController> logger, INotificacion notificacion)
+
+        public UsuarioController(IUsuario usuario, ILogin login, IConfiguration configuration, IUtilidades utilidades, ILogger<UsuarioController> logger, INotificacion notificacion)
         {
             _usuarioBusiness = usuario;
             _loginBusiness = login;
             _configuration = configuration;
             _utilidades = utilidades;
-            _mapper = mapper;
             _logger = logger;
             _notificacion = notificacion;
         }
 
         [HttpGet]
-        //[Route("Get")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get()
         {
             var lst_usuarios = await _usuarioBusiness.GetUsuario();
@@ -57,7 +54,6 @@ namespace SWNegocio.Controllers
 
         [HttpGet]
         [Route("GetId")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult GetUsuario(decimal id)
         {
             var lst_usuarios = _usuarioBusiness.GetUsuario(id);
@@ -72,8 +68,6 @@ namespace SWNegocio.Controllers
 
 
         [HttpPut("{id}")]
-        //[Route("Update")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> UpdateUsuario(decimal id, [FromBody] Usuario usuario)
         {
             ResponseStatus r;
@@ -90,7 +84,7 @@ namespace SWNegocio.Controllers
 
             try
             {
-                var usua = _mapper.Map<POGEUSUARIO>(usuario);
+                var usua = usuario.Adapt<POGEUSUARIO>();
                 await _usuarioBusiness.UpdateUsuario(id, usua);
                 r = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
@@ -108,9 +102,8 @@ namespace SWNegocio.Controllers
         }
 
         [HttpPost]
-        /*[Route("Insert")]*/
         public async Task<IActionResult> InsertUsuario([FromBody]Usuario usuario)
-        {            
+        {
             if (!ModelState.IsValid)
             {
                 _logger.LogError($"PN - Error al insertar usuario modelo no es valido: { JsonConvert.SerializeObject(usuario) } ");
@@ -127,7 +120,7 @@ namespace SWNegocio.Controllers
                 usuario.VenceClave = Configuracion.ValorSI;
                 usuario.FechaVence = DateTime.Now.AddDays(10);
 
-                var usua = _mapper.Map<POGEUSUARIO>(usuario);
+                var usua = usuario.Adapt<POGEUSUARIO>();
 
                 var resp = await _usuarioBusiness.InsertUsuario(usua);
 
@@ -154,7 +147,6 @@ namespace SWNegocio.Controllers
 
         [HttpDelete]
         [Route("Delete")]
-       //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult DeleteUsuario(decimal id)
         {
             Usuario usuario = new Usuario();
@@ -174,29 +166,12 @@ namespace SWNegocio.Controllers
             return Ok(usuario);
         }
 
-                
+
         [Route("cambiarclave")]
         [HttpPost]
-        // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ResponseStatus CambiarClaveUsuario(CambioClave request)
         {
-            /*
-            ResponseStatus resp = new ResponseStatus();
-
-            if (!ModelState.IsValid)
-            {
-                resp.Status = "ERROR";
-                resp.Message = "Modelo Invalido";
-                return resp; // -- BadRequest(ModelState);
-            }
-
-            resp = _usuarioBusiness.CambiarClaveUsuario(request);
-
-            resp.Status = "OK";
-            resp.Message = "";
-            return resp;*/
-
-            ResponseStatus resp; // = new ResponseStatus();
+            ResponseStatus resp;
 
             if (request == null)
             {
@@ -226,8 +201,6 @@ namespace SWNegocio.Controllers
 
                 if (resp.Status == Configuracion.StatusOk)
                 {
-
-
                     Usuario usu = _usuarioBusiness.GetUsuario(idUsuario);
                     usu.Clave = resp.Message;
                     //////////////////Envia Correo indicando nuevo registro de usuario//////////////////////////

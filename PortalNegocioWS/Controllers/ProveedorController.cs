@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -21,13 +21,11 @@ namespace SWNegocio.Controllers
     public class ProveedorController : ApiControllerBase
     {
         private readonly IProveedor _proveedorBusiness;
-        private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
-        public ProveedorController(IProveedor proveedor, IMapper mapper, ILogger<ProveedorController> logger)
+        public ProveedorController(IProveedor proveedor, ILogger<ProveedorController> logger)
         {
             _proveedorBusiness = proveedor;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -104,11 +102,11 @@ namespace SWNegocio.Controllers
         [EnableCors]
         [Route("getdatosbasicos")]
         public Response<List<ProveedorDatosBasicos>> ConsultarDatosBasicosProveedor()
-        {            
+        {
             Response<List<ProveedorDatosBasicos>> resp = new Response<List<ProveedorDatosBasicos>>();
             resp.Data = _proveedorBusiness.ConsultarDatosBasicosProveedor();
             resp.Status = new ResponseStatus { Status = Configuracion.StatusOk };
-           
+
             return resp;
         }
 
@@ -163,7 +161,7 @@ namespace SWNegocio.Controllers
         {
             Response<List<ProveedoresPorMes>> res = new Response<List<ProveedoresPorMes>>();
             var r = await _proveedorBusiness.ObtenerNroProveedoresRegistradoPorMes(vigencia);
-            res.Data = _mapper.Map<List<ProveedoresPorMes>>(r);
+            res.Data = r.Adapt<List<ProveedoresPorMes>>();
             res.Status = new ResponseStatus { Status = Configuracion.StatusOk, Message = "" };
 
             return Ok(res);

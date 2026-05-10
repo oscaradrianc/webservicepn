@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,15 +24,13 @@ namespace PortalNegocioWS.Controllers
         private readonly IConstante _constanteBusiness;
         private readonly IConfiguration _configuration;
         private readonly IUtilidades _utilidades;
-        private readonly IMapper _mapper;
         private readonly ILogger<ConstanteController> _logger;
 
-        public ConstanteController(IConstante constante, IConfiguration configuration, IUtilidades utilidades, IMapper mapper, ILogger<ConstanteController> logger)
+        public ConstanteController(IConstante constante, IConfiguration configuration, IUtilidades utilidades, ILogger<ConstanteController> logger)
         {
             _constanteBusiness = constante;
             _configuration = configuration;
             _utilidades = utilidades;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -48,7 +46,7 @@ namespace PortalNegocioWS.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<List<Constante>>(lst_constante));
+            return Ok(lst_constante.Adapt<List<Constante>>());
         }
 
         // GET api/<ConstanteController>/5
@@ -62,7 +60,7 @@ namespace PortalNegocioWS.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<POGECONSTANTE>(constante));
+            return Ok(constante.Adapt<POGECONSTANTE>());
         }
 
         // POST api/<ConstanteController>
@@ -78,8 +76,8 @@ namespace PortalNegocioWS.Controllers
             try
             {
                 constante.LogsFecha = DateTime.Now;
-                
-                var newConsta = _mapper.Map<POGECONSTANTE>(constante);
+
+                var newConsta = constante.Adapt<POGECONSTANTE>();
 
                 var resp = await _constanteBusiness.InsertConstante(newConsta);
 
@@ -115,7 +113,7 @@ namespace PortalNegocioWS.Controllers
 
             try
             {
-                var updConsta = _mapper.Map<POGECONSTANTE>(constante);
+                var updConsta = constante.Adapt<POGECONSTANTE>();
                 await _constanteBusiness.UpdateConstante(id, updConsta);
                 r = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
@@ -130,6 +128,6 @@ namespace PortalNegocioWS.Controllers
                 _logger.LogError($"PN - Error al actualizar la constante: { JsonConvert.SerializeObject(constante) } :: { e.Message }");
                 return StatusCode(500, e.Message);
             }
-        } 
+        }
     }
 }

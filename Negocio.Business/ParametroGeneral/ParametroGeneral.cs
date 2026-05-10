@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Negocio.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using Negocio.Model;
 
 namespace Negocio.Business

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,18 +23,15 @@ namespace SWNegocio.Controllers
     public class RolController : ApiControllerBase
     {
         private readonly IRol _rolBusiness;
-        private readonly IMapper _mapper;
         private readonly ILogger<RolController> _logger;
 
-        public RolController(IRol rol, IMapper mapper, ILogger<RolController> logger)
+        public RolController(IRol rol, ILogger<RolController> logger)
         {
             _rolBusiness = rol;
-            _mapper = mapper;
             _logger = logger;
         }
 
         [HttpGet]
-        //[Route("Get")]
         public async Task<IActionResult> GetCatalogo()
         {
             Response<List<Rol>> r = new Response<List<Rol>>();
@@ -42,7 +39,7 @@ namespace SWNegocio.Controllers
             try
             {
                 var lst_rol = await _rolBusiness.GetRol();
-                r.Data = _mapper.Map<List<Rol>>(lst_rol);
+                r.Data = lst_rol.Adapt<List<Rol>>();
                 r.Status = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
             }
@@ -54,7 +51,6 @@ namespace SWNegocio.Controllers
         }
 
         [HttpGet("{id:int}")]
-        //[Route("GetId")]
         public IActionResult GetRol(decimal id)
         {
             var lst_rol = _rolBusiness.GetRol(id);
@@ -69,7 +65,6 @@ namespace SWNegocio.Controllers
 
 
         [HttpPut]
-        //[Route("Update")]
         public IActionResult UpdateRol(decimal id, Rol rol)
         {
             if (!ModelState.IsValid)
@@ -109,7 +104,7 @@ namespace SWNegocio.Controllers
 
             try
             {
-                resp = await _rolBusiness.InsertRol(_mapper.Map<POGEROL>(rol));
+                resp = await _rolBusiness.InsertRol(rol.Adapt<POGEROL>());
             }
             catch
             {
@@ -120,7 +115,6 @@ namespace SWNegocio.Controllers
         }
 
         [HttpDelete]
-        //[Route("Delete")]
         public IActionResult DeleteRol(decimal id)
         {
             Rol rol = new Rol();

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +21,12 @@ namespace PortalNegocioWS.Controllers
     public class AutorizadorGerenciaController : ApiControllerBase
     {
         private readonly IAutorizadorGerencia _autorizadorGerencia;
-        private readonly IMapper _mapper;
         private readonly ILogger<ParametroGeneralController> _logger;
 
-        public AutorizadorGerenciaController(IAutorizadorGerencia autorizadorGerencia, IMapper mapper, ILogger<ParametroGeneralController> logger)
+        public AutorizadorGerenciaController(IAutorizadorGerencia autorizadorGerencia, ILogger<ParametroGeneralController> logger)
         {
             _autorizadorGerencia = autorizadorGerencia;
-            _mapper = mapper;
             _logger = logger;
-
         }
 
         // GET: api/<AutorizadorGerenciaController>
@@ -41,7 +38,7 @@ namespace PortalNegocioWS.Controllers
             try
             {
                 var autorizadoresGerencia = await _autorizadorGerencia.ObtenerAutorizadores();
-                r.Data = _mapper.Map<List<AutorizadorGerencia>>(autorizadoresGerencia);
+                r.Data = autorizadoresGerencia.Adapt<List<AutorizadorGerencia>>();
                 r.Status = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
             }
@@ -60,7 +57,7 @@ namespace PortalNegocioWS.Controllers
             try
             {
                 var claseValor = await _autorizadorGerencia.ObtenerAutorizadores(id);
-                r.Data = _mapper.Map<List<AutorizadorGerencia>>(claseValor);
+                r.Data = claseValor.Adapt<List<AutorizadorGerencia>>();
                 r.Status = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
             }
@@ -70,26 +67,14 @@ namespace PortalNegocioWS.Controllers
             }
         }
 
-        // GET api/<AutorizadorGerenciaController>/5
-        /*   [HttpGet("{id}")]
-       public string Get(int id)
-       {
-           return "value";
-       }
-
-       // POST api/<AutorizadorGerenciaController>
-       [HttpPost]
-       public void Post([FromBody] string value)
-       {
-       }*/
         // POST api/<ParametroGeneralController>
         [HttpPost]
         public async Task<IActionResult> AgregarClaseValor([FromBody]AutorizadorGerencia autorizador)
         {
             try
             {
-                var resp = await _autorizadorGerencia.InsertarAutorizadorGerencia(_mapper.Map<POGEAUTORIZADORGERENCIA>(autorizador));                 
-                    
+                var resp = await _autorizadorGerencia.InsertarAutorizadorGerencia(autorizador.Adapt<POGEAUTORIZADORGERENCIA>());
+
                 return Ok(resp);
             }
             catch (Exception e)
@@ -98,18 +83,7 @@ namespace PortalNegocioWS.Controllers
                 return StatusCode(500, e.Message);
             }
         }
-        /*
-       // PUT api/<AutorizadorGerenciaController>/5
-       [HttpPut("{id}")]
-       public void Put(int id, [FromBody] string value)
-       {
-       }
 
-       // DELETE api/<AutorizadorGerenciaController>/5
-       [HttpDelete("{id}")]
-       public void Delete(int id)
-       {
-       }*/
         [HttpDelete("{id1:int}/{id2:int}")]
         public async Task<IActionResult> DeleteAutorizacion(int id1, int id2)
         {

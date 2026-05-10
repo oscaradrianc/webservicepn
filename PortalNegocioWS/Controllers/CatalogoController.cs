@@ -1,5 +1,5 @@
-﻿
-using AutoMapper;
+
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,16 +24,13 @@ namespace SWNegocio.Controllers
     {
 
         private readonly ICatalogo _catalogoBusiness;
-        private readonly IMapper _mapper;
 
-        public CatalogoController(ICatalogo catalogo, IMapper mapper)
+        public CatalogoController(ICatalogo catalogo)
         {
             _catalogoBusiness = catalogo;
-            _mapper = mapper;
         }
-        
+
         [HttpGet]
-        //[Route("Get")]
         public async Task<IActionResult> Get()
         {
             var lst_catalogo = await _catalogoBusiness.GetCatalogo();
@@ -58,7 +55,7 @@ namespace SWNegocio.Controllers
             }
 
             return Ok(ltaCatalogo);
-        }        
+        }
 
 
         [HttpGet]
@@ -66,7 +63,7 @@ namespace SWNegocio.Controllers
         public IActionResult GetCatalogo(decimal id)
         {
             var lst_catalogo = _catalogoBusiness.GetCatalogo(id);
-            
+
             if (lst_catalogo == null)
             {
                 return NotFound();
@@ -87,11 +84,11 @@ namespace SWNegocio.Controllers
             if (id != catalogo.CodigoInterno)
             {
                 return BadRequest();
-            }           
+            }
 
             try
-            {                
-                var resp = await _catalogoBusiness.UpdateCatalogo(id, _mapper.Map<PONECATALOGO>(catalogo));
+            {
+                var resp = await _catalogoBusiness.UpdateCatalogo(id, catalogo.Adapt<PONECATALOGO>());
                 return Ok(resp);
             }
             catch (KeyNotFoundException dx)
@@ -101,11 +98,10 @@ namespace SWNegocio.Controllers
             catch
             {
                 return BadRequest();
-            }            
+            }
         }
 
         [HttpPost]
-        //[Route("Insert")]
         public async Task<IActionResult> InsertCatalogo(Catalogo catalogo)
         {
             if (!ModelState.IsValid)
@@ -115,13 +111,13 @@ namespace SWNegocio.Controllers
 
             try
             {
-                var resp = await _catalogoBusiness.InsertCatalogo(_mapper.Map<PONECATALOGO>(catalogo));
+                var resp = await _catalogoBusiness.InsertCatalogo(catalogo.Adapt<PONECATALOGO>());
                 return Ok(resp);
             }
             catch
             {
                 return BadRequest();
-            }          
+            }
         }
 
         [HttpDelete]

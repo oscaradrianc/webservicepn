@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Mapster;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Negocio.Business;
-using AutoMapper;
 using Negocio.Model;
 using Negocio.Data;
 
@@ -19,15 +19,12 @@ namespace PortalNegocioWS.Controllers
     public class OpcionesRolController : ApiControllerBase
     {
         private readonly IRol _rol;
-        private readonly IMapper _mapper;
         private readonly ILogger<ParametroGeneralController> _logger;
 
-        public OpcionesRolController(IRol rol, IMapper mapper, ILogger<ParametroGeneralController> logger)
+        public OpcionesRolController(IRol rol, ILogger<ParametroGeneralController> logger)
         {
             _rol = rol;
-            _mapper = mapper;
             _logger = logger;
-
         }
 
         // GET: api/<OpcionesRolController>
@@ -35,11 +32,11 @@ namespace PortalNegocioWS.Controllers
         public async Task<IActionResult> ObtenerOpcionesRol()
         {
             Response<List<OpcionxRol>> r = new Response<List<OpcionxRol>>();
-         
+
             try
             {
                 var opcionRol = await _rol.GetOpcionRol();
-                r.Data = _mapper.Map<List<OpcionxRol>>(opcionRol);
+                r.Data = opcionRol.Adapt<List<OpcionxRol>>();
                 r.Status = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
             }
@@ -47,7 +44,6 @@ namespace PortalNegocioWS.Controllers
             {
                 return StatusCode(500, e.Message);
             }
-             
         }
 
         // GET api/<OpcionesRolController>/5
@@ -59,7 +55,7 @@ namespace PortalNegocioWS.Controllers
             try
             {
                 var opcionRol = await _rol.GetOpcionRol(id);
-                r.Data = _mapper.Map<List<OpcionxRol>>(opcionRol);
+                r.Data = opcionRol.Adapt<List<OpcionxRol>>();
                 r.Status = new ResponseStatus { Status = Configuracion.StatusOk };
                 return Ok(r);
             }
@@ -75,7 +71,7 @@ namespace PortalNegocioWS.Controllers
         {
             try
             {
-                ResponseStatus res = await _rol.InsertOpcionRol(_mapper.Map<POGEOPCIONXROL>(opcionRol));
+                ResponseStatus res = await _rol.InsertOpcionRol(opcionRol.Adapt<POGEOPCIONXROL>());
 
                 return Ok(res);
             }
