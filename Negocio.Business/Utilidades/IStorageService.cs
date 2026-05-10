@@ -11,6 +11,7 @@ namespace Negocio.Business
     {
         Task<string> SaveFileAsync(string folderPath, string fileName, Stream fileStream, string contentType);
         Task<Stream> GetFileStreamAsync(string filePath); // Nuevo método
+        Task DeleteFileAsync(string filePath);
         bool ExistsDirectory();
     }
 }

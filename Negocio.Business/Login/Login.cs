@@ -18,12 +18,14 @@ namespace Negocio.Business
         private readonly IUtilidades _utilidades;
         private readonly IConfiguration _configuration;
         private readonly IDataContextFactory _factory;
+        private readonly INotificacion _notificacion;
 
-        public LoginBusiness(IUtilidades utilidades, IConfiguration configuration, IDataContextFactory factory)
+        public LoginBusiness(IUtilidades utilidades, IConfiguration configuration, IDataContextFactory factory, INotificacion notificacion)
         {
             _utilidades = utilidades;
             _configuration = configuration;
             _factory = factory;
+            _notificacion = notificacion;
         }
 
         #region Metodos Publicos
@@ -329,7 +331,7 @@ namespace Negocio.Business
 
                     cx.SubmitChanges();
 
-                    (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion(Configuracion.NotificacionResetPassword, usr);
+                    _notificacion.GenerarNotificacion(Configuracion.NotificacionResetPassword, usr);
 
                     resp.Status = Configuracion.StatusOk;
                     resp.Message = "Se envio correo electrónico para reestablecer la contraseña.";

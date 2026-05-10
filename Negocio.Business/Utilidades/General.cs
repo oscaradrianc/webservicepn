@@ -423,17 +423,15 @@ namespace Negocio.Business
         {
             using(PORTALNEGOCIODataContext cx = _factory.Create())
             {
-                return await Task.Run(() => (from mu in cx.POGEMUNICIPIOs
-                                         where mu.MUNICODIGO == idMunicipio
-                                         select new Municipio
-                                         {
-                                             Codigo = (int)mu.MUNICODIGO,
-                                             Codigomunicio = mu.MUNICODMUNICIPIO,
-                                             Nombre = mu.MUNINOMBRE,
-                                             Codigodepto = (int)mu.DEPACODIGO
-                                         }).SingleOrDefault());
-
-
+                return await Task.Run(() => (from m in cx.POGEMUNICIPIOs
+                                             where m.MUNICODIGO == idMunicipio
+                                             select new Municipio
+                                             {
+                                                 Codigo = m.MUNICODIGO,
+                                                 Codigomunicio = m.MUNICODMUNICIPIO,
+                                                 Nombre = m.MUNINOMBRE,
+                                                 Codigodepto = m.DEPACODIGO
+                                             }).SingleOrDefault());
             }
         }
 

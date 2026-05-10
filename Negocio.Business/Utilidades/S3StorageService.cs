@@ -15,44 +15,64 @@ namespace Negocio.Business.Utilidades
         }
 
         /*
-private readonly IAmazonS3 _s3Client;
-private readonly string _bucketName;
+        private readonly IAmazonS3 _s3Client;
+        private readonly string _bucketName;
 
-public S3StorageService(IAmazonS3 s3Client, string bucketName)
-{
-   _s3Client = s3Client;
-   _bucketName = bucketName;
-}
+        public S3StorageService(IAmazonS3 s3Client, string bucketName)
+        {
+           _s3Client = s3Client;
+           _bucketName = bucketName;
+        }
 
-public Task<Stream> GetFileStreamAsync(string filePath)
-{
-   throw new NotImplementedException();
-}
+        public Task<Stream> GetFileStreamAsync(string filePath)
+        {
+           throw new NotImplementedException();
+        }
 
-public async Task<string> SaveFileAsync(string folderPath, string fileName, Stream fileStream, string contentType)
-{
-   var key = $"{folderPath}/{fileName}";
+        public async Task<string> SaveFileAsync(string folderPath, string fileName, Stream fileStream, string contentType)
+        {
+           var key = $"{folderPath}/{fileName}";
 
-   var request = new PutObjectRequest
-   {
-       BucketName = _bucketName,
-       Key = key,
-       InputStream = fileStream,
-       ContentType = contentType
-   };
+           var request = new PutObjectRequest
+           {
+               BucketName = _bucketName,
+               Key = key,
+               InputStream = fileStream,
+               ContentType = contentType
+           };
 
-   await _s3Client.PutObjectAsync(request);
+           await _s3Client.PutObjectAsync(request);
 
-   return $"https://{_bucketName}.s3.amazonaws.com/{key}";
-}
+           return $"https://{_bucketName}.s3.amazonaws.com/{key}";
+        }
 
-*/
+        */
         public Task<Stream> GetFileStreamAsync(string filePath)
         {
             throw new NotImplementedException();
         }
 
         public Task<string> SaveFileAsync(string folderPath, string fileName, Stream fileStream, string contentType)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IStorageService.DeleteFileAsync(string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IStorageService.ExistsDirectory()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Stream> IStorageService.GetFileStreamAsync(string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<string> IStorageService.SaveFileAsync(string folderPath, string fileName, Stream fileStream, string contentType)
         {
             throw new NotImplementedException();
         }

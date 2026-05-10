@@ -96,8 +96,7 @@ namespace Negocio.Model
                     ClasificacionTamano = p.PROVCLASTAMANO,
                     ClasificacionSector = p.PROVCLASSECTOR,
                     OperacionesMercantiles = (p.PROVOPERMERCANTILES == Configuracion.ValorSI),
-                    LogsUsuario = (int?)p.LOGSUSUARIO
-                    
+                    LogsUsuario = (int?)p.LOGSUSUARIO   
                 };
             }
         }
@@ -186,7 +185,6 @@ namespace Negocio.Model
         public string CodigoCIIUIndustriaPereira { get; set; }
         public string CodigoCIIUOtros { get; set; }
         public int? LogsUsuario { get; set; }
-
 
         public static Proveedor CrearProveedor(PONEPROVEEDOR original)
         {

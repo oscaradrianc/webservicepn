@@ -137,21 +137,15 @@ namespace SWNegocio.Controllers
 
         [HttpPost]
         [Route("actualizardocs")]
-        public IActionResult ActualizarDocsProveedor(Proveedor proveedor)
+        public async Task<IActionResult> ActualizarDocsProveedor(Proveedor proveedor)
         {
-
-            //Actualiza los documentos de proveedor
-            string result = _proveedorBusiness.ActualizarDocsProveedor(proveedor);
+            string result = await _proveedorBusiness.ActualizarDocsProveedor(proveedor);
             if (result == "OK")
-            {
                 return Ok();
-            }
-            else
-            {
-                throw new BusinessException(result);
-            }
 
+            throw new BusinessException(result);
         }
+
 
         [HttpGet]
         [Route("proveedorporestado")]

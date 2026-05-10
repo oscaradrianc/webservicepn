@@ -355,13 +355,14 @@ namespace Negocio.Business
         /// <param name="tipo"></param>
         /// <returns></returns>
         public List<SolicitudCompra> ListInvitacion(string tipo)
-        {   
+        {
             using (var cx = _factory.Create())
             {
+                var estadoPublicado = GetEstadoSolicitud("PUBLICADO").FirstOrDefault().CodigoEstado.ToString();
 
                 var s = (from x in cx.PONESOLICITUDCOMPRAs
-                         where x.SOCOTIPOSOLICITUD == tipo.ToString() && DateTime.Now.Date <= x.SOCOFECHACIERRE  
-                         && x.SOCOESTADO == GetEstadoSolicitud("PUBLICADO").FirstOrDefault().CodigoEstado.ToString()
+                         where x.SOCOTIPOSOLICITUD == tipo.ToString() && DateTime.Now.Date <= x.SOCOFECHACIERRE
+                         && x.SOCOESTADO == estadoPublicado
                          select new SolicitudCompra
                          {
                              Area = Convert.ToInt32(x.CLASAREA9),
@@ -371,20 +372,30 @@ namespace Negocio.Business
                              FechaPublicacion = x.SOCOFECHAPUBLICACION,
                              FechaSolicitud = x.SOCOFECHA,
                              FechaCierre = x.SOCOFECHACIERRE,
-                             ArticulosSolicitud = (from p in x.PONEDETALLESOLICITUDs
-                                                   join q in cx.PONECATALOGOs on p.CATACATALOGO equals q.CATACATALOGO
-                                                   join r in cx.POGECLASEVALORs on q.CLASUNIDADMEDIDA4 equals r.CLVACLASEVALOR
-                                                   where p.SOCOSOLICITUD == Convert.ToInt32(x.SOCOSOLICITUD)
-                                                   select new DetalleSolicitud
-                                                   {
-                                                       Cantidad = Convert.ToInt32(p.DESOCANTIDAD),
-                                                       Caracteristicas = p.DESOCARACTERISTICAS,
-                                                       Catalogo = Convert.ToInt32(p.CATACATALOGO),
-                                                       CodigoSolicitud = Convert.ToInt32(p.SOCOSOLICITUD),
-                                                       CodigoDetalle = Convert.ToInt32(p.DESODETALLESOLICITUD),
-                                                       Medida = r.CLVAVALOR
-                                                   }).ToList(),
                          }).ToList();
+
+                if (s.Count > 0)
+                {
+                    var ids = s.Select(x => x.CodigoSolicitud).ToList();
+
+                    var articulos = (from p in cx.PONEDETALLESOLICITUDs
+                                     join q in cx.PONECATALOGOs on p.CATACATALOGO equals q.CATACATALOGO
+                                     join r in cx.POGECLASEVALORs on q.CLASUNIDADMEDIDA4 equals r.CLVACLASEVALOR
+                                     where ids.Contains(Convert.ToInt32(p.SOCOSOLICITUD))
+                                     select new DetalleSolicitud
+                                     {
+                                         Cantidad = Convert.ToInt32(p.DESOCANTIDAD),
+                                         Caracteristicas = p.DESOCARACTERISTICAS,
+                                         Catalogo = Convert.ToInt32(p.CATACATALOGO),
+                                         CodigoSolicitud = Convert.ToInt32(p.SOCOSOLICITUD),
+                                         CodigoDetalle = Convert.ToInt32(p.DESODETALLESOLICITUD),
+                                         Medida = r.CLVAVALOR
+                                     }).ToList();
+
+                    foreach (var sol in s)
+                        sol.ArticulosSolicitud = articulos.Where(a => a.CodigoSolicitud == sol.CodigoSolicitud).ToList();
+                }
+
                 return s;
             }
         }
@@ -398,60 +409,7 @@ namespace Negocio.Business
         {
             using (var cx = _factory.Create())
             {
-
-                var g = cx.PONESOLICITUDCOMPRAs.Where(x => x.SOCOSOLICITUD == id).Select(x => new SolicitudCompra()
-                {
-
-                    Usuario = Convert.ToInt32(x.USUAUSUARIO),
-                    Estado = x.SOCOESTADO,
-                    TipoContratacion = Convert.ToInt32(x.CLASTIPOCONTRATACION3),
-                    Etapa = x.SOCOETAPA,
-                    ObservacionAutorizacion = x.SOCOOBSERVACIONESAUTORIZACION,
-                    FechaPublicacion = x.SOCOFECHAPUBLICACION,
-                    FechaPregunta = x.SOCOFECHAPREGUNTA,
-                    FechaRespuesta = x.SOCOFECHARESPUESTA,
-                    FechaPropuestas = x.SOCOFECHAPROPUESTAS,
-                    FechaCierre = x.SOCOFECHACIERRE,
-                    NumeroSAIA =x.SOCONUMEROSAIA.ToString(),
-                    ProyectoSAIA = Convert.ToInt32(x.SOCOPROYECTOSAIA),
-                    FechaSAIA = x.SOCOFECHASAIA,
-                    TipoSolicitud = x.SOCOTIPOSOLICITUD,
-                    Presupuesto = x.SOCOPRESUPUESTO,
-                    ValorSAIA = Convert.ToInt64(x.SOCOVALOR),
-                    ArticulosSolicitud = (from p in x.PONEDETALLESOLICITUDs
-                                          join q in cx.PONECATALOGOs on p.CATACATALOGO equals q.CATACATALOGO
-                                          join r in cx.POGECLASEVALORs on q.CLASUNIDADMEDIDA4 equals r.CLVACLASEVALOR
-                                          select new DetalleSolicitud
-                                          {
-                                              Cantidad = Convert.ToInt32(p.DESOCANTIDAD),
-                                              Caracteristicas = p.DESOCARACTERISTICAS,
-                                              Catalogo = Convert.ToInt32(p.CATACATALOGO),
-                                              CodigoSolicitud = Convert.ToInt32(p.SOCOSOLICITUD),
-                                              CodigoDetalle = Convert.ToInt32(p.DESODETALLESOLICITUD),
-                                              Medida = r.CLVAVALOR
-                                          }).ToList(),
-                    Area = Convert.ToInt32(x.CLASAREA9),
-                    Terminos = GetDocumentosSolicitud(x, cx, 332),
-                    Anexos = GetDocumentosSolicitud(x, cx, 333),
-                    CodigoSolicitud = Convert.ToInt32(x.SOCOSOLICITUD),
-                    Descripcion = x.SOCODESCRIPCION,
-                    FechaSolicitud = x.SOCOFECHA
-                }).FirstOrDefault();
-
-                return g;
-            }
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public SolicitudCompra GetSolicitud(int id)
-        {
-            using (var cx = _factory.Create())
-            {
-                var g = cx.PONESOLICITUDCOMPRAs.Where(x => x.SOCOSOLICITUD == id).Select(x => new SolicitudCompra()
+                var entity = cx.PONESOLICITUDCOMPRAs.Where(x => x.SOCOSOLICITUD == id).Select(x => new SolicitudCompra()
                 {
                     Usuario = Convert.ToInt32(x.USUAUSUARIO),
                     Estado = x.SOCOESTADO,
@@ -468,28 +426,91 @@ namespace Negocio.Business
                     FechaSAIA = x.SOCOFECHASAIA,
                     TipoSolicitud = x.SOCOTIPOSOLICITUD,
                     Presupuesto = x.SOCOPRESUPUESTO,
-                    ValorSAIA = Convert.ToInt64(x.SOCOVALOR),                   
+                    ValorSAIA = Convert.ToInt64(x.SOCOVALOR),
                     Area = Convert.ToInt32(x.CLASAREA9),
-                    Terminos = GetDocumentosSolicitud(x,cx, 332),
-                    Anexos =  GetDocumentosSolicitud(x, cx, 333),
+                    CodigoSolicitud = Convert.ToInt32(x.SOCOSOLICITUD),
+                    Descripcion = x.SOCODESCRIPCION,
+                    FechaSolicitud = x.SOCOFECHA
+                }).FirstOrDefault();
+
+                if (entity != null)
+                {
+                    entity.ArticulosSolicitud = (from p in cx.PONEDETALLESOLICITUDs
+                                                 join q in cx.PONECATALOGOs on p.CATACATALOGO equals q.CATACATALOGO
+                                                 join r in cx.POGECLASEVALORs on q.CLASUNIDADMEDIDA4 equals r.CLVACLASEVALOR
+                                                 where p.SOCOSOLICITUD == id
+                                                 select new DetalleSolicitud
+                                                 {
+                                                     Cantidad = Convert.ToInt32(p.DESOCANTIDAD),
+                                                     Caracteristicas = p.DESOCARACTERISTICAS,
+                                                     Catalogo = Convert.ToInt32(p.CATACATALOGO),
+                                                     CodigoSolicitud = Convert.ToInt32(p.SOCOSOLICITUD),
+                                                     CodigoDetalle = Convert.ToInt32(p.DESODETALLESOLICITUD),
+                                                     Medida = r.CLVAVALOR
+                                                 }).ToList();
+
+                    entity.Terminos = GetDocumentosSolicitud(id, cx, 332);
+                    entity.Anexos = GetDocumentosSolicitud(id, cx, 333);
+                }
+
+                return entity;
+            }
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public SolicitudCompra GetSolicitud(int id)
+        {
+            using (var cx = _factory.Create())
+            {
+                var entity = cx.PONESOLICITUDCOMPRAs.Where(x => x.SOCOSOLICITUD == id).Select(x => new SolicitudCompra()
+                {
+                    Usuario = Convert.ToInt32(x.USUAUSUARIO),
+                    Estado = x.SOCOESTADO,
+                    TipoContratacion = Convert.ToInt32(x.CLASTIPOCONTRATACION3),
+                    Etapa = x.SOCOETAPA,
+                    ObservacionAutorizacion = x.SOCOOBSERVACIONESAUTORIZACION,
+                    FechaPublicacion = x.SOCOFECHAPUBLICACION,
+                    FechaPregunta = x.SOCOFECHAPREGUNTA,
+                    FechaRespuesta = x.SOCOFECHARESPUESTA,
+                    FechaPropuestas = x.SOCOFECHAPROPUESTAS,
+                    FechaCierre = x.SOCOFECHACIERRE,
+                    NumeroSAIA = x.SOCONUMEROSAIA.ToString(),
+                    ProyectoSAIA = Convert.ToInt32(x.SOCOPROYECTOSAIA),
+                    FechaSAIA = x.SOCOFECHASAIA,
+                    TipoSolicitud = x.SOCOTIPOSOLICITUD,
+                    Presupuesto = x.SOCOPRESUPUESTO,
+                    ValorSAIA = Convert.ToInt64(x.SOCOVALOR),
+                    Area = Convert.ToInt32(x.CLASAREA9),
                     CodigoSolicitud = Convert.ToInt32(x.SOCOSOLICITUD),
                     Descripcion = x.SOCODESCRIPCION,
                     FechaSolicitud = x.SOCOFECHA,
-                    ArticulosSolicitud = (from p in x.PONEDETALLESOLICITUDs
-                                          join q in cx.PONECATALOGOs on p.CATACATALOGO equals q.CATACATALOGO
-                                          join r in cx.POGECLASEVALORs on q.CLASUNIDADMEDIDA4 equals r.CLVACLASEVALOR
-                                          select new DetalleSolicitud
-                                          {
-                                              Cantidad = Convert.ToInt32(p.DESOCANTIDAD),
-                                              Caracteristicas = p.DESOCARACTERISTICAS,
-                                              Id = Convert.ToInt32(p.CATACATALOGO),
-                                              CodigoSolicitud = Convert.ToInt32(p.SOCOSOLICITUD),
-                                              CodigoDetalle = Convert.ToInt32(p.DESODETALLESOLICITUD),
-                                              Medida = r.CLVAVALOR
-                                          }).ToList(),
                 }).SingleOrDefault();
 
-                return g;
+                if (entity != null)
+                {
+                    entity.Terminos = GetDocumentosSolicitud(id, cx, 332);
+                    entity.Anexos = GetDocumentosSolicitud(id, cx, 333);
+
+                    entity.ArticulosSolicitud = (from p in cx.PONEDETALLESOLICITUDs
+                                            join q in cx.PONECATALOGOs on p.CATACATALOGO equals q.CATACATALOGO
+                                            join r in cx.POGECLASEVALORs on q.CLASUNIDADMEDIDA4 equals r.CLVACLASEVALOR
+                                            where p.SOCOSOLICITUD == id
+                                            select new DetalleSolicitud
+                                            {
+                                                Cantidad = Convert.ToInt32(p.DESOCANTIDAD),
+                                                Caracteristicas = p.DESOCARACTERISTICAS,
+                                                Id = Convert.ToInt32(p.CATACATALOGO),
+                                                CodigoSolicitud = Convert.ToInt32(p.SOCOSOLICITUD),
+                                                CodigoDetalle = Convert.ToInt32(p.DESODETALLESOLICITUD),
+                                                Medida = r.CLVAVALOR
+                                            }).ToList();
+                }
+
+                return entity;
             }
         }
         
@@ -994,26 +1015,20 @@ namespace Negocio.Business
             }                
         }
 
-        private List<Documento> GetDocumentosSolicitud(PONESOLICITUDCOMPRA x, PORTALNEGOCIODataContext cx, int tipoDocumento)
+        private List<Documento> GetDocumentosSolicitud(int idSolicitud, PORTALNEGOCIODataContext cx, int tipoDocumento)
         {
-          var t = (from p in x.PONEDOCUMENTOSOLICITUDs
-                         join q in cx.PONEDOCUMENTOs on p.DOCUDOCUMENTO equals q.DOCUDOCUMENTO
-                         //join r in cx.PONEBLOBs on q.BLOBBLOB equals r.BLOBBLOB
-                         where q.CLASTIPODOCUMENTO8 == tipoDocumento
-                  select new Documento
+            return (from p in cx.PONEDOCUMENTOSOLICITUDs
+                    join q in cx.PONEDOCUMENTOs on p.DOCUDOCUMENTO equals q.DOCUDOCUMENTO
+                    where p.SOCOSOLICITUD == idSolicitud && q.CLASTIPODOCUMENTO8 == tipoDocumento
+                    select new Documento
                     {
                         FechaCreacion = q.DOCUFECHACREACION,
-                        //CodigoBlob = Convert.ToInt32(q.PONEBLOB.BLOBBLOB),
                         CodigoDocumento = Convert.ToInt32(q.DOCUDOCUMENTO),
-                        //DataB64 = Convert.ToBase64String(q.PONEBLOB.BLOBDATO),
                         ContentType = q.DOCUCONTENTTYPE,
                         Ruta = q.DOCURUTA,
-                      Nombre = q.DOCUNOMBRE,
+                        Nombre = q.DOCUNOMBRE,
                         Tipo = Convert.ToInt32(q.CLASTIPODOCUMENTO8)
                     }).ToList();
-
-            return t;
-
         }
 
         #endregion

@@ -14,14 +14,12 @@ namespace Negocio.Business
     {
         private readonly IUtilidades _utilidades;
         private readonly IDataContextFactory _factory;
-        private readonly ProveedorBusiness _proveedor;
         private readonly IEmailQueue _emailQueue;
-        public NotificacionBusiness(IUtilidades utilidades, IDataContextFactory factory, IEmailQueue emailQueue, ProveedorBusiness proveedor = null)
+        public NotificacionBusiness(IUtilidades utilidades, IDataContextFactory factory, IEmailQueue emailQueue)
         {
             _utilidades = utilidades;
             _factory = factory;
             _emailQueue = emailQueue;
-            _proveedor = proveedor;
         }
         #region Metodos Publicos
 
@@ -305,13 +303,31 @@ namespace Negocio.Business
                         case "autorizacionproveedo":
 
                             Usuario provAuto = obj as Usuario;
-                            correoProv = _proveedor.ObtenerEmailxProveedor((int)provAuto.IdProveedor);
-
-                            if (correoProv != null)
+                            if (provAuto != null && provAuto.IdProveedor.HasValue)
                             {
-                                mensaje = stubble.Render(noti.Plantilla, provAuto);
-                                correos.Add(correoProv);
-                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
+                                correoProv = ObtenerEmailxProveedor((int)provAuto.IdProveedor);
+
+                                if (correoProv != null)
+                                {
+                                    mensaje = stubble.Render(noti.Plantilla, provAuto);
+                                    correos.Add(correoProv);
+                                    _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
+                                }
+                            }
+                            break;
+                        case "rechazoproveedor":
+
+                            Usuario provRechazado = obj as Usuario;
+                            if (provRechazado != null && provRechazado.IdProveedor.HasValue)
+                            {
+                                correoProv = ObtenerEmailxProveedor((int)provRechazado.IdProveedor);
+
+                                if (correoProv != null)
+                                {
+                                    mensaje = stubble.Render(noti.Plantilla, provRechazado);
+                                    correos.Add(correoProv);
+                                    _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
+                                }
                             }
                             break;
                         case "registropregunta":
@@ -334,13 +350,16 @@ namespace Negocio.Business
                         case "registrorespuesta":
 
                             CrearRespuesta respuesta = obj as CrearRespuesta;
-                            correoProv = _proveedor.ObtenerEmailxProveedor(respuesta.CodigoProveedor);
-
-                            if (!string.IsNullOrEmpty(correoProv))
+                            if (respuesta != null)
                             {
-                                mensaje = stubble.Render(noti.Plantilla, respuesta);
-                                correos.Add(correoProv);
-                                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
+                                correoProv = ObtenerEmailxProveedor(respuesta.CodigoProveedor);
+
+                                if (!string.IsNullOrEmpty(correoProv))
+                                {
+                                    mensaje = stubble.Render(noti.Plantilla, respuesta);
+                                    correos.Add(correoProv);
+                                    _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
+                                }
                             }
                             break;
                         case "confirmacioncotizaci":
@@ -453,12 +472,12 @@ namespace Negocio.Business
         private void EnviarNotificacionProveedor(int codigoProveedor, Notificacion noti, object obj, PORTALNEGOCIODataContext cx)
         {
             var stubble = new StubbleBuilder().Build();
-            List<string> correos = new List<string> { _proveedor.ObtenerEmailxProveedor(codigoProveedor) };
+            string correo = ObtenerEmailxProveedor(codigoProveedor);
 
-            if (correos.Count > 0)
+            if (!string.IsNullOrEmpty(correo))
             {
-                string mensaje = stubble.Render(noti.Plantilla, obj);                
-                _emailQueue.Queue(new EmailMessage(correos, noti.Asunto, mensaje));
+                string mensaje = stubble.Render(noti.Plantilla, obj);
+                _emailQueue.Queue(new EmailMessage(new List<string> { correo }, noti.Asunto, mensaje));
             }
         }
 
@@ -556,6 +575,15 @@ namespace Negocio.Business
 
         #endregion
 
+        private string ObtenerEmailxProveedor(int idProveedor)
+        {
+            using (var cx = _factory.Create())
+            {
+                return (from p in cx.PONEPROVEEDORs
+                         where p.PROVPROVEEDOR == idProveedor
+                         select p.PROVEMAIL).SingleOrDefault();
+            }
+        }
 
     }
 }

@@ -13,7 +13,7 @@ namespace Negocio.Model
             {
                 return e => new Especialidad
                 {
-                    SecuenciaEspecialidad = (int)e.LIESSECUENCIA,
+                    SecuenciaEspecialidad = e.LIESSECUENCIA,
                     BienesServiciosEspecialidad = e.LIESBIENESOSERVICIOS,
                     ComercioEspecialidad = e.LIESCOMERCIO == "S" ? true : false,
                     ServiciosEspecialidad = e.LIESSERVICIOS == "S" ? true : false,
@@ -24,7 +24,7 @@ namespace Negocio.Model
             }
         }
 
-        public int SecuenciaEspecialidad { get; set; }
+        public decimal SecuenciaEspecialidad { get; set; }
         public string ItemEspecialidad { get; set; }
         public string BienesServiciosEspecialidad { get; set; }
         public bool ComercioEspecialidad { get; set; }

@@ -1,11 +1,14 @@
-﻿using Negocio.Data;
+using Negocio.Data;
 using Negocio.Model;
 using Newtonsoft.Json;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -38,7 +41,7 @@ namespace Negocio.Business
                 var transaction = cx.Connection.BeginTransaction();
                 try
                 {
-                    
+
                     var configuraciones = ObtenerConfiguracionArchivo(cx, out codigoArchivo);
                     List<ValoresArchivo> valores = new List<ValoresArchivo>();
 
@@ -91,8 +94,8 @@ namespace Negocio.Business
 
                         AlmacenarValores(cx, valores, request, bin.Length, codigoArchivo);
                     }
-                        
-                    transaction.Commit();
+
+                        transaction.Commit();
 
                 }
                 catch
@@ -125,134 +128,133 @@ namespace Negocio.Business
                 return await Task.Run(async () =>
                 {
 
-                    //Proveedor prov = JsonConvert.DeserializeObject<Proveedor>(proveedorJson);
-
                     ProveedorFormato prov = await _proveedor.ObtenerProveedorFormatoJson(proveedor);
 
                     return await EscribirFormatoProveedor(prov);
                 });
-            }            
+            }
         }
 
-        private async  Task<string> EscribirFormatoProveedor(ProveedorFormato proveedorActual)
+        private async Task<string> EscribirFormatoProveedor(ProveedorFormato proveedorActual)
         {
             using (PORTALNEGOCIODataContext cx = _factory.Create())
             {
                 return await Task.Run(() =>
                 {
-                    //int codigoBlob = (int)cx.PONEDOCUMENTOs.Where(x => x.DOCUDOCUMENTO == Configuracion.DocumentoFormatoProveedor).FirstOrDefault();
                     byte[] blob = cx.PONEBLOBs.Where(x => x.BLOBBLOB == Configuracion.DocumentoFormatoProveedor).FirstOrDefault().BLOBDATO;
 
+                    var stream = new MemoryStream();
+                    stream.Write(blob, 0, blob.Length);
+                    stream.Position = 0;
 
-                    using (MemoryStream stream = new MemoryStream(blob))
+                    using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
                     {
-                        //Proveedor proveedorActual = ObtenerValoresProveedor(idProveedor);
-
-
-                        XSSFWorkbook excelPackage = new XSSFWorkbook(stream);
-                        ISheet sheet = excelPackage.GetSheetAt(1);
+                        WorkbookPart workbookPart = document.WorkbookPart;
+                        Workbook workbook = workbookPart.Workbook;
+                        Sheet sheet = workbook.Sheets.Elements<Sheet>().ElementAt(1);
+                        WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id.Value);
+                        Worksheet worksheet = worksheetPart.Worksheet;
 
                         if (proveedorActual.TipoPersona == Configuracion.TipoPersonaNatural)
                         {
                             //Nombre
                             if (proveedorActual.TipoPersona == Configuracion.TipoPersonaNatural)
                             {
-                                sheet.GetRow(1).CreateCell(1).SetCellValue(proveedorActual.Nombre);
+                                SetCellString(worksheet, 1, 1, proveedorActual.Nombre);
                             }
                             else
                             {
-                                sheet.GetRow(1).CreateCell(1).SetCellValue(" ");
+                                SetCellString(worksheet, 1, 1, " ");
                             }
-                           
+
                             if (proveedorActual.TipoDocumento == Configuracion.TipoIdentificacionNIT)
                             {
-                                sheet.GetRow(2).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 2, 1, "X");
                             }
-                            else                            
+                            else
                             {
-                                sheet.GetRow(3).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 3, 1, "X");
                             }
-                            
+
                             //Documento
-                            sheet.GetRow(4).CreateCell(1).SetCellValue(proveedorActual.Documento);
+                            SetCellString(worksheet, 4, 1, proveedorActual.Documento);
                             //Lugar Expedicion documento
-                            sheet.GetRow(5).CreateCell(1).SetCellValue(proveedorActual.LugarExpedicion);
+                            SetCellString(worksheet, 5, 1, proveedorActual.LugarExpedicion);
                             //Fecha nacimiento
-                            sheet.GetRow(6).CreateCell(1).SetCellValue((proveedorActual.FechaNacimiento != null) ? ((DateTime)proveedorActual.FechaNacimiento).ToString("dd/MM/yyyy") : " ");
+                            SetCellString(worksheet, 6, 1, (proveedorActual.FechaNacimiento != null) ? ((DateTime)proveedorActual.FechaNacimiento).ToString("dd/MM/yyyy") : " ");
                             //Lugar nacimiento
-                            sheet.GetRow(7).CreateCell(1).SetCellValue(proveedorActual.LugarNacimiento);
-                            //Dir residencia 
-                            sheet.GetRow(8).CreateCell(1).SetCellValue(proveedorActual.DireccionResidencia);
+                            SetCellString(worksheet, 7, 1, proveedorActual.LugarNacimiento);
+                            //Dir residencia
+                            SetCellString(worksheet, 8, 1, proveedorActual.DireccionResidencia);
                             //Ciudad residencia
-                            sheet.GetRow(9).CreateCell(1).SetCellValue(proveedorActual.Ciudad);
+                            SetCellString(worksheet, 9, 1, proveedorActual.Ciudad);
                             //Telefono residencia
-                            sheet.GetRow(10).CreateCell(1).SetCellValue((proveedorActual.Telefono != null) ? ((double)proveedorActual.Telefono).ToString() : " ");
+                            SetCellString(worksheet, 10, 1, (proveedorActual.Telefono != null) ? ((double)proveedorActual.Telefono).ToString() : " ");
                             //Email
-                            sheet.GetRow(11).CreateCell(1).SetCellValue(proveedorActual.Email);
+                            SetCellString(worksheet, 11, 1, proveedorActual.Email);
                             //Profesion
-                            sheet.GetRow(12).CreateCell(1).SetCellValue(proveedorActual.Profesion);
+                            SetCellString(worksheet, 12, 1, proveedorActual.Profesion);
                             //Actividad
                             if (proveedorActual.Actividad == 1)
                             {
-                                sheet.GetRow(13).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 13, 1, "X");
                             }
-                            else
-                            if (proveedorActual.Actividad == 2)
+                            else if (proveedorActual.Actividad == 2)
                             {
-                                sheet.GetRow(14).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 14, 1, "X");
                             }
                             //Empresa donde trabaja
-                            sheet.GetRow(15).CreateCell(1).SetCellValue(proveedorActual.Empresa != null ? proveedorActual.Empresa : " ");
+                            SetCellString(worksheet, 15, 1, proveedorActual.Empresa != null ? proveedorActual.Empresa : " ");
                             //Cargo
-                            sheet.GetRow(16).CreateCell(1).SetCellValue(proveedorActual.Cargo != null ? proveedorActual.Cargo : " ");
+                            SetCellString(worksheet, 16, 1, proveedorActual.Cargo != null ? proveedorActual.Cargo : " ");
                             //Telefono trabaja
-                            sheet.GetRow(17).CreateCell(1).SetCellValue(proveedorActual.TelefonoEmpresa != null ? proveedorActual.TelefonoEmpresa : " ");
+                            SetCellString(worksheet, 17, 1, proveedorActual.TelefonoEmpresa != null ? proveedorActual.TelefonoEmpresa : " ");
                             //Direccion comercial
-                            sheet.GetRow(18).CreateCell(1).SetCellValue(proveedorActual.DireccionComercial != null ? proveedorActual.DireccionComercial : " ");
+                            SetCellString(worksheet, 18, 1, proveedorActual.DireccionComercial != null ? proveedorActual.DireccionComercial : " ");
                             //Ciudad Empresa
-                            sheet.GetRow(19).CreateCell(1).SetCellValue(proveedorActual.CiudadEmpresa != null ? proveedorActual.CiudadEmpresa : " ");
+                            SetCellString(worksheet, 19, 1, proveedorActual.CiudadEmpresa != null ? proveedorActual.CiudadEmpresa : " ");
                             //Fax
-                            sheet.GetRow(20).CreateCell(1).SetCellValue(proveedorActual.Fax.ToString());
+                            SetCellString(worksheet, 20, 1, proveedorActual.Fax.ToString());
                             //Maneja recurso publicos
                             if ((proveedorActual.ManejaRecursos != null) ? (bool)proveedorActual.ManejaRecursos : false)
                             {
-                                sheet.GetRow(21).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 21, 1, "X");
                             }
                             else
                             {
-                                sheet.GetRow(22).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 22, 1, "X");
                             }
 
                             //Reconocimiento publico
                             if ((proveedorActual.ReconocimientoPublico != null) ? (bool)proveedorActual.ReconocimientoPublico : false)
                             {
-                                sheet.GetRow(23).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 23, 1, "X");
                             }
                             else
                             {
-                                sheet.GetRow(24).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 24, 1, "X");
                             }
 
                             //Poder publico
                             if ((proveedorActual.PoderPublico != null) ? (bool)proveedorActual.PoderPublico : false)
                             {
-                                sheet.GetRow(25).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 25, 1, "X");
                             }
                             else
                             {
-                                sheet.GetRow(26).CreateCell(1).SetCellValue("X");
+                                SetCellString(worksheet, 26, 1, "X");
                             }
 
                             //Explicacion poder publico
-                            if ((proveedorActual.ManejaRecursos != null && (bool)proveedorActual.ManejaRecursos) || 
-                                (proveedorActual.ReconocimientoPublico != null && (bool)proveedorActual.ReconocimientoPublico) || 
+                            if ((proveedorActual.ManejaRecursos != null && (bool)proveedorActual.ManejaRecursos) ||
+                                (proveedorActual.ReconocimientoPublico != null && (bool)proveedorActual.ReconocimientoPublico) ||
                                 (proveedorActual.PoderPublico != null && (bool)proveedorActual.PoderPublico))
                             {
-                                sheet.GetRow(27).CreateCell(1).SetCellValue(proveedorActual.RespuestaAfirmativa);
+                                SetCellString(worksheet, 27, 1, proveedorActual.RespuestaAfirmativa);
                             }
                             else
                             {
-                                sheet.GetRow(27).CreateCell(1).SetCellValue(" ");
+                                SetCellString(worksheet, 27, 1, " ");
                             }
                         }
 
@@ -260,264 +262,245 @@ namespace Negocio.Business
                         if (proveedorActual.TipoPersona == Configuracion.TipoPersonaJuridica)
                         {
                             //Razon Social
-                            sheet.GetRow(29).CreateCell(1).SetCellValue(proveedorActual.Nombre);
+                            SetCellString(worksheet, 29, 1, proveedorActual.Nombre);
                             //NIT
-                            sheet.GetRow(30).CreateCell(1).SetCellValue(proveedorActual.Documento);
+                            SetCellString(worksheet, 30, 1, proveedorActual.Documento);
                             //Direccion oficina ppal
-                            sheet.GetRow(31).CreateCell(1).SetCellValue(proveedorActual.DireccionJuridica);
+                            SetCellString(worksheet, 31, 1, proveedorActual.DireccionJuridica);
                             //Ciudad oficina ppal
-                            sheet.GetRow(32).CreateCell(1).SetCellValue(proveedorActual.CiudadJuridica);
+                            SetCellString(worksheet, 32, 1, proveedorActual.CiudadJuridica);
                             //Telefono oficina ppal
-                            sheet.GetRow(33).CreateCell(1).SetCellValue((proveedorActual.TelefonoPrincipal == null) ? " " : proveedorActual.TelefonoPrincipal);
+                            SetCellString(worksheet, 33, 1, (proveedorActual.TelefonoPrincipal == null) ? " " : proveedorActual.TelefonoPrincipal);
                             //Direccion Sucursal
-                            sheet.GetRow(34).CreateCell(1).SetCellValue((proveedorActual.DireccionSucursal == null) ? " " : proveedorActual.DireccionSucursal);
+                            SetCellString(worksheet, 34, 1, (proveedorActual.DireccionSucursal == null) ? " " : proveedorActual.DireccionSucursal);
                             //Ciudad Sucursal
-                            sheet.GetRow(35).CreateCell(1).SetCellValue((proveedorActual.CiudadSucursal == null) ? " " : proveedorActual.CiudadSucursal);
+                            SetCellString(worksheet, 35, 1, (proveedorActual.CiudadSucursal == null) ? " " : proveedorActual.CiudadSucursal);
                             //Telefono Sucursal
-                            sheet.GetRow(36).CreateCell(1).SetCellValue((proveedorActual.TelefonoSucursal == null) ? " " : proveedorActual.TelefonoSucursal);
+                            SetCellString(worksheet, 36, 1, (proveedorActual.TelefonoSucursal == null) ? " " : proveedorActual.TelefonoSucursal);
                             //Tipo de empresa
-                            sheet.GetRow(37).CreateCell(1).SetCellValue(proveedorActual.TipoEmpresa);
-                            //Sector de la economina
-                            sheet.GetRow(38).CreateCell(1).SetCellValue(proveedorActual.SectorEconomia);
+                            SetCellString(worksheet, 37, 1, proveedorActual.TipoEmpresa);
+                            //Sector de la economia
+                            SetCellString(worksheet, 38, 1, proveedorActual.SectorEconomia);
                             //Email persona juridica
-                            sheet.GetRow(39).CreateCell(1).SetCellValue(proveedorActual.Email);
+                            SetCellString(worksheet, 39, 1, proveedorActual.Email);
                             //Nombre representante
-                            sheet.GetRow(41).CreateCell(1).SetCellValue(proveedorActual.NombreRep);
+                            SetCellString(worksheet, 41, 1, proveedorActual.NombreRep);
                             //Tipo doc rep
-                            sheet.GetRow(42).CreateCell(1).SetCellValue(proveedorActual.TipoDocumentoRep);
+                            SetCellString(worksheet, 42, 1, proveedorActual.TipoDocumentoRep);
                             //Identificacion repre
-                            sheet.GetRow(43).CreateCell(1).SetCellValue(proveedorActual.DocumentoRep);
+                            SetCellString(worksheet, 43, 1, proveedorActual.DocumentoRep);
                             //Fecha expedicion doc repre
-                            sheet.GetRow(44).CreateCell(1).SetCellValue((proveedorActual.FechaExpedicionRep != null) ? ((DateTime)proveedorActual.FechaExpedicionRep).ToString("dd/MM/yyyy") : " ");
+                            SetCellString(worksheet, 44, 1, (proveedorActual.FechaExpedicionRep != null) ? ((DateTime)proveedorActual.FechaExpedicionRep).ToString("dd/MM/yyyy") : " ");
                             //Lugar exp doc repre
-                            sheet.GetRow(45).CreateCell(1).SetCellValue(proveedorActual.LugarExpedicionRep);
+                            SetCellString(worksheet, 45, 1, proveedorActual.LugarExpedicionRep);
                             //Fecha nacimiento repre
-                            sheet.GetRow(46).CreateCell(1).SetCellValue((proveedorActual.FechaNacimientoRep != null) ? ((DateTime)proveedorActual.FechaNacimientoRep).ToString("dd/MM/yyyy") : " ");
+                            SetCellString(worksheet, 46, 1, (proveedorActual.FechaNacimientoRep != null) ? ((DateTime)proveedorActual.FechaNacimientoRep).ToString("dd/MM/yyyy") : " ");
                             //Lugar nacimiento repre
-                            sheet.GetRow(47).CreateCell(1).SetCellValue(proveedorActual.LugarNacimientoRep);
+                            SetCellString(worksheet, 47, 1, proveedorActual.LugarNacimientoRep);
                             //Nacionalidad repre
-                            sheet.GetRow(48).CreateCell(1).SetCellValue(proveedorActual.NacionalidadRep);
+                            SetCellString(worksheet, 48, 1, proveedorActual.NacionalidadRep);
                         }
                         else
                         {
-                            sheet.GetRow(29).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 29, 1, " ");
                         }
 
                         //ActividadEconomica
-                        sheet.GetRow(50).CreateCell(1).SetCellValue(proveedorActual.ActividadEconomica);
+                        SetCellString(worksheet, 50, 1, proveedorActual.ActividadEconomica);
                         //Codigo CIIU
-                        sheet.GetRow(51).CreateCell(1).SetCellValue(proveedorActual.CodigoCIIU);
+                        SetCellString(worksheet, 51, 1, proveedorActual.CodigoCIIU);
                         //Ingresos Mensuales (Pesos)
                         if (proveedorActual.IngresosMensuales != null)
                         {
-                            sheet.GetRow(52).CreateCell(1).SetCellValue((double)proveedorActual.IngresosMensuales);
+                            SetCellNumber(worksheet, 52, 1, (double)proveedorActual.IngresosMensuales);
                         }
                         else
                         {
-                            sheet.GetRow(52).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 52, 1, " ");
                         }
 
                         //Egresos Mensuales
                         if (proveedorActual.EgresosMensuales != null)
                         {
-                            sheet.GetRow(53).CreateCell(1).SetCellValue((double)proveedorActual.EgresosMensuales);
+                            SetCellNumber(worksheet, 53, 1, (double)proveedorActual.EgresosMensuales);
                         }
                         else
                         {
-                            sheet.GetRow(53).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 53, 1, " ");
                         }
 
                         //Activos (Pesos)
                         if (proveedorActual.Activos != null)
                         {
-                            sheet.GetRow(54).CreateCell(1).SetCellValue((double)proveedorActual.Activos);
+                            SetCellNumber(worksheet, 54, 1, (double)proveedorActual.Activos);
                         }
                         else
                         {
-                            sheet.GetRow(54).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 54, 1, " ");
                         }
 
                         //Pasivos
                         if (proveedorActual.Pasivos != null)
                         {
-                            sheet.GetRow(55).CreateCell(1).SetCellValue((double)proveedorActual.Pasivos);
+                            SetCellNumber(worksheet, 55, 1, (double)proveedorActual.Pasivos);
                         }
                         else
                         {
-                            sheet.GetRow(55).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 55, 1, " ");
                         }
 
                         //Patrimonio (Pesos)
                         if (proveedorActual.Patrimonio != null)
                         {
-                            sheet.GetRow(56).CreateCell(1).SetCellValue((double)proveedorActual.Patrimonio);
+                            SetCellNumber(worksheet, 56, 1, (double)proveedorActual.Patrimonio);
                         }
                         else
                         {
-                            sheet.GetRow(56).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 56, 1, " ");
                         }
 
                         //Otros Ingresos
                         if (proveedorActual.OtrosIngresos != null)
                         {
-                            sheet.GetRow(57).CreateCell(1).SetCellValue((double)proveedorActual.OtrosIngresos);
+                            SetCellNumber(worksheet, 57, 1, (double)proveedorActual.OtrosIngresos);
                         }
                         else
                         {
-                            sheet.GetRow(57).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 57, 1, " ");
                         }
 
                         //Concepto otros ingresos
-                        sheet.GetRow(58).CreateCell(1).SetCellValue(proveedorActual.ConceptoOtrosIngresos ?? " ");
+                        SetCellString(worksheet, 58, 1, proveedorActual.ConceptoOtrosIngresos ?? " ");
                         //Transacciones moneda extranjera
                         if (proveedorActual.MonedaExtranjera)
                         {
-                            sheet.GetRow(59).CreateCell(1).SetCellValue("X");
+                            SetCellString(worksheet, 59, 1, "X");
                             //Tipo Moneda Extranjera
-                            sheet.GetRow(61).CreateCell(1).SetCellValue(proveedorActual.TipoMoneda);
+                            SetCellString(worksheet, 61, 1, proveedorActual.TipoMoneda);
                         }
                         else
                         {
-                            sheet.GetRow(60).CreateCell(1).SetCellValue("X");
+                            SetCellString(worksheet, 60, 1, "X");
                             //Tipo Moneda Extranjera
-                            sheet.GetRow(61).CreateCell(1).SetCellValue(" ");
+                            SetCellString(worksheet, 61, 1, " ");
                         }
 
                         //Productos en el exterior
                         if (proveedorActual.CuentasMonedaExtranjera)
                         {
-                            sheet.GetRow(62).CreateCell(1).SetCellValue("X");
+                            SetCellString(worksheet, 62, 1, "X");
                         }
                         else
                         {
-                            sheet.GetRow(63).CreateCell(1).SetCellValue("X");
+                            SetCellString(worksheet, 63, 1, "X");
                         }
 
-
                         //Entidad Estatal
-                        sheet.GetRow(65).CreateCell(1).SetCellValue(proveedorActual.EntidadEstatal ?? false);
+                        SetCellBoolean(worksheet, 65, 1, proveedorActual.EntidadEstatal ?? false);
                         //Entidad sin animo de lucro
-                        sheet.GetRow(99).CreateCell(1).SetCellValue(proveedorActual.EntidadSinLucro ?? false);
+                        SetCellBoolean(worksheet, 99, 1, proveedorActual.EntidadSinLucro ?? false);
                         //Resolucion sin animo de lucro
-                        sheet.GetRow(100).CreateCell(1).SetCellValue(proveedorActual.ResolEntidadSinLucro ?? " ");
+                        SetCellString(worksheet, 100, 1, proveedorActual.ResolEntidadSinLucro ?? " ");
                         //Gran contribuyente
-                        sheet.GetRow(66).CreateCell(1).SetCellValue(proveedorActual.GranContribuyente ?? false);
+                        SetCellBoolean(worksheet, 66, 1, proveedorActual.GranContribuyente ?? false);
                         //No responsable iva
-                        sheet.GetRow(68).CreateCell(1).SetCellValue(proveedorActual.ResolGranContribuyente ?? " ");
-                        //Reponsable de iva
-                        sheet.GetRow(67).CreateCell(1).SetCellValue(proveedorActual.ResponsableIVA ?? false);                        
+                        SetCellString(worksheet, 68, 1, proveedorActual.ResolGranContribuyente ?? " ");
+                        //Responsable de iva
+                        SetCellBoolean(worksheet, 67, 1, proveedorActual.ResponsableIVA ?? false);
                         //Autorretenedor
-                        sheet.GetRow(69).CreateCell(1).SetCellValue(proveedorActual.Autorretenedor ?? false);
+                        SetCellBoolean(worksheet, 69, 1, proveedorActual.Autorretenedor ?? false);
                         //Resolucion Autorretenedor
-                        sheet.GetRow(73).CreateCell(1).SetCellValue(proveedorActual.ResolAutorretenedor ?? " ");
+                        SetCellString(worksheet, 73, 1, proveedorActual.ResolAutorretenedor ?? " ");
                         //Contribuyente
-                        sheet.GetRow(70).CreateCell(1).SetCellValue(proveedorActual.ContribuyenteRenta ?? false);
+                        SetCellBoolean(worksheet, 70, 1, proveedorActual.ContribuyenteRenta ?? false);
                         //Agente retenedor de iva
-                        sheet.GetRow(71).CreateCell(1).SetCellValue(proveedorActual.AgenteRetenedorIVA ?? false);
+                        SetCellBoolean(worksheet, 71, 1, proveedorActual.AgenteRetenedorIVA ?? false);
                         //Resolucion agente retenedor de iva
-                        sheet.GetRow(74).CreateCell(1).SetCellValue(proveedorActual.ResolAgenteRetenedorIVA ?? " ");
-                        //Indistria y comercio
-                        sheet.GetRow(72).CreateCell(1).SetCellValue(proveedorActual.ResponsableIndyComer ?? false);
-                        //Actividad industria y comercio pereira
-                        //sheet.GetRow(98).CreateCell(1).SetCellValue(proveedorActual.NomIndYComPereira ?? " ");
-                        //Codigo ind y com pereira
-                        //sheet.GetRow(99).CreateCell(1).SetCellValue(proveedorActual.CodIndYComPereira != null ? proveedorActual.CodIndYComPereira.ToString() :  " ");
-                        //Actividad industria y  comercio otros
-                        //sheet.GetRow(100).CreateCell(1).SetCellValue(proveedorActual.NomdIndYComOtros ?? " ");
-                        //Codigo ind y com otros
-                        //sheet.GetRow(101).CreateCell(1).SetCellValue(proveedorActual.CodIndYComOtros != null ? proveedorActual.CodIndYComOtros.ToString() : " ");
-
+                        SetCellString(worksheet, 74, 1, proveedorActual.ResolAgenteRetenedorIVA ?? " ");
+                        //Industria y comercio
+                        SetCellBoolean(worksheet, 72, 1, proveedorActual.ResponsableIndyComer ?? false);
 
                         //Entidad bancaria
-                        sheet.GetRow(76).CreateCell(1).SetCellValue(proveedorActual.EntidadBancaria);
+                        SetCellString(worksheet, 76, 1, proveedorActual.EntidadBancaria);
                         //Sucursal
-                        sheet.GetRow(77).CreateCell(1).SetCellValue(proveedorActual.Sucursal);
+                        SetCellString(worksheet, 77, 1, proveedorActual.Sucursal);
                         //Numero cuenta
-                        sheet.GetRow(78).CreateCell(1).SetCellValue(proveedorActual.Cuenta);
+                        SetCellString(worksheet, 78, 1, proveedorActual.Cuenta);
                         //Tipo Cuenta
-                        sheet.GetRow(79).CreateCell(1).SetCellValue(proveedorActual.TipoCuenta);
+                        SetCellString(worksheet, 79, 1, proveedorActual.TipoCuenta);
                         //Titular cuenta
-                        sheet.GetRow(80).CreateCell(1).SetCellValue(proveedorActual.TitularCuenta);
+                        SetCellString(worksheet, 80, 1, proveedorActual.TitularCuenta);
                         //Identificacion titular
-                        sheet.GetRow(81).CreateCell(1).SetCellValue(proveedorActual.IdentificacionCuenta);
+                        SetCellString(worksheet, 81, 1, proveedorActual.IdentificacionCuenta);
 
                         int index = 1;
                         int row = 85;
-                        //ltaEspecialidad.ForEach(e =>
                         proveedorActual.Especialidades.ForEach(e =>
                         {
-                        //item
-                        sheet.GetRow(row).CreateCell(0).SetCellValue(index);
-                        //Pricipales bienes
-                        sheet.GetRow(row).CreateCell(1).SetCellValue(e.BienesOServicios);
-                        //Importador
-                        sheet.GetRow(row).CreateCell(2).SetCellValue(e.ComercioEspecialidad);
-                        //Fabricante
-                        sheet.GetRow(row).CreateCell(3).SetCellValue(e.ServiciosEspecialidad);
-                        //Distribuidor Exclusivo
-                        sheet.GetRow(row).CreateCell(4).SetCellValue(e.ManufacturaEspecialidad);
-                        //Comercializador
-                        /*sheet.GetRow(row).CreateCell(5).SetCellValue(e.ComercializadorEspecialidad);
-                        //Proveedor Servicios
-                        sheet.GetRow(row).CreateCell(6).SetCellValue(e.ProveedorEspecialidad);
-                        //Consultor
-                        sheet.GetRow(row).CreateCell(7).SetCellValue(e.ConsultorEspecialidad);*/
-                        //Excluida
-                        sheet.GetRow(row).CreateCell(5).SetCellValue(e.GravadaEspecialidad);
-                        //Grabada   
-                        sheet.GetRow(row).CreateCell(6).SetCellValue(e.GravadaEspecialidad);
+                            //item
+                            SetCellNumber(worksheet, row, 0, index);
+                            //Principales bienes
+                            SetCellString(worksheet, row, 1, e.BienesOServicios);
+                            //Importador
+                            SetCellString(worksheet, row, 2, e.ComercioEspecialidad);
+                            //Fabricante
+                            SetCellString(worksheet, row, 3, e.ServiciosEspecialidad);
+                            //Distribuidor Exclusivo
+                            SetCellString(worksheet, row, 4, e.ManufacturaEspecialidad);
+                            //Excluida
+                            SetCellString(worksheet, row, 5, e.GravadaEspecialidad);
+                            //Grabada
+                            SetCellString(worksheet, row, 6, e.GravadaEspecialidad);
 
                             index++;
                             row++;
-                        });//
+                        });
 
-                        //Accionistas                    
+                        //Accionistas
                         row = 92;
-                        //ltaAccionistas.ForEach(a =>
                         proveedorActual.Accionistas.ForEach(a =>
                         {
-                        //Nombre
-                        sheet.GetRow(row).CreateCell(0).SetCellValue(a.NombreAccionista);
-                        //Tipo indentificacion
-                        sheet.GetRow(row).CreateCell(1).SetCellValue(a.TipoDocumentoAccionista);
-                        //Identificacion 
-                        sheet.GetRow(row).CreateCell(2).SetCellValue(a.IdentificacionAccionista);
-                        //% Participacion
-                        if (a.ParticipacionAccionista != null)
+                            //Nombre
+                            SetCellString(worksheet, row, 0, a.NombreAccionista);
+                            //Tipo identificacion
+                            SetCellString(worksheet, row, 1, a.TipoDocumentoAccionista);
+                            //Identificacion
+                            SetCellString(worksheet, row, 2, a.IdentificacionAccionista);
+                            //% Participacion
+                            if (a.ParticipacionAccionista != null)
                             {
-                                sheet.GetRow(row).CreateCell(3).SetCellValue((double)a.ParticipacionAccionista);
+                                SetCellNumber(worksheet, row, 3, (double)a.ParticipacionAccionista);
                             }
                             else
                             {
-                                sheet.GetRow(row).CreateCell(3).SetCellValue(" ");
+                                SetCellString(worksheet, row, 3, " ");
                             }
 
                             row++;
                         });
 
-                        ///INFORMACIÓN CLASIFICACIÓN TAMAÑO EMPRESARIAL - DECRETO 957 DE 2019                       
-                        sheet.GetRow(105).CreateCell(1).SetCellValue((proveedorActual.ClasificacionTamano == "M") ? "X" : " ");
-                        sheet.GetRow(106).CreateCell(1).SetCellValue((proveedorActual.ClasificacionTamano == "P") ? "X" : " ");
-                        sheet.GetRow(107).CreateCell(1).SetCellValue((proveedorActual.ClasificacionTamano == "E") ? "X" : " ");
-                        sheet.GetRow(108).CreateCell(1).SetCellValue((proveedorActual.ClasificacionTamano == "G") ? "X" : " ");
+                        //INFORMACIÓN CLASIFICACIÓN TAMAÑO EMPRESARIAL - DECRETO 957 DE 2019
+                        SetCellString(worksheet, 105, 1, (proveedorActual.ClasificacionTamano == "M") ? "X" : " ");
+                        SetCellString(worksheet, 106, 1, (proveedorActual.ClasificacionTamano == "P") ? "X" : " ");
+                        SetCellString(worksheet, 107, 1, (proveedorActual.ClasificacionTamano == "E") ? "X" : " ");
+                        SetCellString(worksheet, 108, 1, (proveedorActual.ClasificacionTamano == "G") ? "X" : " ");
 
-                        sheet.GetRow(109).CreateCell(1).SetCellValue((proveedorActual.ClasificacionSector == "M") ? "X" : " ");
-                        sheet.GetRow(110).CreateCell(1).SetCellValue((proveedorActual.ClasificacionSector == "S") ? "X" : " ");
-                        sheet.GetRow(111).CreateCell(1).SetCellValue((proveedorActual.ClasificacionSector == "C") ? "X" : " ");
+                        SetCellString(worksheet, 109, 1, (proveedorActual.ClasificacionSector == "M") ? "X" : " ");
+                        SetCellString(worksheet, 110, 1, (proveedorActual.ClasificacionSector == "S") ? "X" : " ");
+                        SetCellString(worksheet, 111, 1, (proveedorActual.ClasificacionSector == "C") ? "X" : " ");
 
-                        sheet.GetRow(112).CreateCell(1).SetCellValue((proveedorActual.OperacionesMercantiles) ? "X" : " ");
-                        sheet.GetRow(113).CreateCell(1).SetCellValue((!proveedorActual.OperacionesMercantiles) ? "X" : " ");
+                        SetCellString(worksheet, 112, 1, (proveedorActual.OperacionesMercantiles) ? "X" : " ");
+                        SetCellString(worksheet, 113, 1, (!proveedorActual.OperacionesMercantiles) ? "X" : " ");
 
-                        //XSSFFormulaEvaluator.EvaluateAllFormulaCells(excelPackage);
-                        //workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
-                        //excelPackage.GetCreationHelper().CreateFormulaEvaluator().EvaluateAll();\
-                        //wb.setForceFormulaRecalculation(true);
-                        excelPackage.SetForceFormulaRecalculation(true);
+                        //Force formula recalculation on open
+                        var calcProps = workbook.GetFirstChild<CalculationProperties>();
+                        if (calcProps != null)
+                        {
+                            calcProps.FullCalculationOnLoad = true;
+                        }
+                    }
 
-                        MemoryStream streamOutput = new MemoryStream();
-                        excelPackage.Write(streamOutput);
-                        return Convert.ToBase64String(streamOutput.ToArray());
-                    };
+                    return Convert.ToBase64String(stream.ToArray());
                 });
             }
         }
@@ -553,7 +536,7 @@ namespace Negocio.Business
 
             cx.PONEFORMATOXPROVEEDORs.InsertOnSubmit(tbl_formatoxproveedor);
             cx.SubmitChanges();
-            
+
 
             //Inserta el detalle
             foreach (var item in valores)
@@ -593,7 +576,7 @@ namespace Negocio.Business
                             valor = q.DECFVALOR,
                             guardar = q.DECFGUARDAR
                         }).ToList();
-            
+
             codigoArchivo = lst_configuracion.FirstOrDefault().codigoArchivo;
 
             return lst_configuracion;
@@ -615,7 +598,7 @@ namespace Negocio.Business
             //Busca la celda
             var configuracion = configuraciones.Where(x => x.celda == celda && x.hoja == hoja)
                 .FirstOrDefault();
-            
+
             if(configuracion != null)
             {
                 if (configuracion.validar == "S")
@@ -626,7 +609,7 @@ namespace Negocio.Business
                         {
                             error = configuracion.error;
                         }
-                        
+
                     } else {
                         error = "N";
                     }
@@ -645,5 +628,75 @@ namespace Negocio.Business
         {
             return _proveedor.ObtenerProveedor(idProveedor);
         }
+
+        #region Open XML SDK Helpers
+
+        private static string CellRef(int npoiRow, int npoiCol)
+        {
+            return GetColumnLetter(npoiCol) + (npoiRow + 1);
+        }
+
+        private static string GetColumnLetter(int col)
+        {
+            string column = "";
+            while (col >= 26)
+            {
+                column = (char)('A' + (col % 26)) + column;
+                col = col / 26 - 1;
+            }
+            return (char)('A' + col) + column;
+        }
+
+        private static Cell FindOrCreateCell(Worksheet worksheet, string cellRef)
+        {
+            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
+            uint rowIndex = uint.Parse(new string(cellRef.Where(char.IsDigit).ToArray()));
+
+            Row row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex == rowIndex);
+            if (row == null)
+            {
+                row = new Row { RowIndex = rowIndex };
+                sheetData.Append(row);
+            }
+
+            Cell cell = row.Elements<Cell>().FirstOrDefault(c =>
+                c.CellReference != null && c.CellReference.Value == cellRef);
+
+            if (cell == null)
+            {
+                cell = new Cell { CellReference = cellRef };
+                row.Append(cell);
+            }
+
+            return cell;
+        }
+
+        private static void SetCellString(Worksheet worksheet, int row, int col, string value)
+        {
+            Cell cell = FindOrCreateCell(worksheet, CellRef(row, col));
+            cell.CellFormula = null;
+            cell.DataType = new EnumValue<CellValues>(CellValues.InlineString);
+            cell.InlineString = new InlineString { Text = new Text(value ?? "") };
+        }
+
+        private static void SetCellNumber(Worksheet worksheet, int row, int col, double value)
+        {
+            Cell cell = FindOrCreateCell(worksheet, CellRef(row, col));
+            cell.CellFormula = null;
+            cell.InlineString = null;
+            cell.DataType = new EnumValue<CellValues>(CellValues.Number);
+            cell.CellValue = new DocumentFormat.OpenXml.Spreadsheet.CellValue(value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private static void SetCellBoolean(Worksheet worksheet, int row, int col, bool value)
+        {
+            Cell cell = FindOrCreateCell(worksheet, CellRef(row, col));
+            cell.CellFormula = null;
+            cell.InlineString = null;
+            cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
+            cell.CellValue = new DocumentFormat.OpenXml.Spreadsheet.CellValue(value ? "1" : "0");
+        }
+
+        #endregion
     }
 }

@@ -21,8 +21,9 @@ namespace Negocio.Business
         private readonly IParametroGeneral _parametroGeneral;
         private readonly IStorageService _storageService;
         private readonly IDataContextFactory _factory;
+        private readonly INotificacion _notificacion;
 
-        public ProveedorBusiness(IUtilidades utilidades, IConfiguration configuration, IUsuario usuario, IParametroGeneral parametroGeneral, IStorageService storageService, IDataContextFactory factory)
+        public ProveedorBusiness(IUtilidades utilidades, IConfiguration configuration, IUsuario usuario, IParametroGeneral parametroGeneral, IStorageService storageService, IDataContextFactory factory, INotificacion notificacion)
         {
             _utilidades = utilidades;
             _configuration = configuration;
@@ -30,6 +31,7 @@ namespace Negocio.Business
             _parametroGeneral = parametroGeneral;
             _storageService = storageService;
             _factory = factory;
+            _notificacion = notificacion;
         }
 
         #region Metodos Publicos
@@ -201,13 +203,13 @@ namespace Negocio.Business
                             {
                                 //////////////////Envia Correo indicando nuevo registro de proveedor//////////////////////////
                                 Thread t = new(() =>
-                                    (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion("registroproveedor", prov)
+                                    _notificacion.GenerarNotificacion("registroproveedor", prov)
                                 );
                                 t.Start();
                                 t.IsBackground = true;
 
                                 Thread t1 = new(() =>
-                                    (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion("confregistroprov", request)
+                                    _notificacion.GenerarNotificacion("confregistroprov", request)
                                 );
                                 t1.Start();
                                 t1.IsBackground = true;
@@ -350,7 +352,7 @@ namespace Negocio.Business
             }
         }
 
-        public string ActualizarDocsProveedor(Proveedor proveedor)
+        /*public string ActualizarDocsProveedor(Proveedor proveedor)
         {
             using (var cx = _factory.Create())
             {
@@ -383,6 +385,83 @@ namespace Negocio.Business
                 }
 
             }
+        }*/
+        public async Task<string> ActualizarDocsProveedor(Proveedor proveedor)
+        {
+            // Fase 1: operaciones de storage FUERA de la transacción DB
+            var documentosConRuta = await PrepararArchivosStorage(
+                proveedor.Certificaciones,
+                proveedor.CodigoProveedor);
+
+            // Fase 2: transacción DB pura, sin async
+            using var cx = _factory.Create();
+            cx.Connection.Open();
+            using var tx = cx.Connection.BeginTransaction();
+            try
+            {
+                var tblProveedor = cx.PONEPROVEEDORs
+                    .FirstOrDefault(p => p.PROVPROVEEDOR == proveedor.CodigoProveedor);
+
+                if (tblProveedor != null)
+                {
+                    ActualizarDocumentosProveedor(
+                        documentosConRuta, cx,
+                        proveedor.CodigoProveedor,
+                        proveedor.LogsUsuario);
+
+                    cx.SubmitChanges(); // único SubmitChanges
+                    tx.Commit();
+                }
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                tx.Rollback();
+
+                // Compensación: revertir los archivos subidos
+                await CompensarStorage(documentosConRuta);
+
+                return ex.Message;
+            }
+        }
+
+        // Prepara archivos en storage y retorna docs enriquecidos con ruta
+        private async Task<List<DocumentoConRuta>> PrepararArchivosStorage(
+            List<Documento> documentos,
+            int codigoProveedor)
+        {
+            var resultado = new List<DocumentoConRuta>();
+            var folder = $@"proveedores\{codigoProveedor}\{DateTime.Now.Year}";
+
+            foreach (var doc in documentos)
+            {
+                // Sin DataB64 = documento existente sin cambio, no subir nada
+                if (string.IsNullOrEmpty(doc.DataB64))
+                {
+                    resultado.Add(new DocumentoConRuta
+                    {
+                        Documento = doc,
+                        Ruta = doc.Ruta,        // conservar ruta original
+                        ContentType = doc.ContentType, // conservar contentType original
+                        EsNuevo = false
+                    });
+                    continue;
+                }
+
+                var (contentType, data) = _utilidades.DecodificarArchivoContentType(doc.DataB64);
+                using var stream = new MemoryStream(data);
+                var ruta = await _storageService.SaveFileAsync(folder, doc.Nombre, stream, contentType);
+
+                resultado.Add(new DocumentoConRuta
+                {
+                    Documento = doc,
+                    Ruta = ruta,
+                    ContentType = contentType,
+                    EsNuevo = true
+                });
+            }
+
+            return resultado;
         }
 
 
@@ -543,7 +622,12 @@ namespace Negocio.Business
                         lobj_proveedor.ClasificacionTamano = proveedor.PROVCLASTAMANO;
                         lobj_proveedor.ClasificacionSector = proveedor.PROVCLASSECTOR;
                         lobj_proveedor.OperacionesMercantiles = proveedor.PROVOPERMERCANTILES == "S";
-
+                        lobj_proveedor.ResolAgenteRetenedorIVA = proveedor.PROVRESOLAGENTERETENEDORIVA;
+                        lobj_proveedor.EntidadSinLucro = proveedor.PROVENTIDADSINANILUCRO == Configuracion.ValorSI;
+                        lobj_proveedor.ResolEntidadSinLucro = proveedor.PROVRESOLENTSINANILUCRO;
+                        lobj_proveedor.ResolGranContribuyente = proveedor.PROVRESOLGRANCONTRIBUYENTE;
+                        lobj_proveedor.ResolAutorretenedor = proveedor.PROVRESOLAUTORRETENEDOR;
+           
                         proveedores.Add(lobj_proveedor);
                     }
                 });
@@ -604,11 +688,11 @@ namespace Negocio.Business
                         };
                         if (estadoProveedor.Estado == Configuracion.EstadoActivo)
                         {
-                            (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion(Configuracion.NotificacionProvAutorizado, usr);
+                                                        _notificacion.GenerarNotificacion(Configuracion.NotificacionProvAutorizado, usr);
                         }
                         else
                         {
-                            (new NotificacionBusiness(_utilidades, _factory, new NullEmailQueue())).GenerarNotificacion(Configuracion.NotificacionProvRechazado, usr);
+                            _notificacion.GenerarNotificacion(Configuracion.NotificacionProvRechazado, usr);
                         }                       
 
                         return "OK";
@@ -1077,7 +1161,84 @@ namespace Negocio.Business
             cx.SubmitChanges();
         }
 
-        private void ActualizarEspecialidades(List<Especialidad> Especialidades, PORTALNEGOCIODataContext cx, int codigoProveedor, int? logsUsuario)
+        private void ActualizarEspecialidades( List<Especialidad> especialidades,  PORTALNEGOCIODataContext cx,
+                                              int codigoProveedor,  int? logsUsuario)
+        {
+            var especialidadesFiltradas = especialidades
+                .Where(e => e.BienesServiciosEspecialidad != null)
+                .ToList();
+
+            var secuenciasEntrantes = especialidadesFiltradas
+                .Select(e => e.SecuenciaEspecialidad)
+                .ToHashSet();
+
+            // Traer todos los registros del proveedor a memoria primero
+            var especialidadesDB = cx.PONEESPECIALIDADPROVEEDORs
+                .Where(e => e.PROVPROVEEDOR == codigoProveedor)
+                .ToList();
+
+
+            // 1. Eliminar registros del proveedor que no vienen en la lista
+            // Filtrar en memoria con HashSet
+            var paraEliminar = especialidadesDB
+                .Where(e => !secuenciasEntrantes.Contains(e.LIESSECUENCIA))
+                .ToList();
+
+            foreach (var item in paraEliminar)
+            {
+                item.LOGSUSUARIO = logsUsuario;
+                cx.PONEESPECIALIDADPROVEEDORs.DeleteOnSubmit(item);
+            }
+
+            // 2. Upsert
+            foreach (var item in especialidadesFiltradas)
+            {
+                var existente = cx.PONEESPECIALIDADPROVEEDORs
+                    .SingleOrDefault(e => e.LIESSECUENCIA == item.SecuenciaEspecialidad);
+
+                if (existente != null)
+                    ActualizarEspecialidad(existente, item, logsUsuario);
+                else
+                    InsertarEspecialidad(cx, item, codigoProveedor, logsUsuario);
+            }
+
+            cx.SubmitChanges();
+        }
+
+        private void ActualizarEspecialidad(
+            PONEESPECIALIDADPROVEEDOR entidad,
+            Especialidad item,
+            int? logsUsuario)
+        {
+            entidad.LIESCOMERCIO = item.ComercioEspecialidad ? "S" : "N";
+            entidad.LIESSERVICIOS = item.ServiciosEspecialidad ? "S" : "N";
+            entidad.LIESMANUFACTURA = item.ManufacturaEspecialidad ? "S" : "N";
+            entidad.LIESGRAVADA = item.GravadaEspecialidad ? "S" : "N";
+            entidad.LIESBIENESOSERVICIOS = item.BienesServiciosEspecialidad;
+            entidad.LOGSUSUARIO = logsUsuario;
+        }
+
+        private void InsertarEspecialidad(
+            PORTALNEGOCIODataContext cx,
+            Especialidad item,
+            int codigoProveedor,
+            int? logsUsuario)
+        {
+            var nueva = new PONEESPECIALIDADPROVEEDOR
+            {
+                LIESSECUENCIA = _utilidades.GetSecuencia("SECU_PONEESPECIALIDAD", cx),
+                PROVPROVEEDOR = codigoProveedor,
+                LIESCOMERCIO = item.ComercioEspecialidad ? "S" : "N",
+                LIESSERVICIOS = item.ServiciosEspecialidad ? "S" : "N",
+                LIESMANUFACTURA = item.ManufacturaEspecialidad ? "S" : "N",
+                LIESGRAVADA = item.GravadaEspecialidad ? "S" : "N",
+                LIESBIENESOSERVICIOS = item.BienesServiciosEspecialidad,
+                LOGSUSUARIO = logsUsuario
+            };
+            cx.PONEESPECIALIDADPROVEEDORs.InsertOnSubmit(nueva);
+        }
+
+        /*private void ActualizarEspecialidades(List<Especialidad> Especialidades, PORTALNEGOCIODataContext cx, int codigoProveedor, int? logsUsuario)
         {
             foreach (var item in Especialidades)
             {
@@ -1124,7 +1285,7 @@ namespace Negocio.Business
                     }
                 }
             }
-        }
+        }*/
 
         /// <summary>
         /// Carga los documentos anexos del proveedor
@@ -1187,7 +1348,60 @@ namespace Negocio.Business
         /// <param name="Certificaciones">Lista de Documentos</param>
         /// <param name="cx">Contexto de BD</param>
         /// <param name="codigoProveedor">Codigo del Proveedor</param>
-        private void ActualizarDocumentosProveedor(List<Documento> certificaciones, PORTALNEGOCIODataContext cx, int codigoProveedor, int? IdUsuario)
+        private void ActualizarDocumentosProveedor(
+            List<DocumentoConRuta> documentos,
+            PORTALNEGOCIODataContext cx,
+            int codigoProveedor,
+            int? idUsuario)
+        {
+            var documentosActuales = cx.PONEDOCUMENTOs
+                .Where(d => cx.PONEPROVEEDORs
+                    .Where(p => p.PROVPROVEEDOR == codigoProveedor)
+                    .SelectMany(p => p.PONEDOCUMENTOs)
+                    .Select(x => x.DOCUDOCUMENTO)
+                    .Contains(d.DOCUDOCUMENTO))
+                .ToList();
+
+            var documentosPorTipo = documentosActuales
+                .ToDictionary(d => (int)d.CLASTIPODOCUMENTO8);
+
+            var proveedor = cx.PONEPROVEEDORs
+                .FirstOrDefault(p => p.PROVPROVEEDOR == codigoProveedor);
+
+            foreach (var item in documentos)
+            {
+                // Sin DataB64 = sin cambio, skip completo
+                if (!item.EsNuevo)
+                    continue;
+
+                var doc = item.Documento;
+                var existente = documentosPorTipo.GetValueOrDefault(doc.Tipo);
+
+                if (existente != null)
+                {
+                    RegistrarHistorico(existente, codigoProveedor, idUsuario, cx);
+                    // Desasociar del proveedor sin borrar PONEDOCUMENTO
+                    // PONEHISTDOCPROV mantiene la FK al documento que sigue existiendo
+                    proveedor?.PONEDOCUMENTOs.Remove(existente);
+                }
+
+                var nuevoDoc = new PONEDOCUMENTO
+                {
+                    DOCUDOCUMENTO = _utilidades.GetSecuencia("SECU_PONEDOCUMENTO", cx),
+                    DOCUFECHACREACION = DateTime.Now,
+                    DOCUNOMBRE = doc.Nombre,
+                    LOGSFECHA = DateTime.Now,
+                    LOGSUSUARIO = (decimal)idUsuario,
+                    CLASTIPODOCUMENTO8 = doc.Tipo,
+                    DOCURUTA = item.Ruta,
+                    DOCUCONTENTTYPE = item.ContentType
+                };
+
+                cx.PONEDOCUMENTOs.InsertOnSubmit(nuevoDoc);
+                proveedor?.PONEDOCUMENTOs.Add(nuevoDoc);
+            }
+        }
+        /*private void ActualizarDocumentosProveedor(List<Documento> certificaciones, PORTALNEGOCIODataContext cx, int codigoProveedor, int? IdUsuario)
         {
             // Por cada documento que llega valida si ya existe, si no existe pone en estado I al del mismo tipo y e inserta el nuevo documento
             foreach (var item in certificaciones)
@@ -1229,17 +1443,96 @@ namespace Negocio.Business
                             codigoProveedor,
                             IdUsuario,
                             true);
-                    }
-                    
+                    }                    
                     // Inserta el nuevo documento
                     InsertarAnexo(item, cx, codigoProveedor, IdUsuario);
 
+                }                
+            }
+        }*/
+
+
+        private record DocumentoConRuta
+        {            public Documento Documento { get; init; }
+            public string Ruta { get; init; }
+            public string ContentType { get; init; }
+            public bool EsNuevo { get; init; }
+        }
+
+        private bool HuboCambio(PONEDOCUMENTO existente, Documento entrante)
+        {
+            // Ajusta los campos que consideres relevantes para detectar cambio
+            return existente.DOCUNOMBRE != entrante.Nombre
+                || existente.CLASTIPODOCUMENTO8 != entrante.Tipo;
+        }
+
+        private void RegistrarHistorico(
+                PONEDOCUMENTO documento,
+                int codigoProveedor,
+                int? idUsuario,
+                PORTALNEGOCIODataContext cx)
+        {
+            var historico = new PONEHISTDOCPROV
+            {
+                HIDOHIDO = _utilidades.GetSecuencia("SECU_PONEHISTDOCPROV", cx),
+                DOCUDOCUMENTO = documento.DOCUDOCUMENTO,
+                PROVPROVEEDOR = codigoProveedor,
+                HIDOFECHA = DateTime.Now,
+                LOGSUSUARIO = idUsuario
+            };
+            cx.PONEHISTDOCPROVs.InsertOnSubmit(historico);
+        }
+
+        private async Task InsertarDocumento(
+            Documento doc,
+            PORTALNEGOCIODataContext cx,
+            int codigoProveedor,
+            int? idUsuario)
+        {
+            var folder = $@"proveedores\{codigoProveedor}\{DateTime.Now.Year}";
+            var (contentType, data) = _utilidades.DecodificarArchivoContentType(doc.DataB64);
+
+            string rutaCompleta;
+            using (var stream = new MemoryStream(data))
+            {
+                rutaCompleta = await _storageService.SaveFileAsync(folder, doc.Nombre, stream, contentType);
+            }
+
+            var nuevoDoc = new PONEDOCUMENTO
+            {
+                DOCUDOCUMENTO = _utilidades.GetSecuencia("SECU_PONEDOCUMENTO", cx),
+                DOCUFECHACREACION = DateTime.Now,
+                DOCUNOMBRE = doc.Nombre,
+                LOGSFECHA = DateTime.Now,
+                LOGSUSUARIO = (decimal)idUsuario,
+                CLASTIPODOCUMENTO8 = doc.Tipo,
+                DOCURUTA = rutaCompleta,
+                DOCUCONTENTTYPE = contentType
+            };
+
+            cx.PONEDOCUMENTOs.InsertOnSubmit(nuevoDoc);
+
+            // Asociar al proveedor via colección de navegación
+            var proveedor = cx.PONEPROVEEDORs
+                .FirstOrDefault(p => p.PROVPROVEEDOR == codigoProveedor);
+            proveedor?.PONEDOCUMENTOs.Add(nuevoDoc);
+        }
+
+        private async Task CompensarStorage(List<DocumentoConRuta> documentos)
+        {
+            foreach (var item in documentos.Where(d => d.EsNuevo))
+            {
+                try
+                {
+                    await _storageService.DeleteFileAsync(item.Ruta);
                 }
-                
+                catch (Exception ex)
+                {
+                    
+                }
             }
         }
 
         #endregion
     }
-
 }

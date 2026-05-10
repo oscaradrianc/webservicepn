@@ -413,7 +413,11 @@ D: Desierta</Summary>
           <Summary>Indica si el proveedor es responsable del IVA</Summary>
         </Documentation>
       </Column>
-      <Column Name="PROV_AGENTERETENEDORIVA" Member="PROVAGENTERETENEDORIVA" Type="System.String" DbType="VARCHAR2(1 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="false" ed:Guid="ab1df5e1-0c83-4bff-9b4e-fd39ba17b6fb" />
+      <Column Name="PROV_AGENTERETENEDORIVA" Member="PROVAGENTERETENEDORIVA" Type="System.String" DbType="VARCHAR2(1 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="false" ed:Guid="ab1df5e1-0c83-4bff-9b4e-fd39ba17b6fb">
+        <Documentation>
+          <Summary>Indica si el proveedor es agente retenedor de IVA</Summary>
+        </Documentation>
+      </Column>
       <Column Name="PROV_INDUSTRIAYCOMERCIO" Member="PROVINDUSTRIAYCOMERCIO" Type="System.String" DbType="VARCHAR2(1 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="false" ed:Guid="ceccffbb-37d8-46a2-9fee-879925bd8e20">
         <Documentation>
           <Summary>Responsable de industria y comercio</Summary>
@@ -535,8 +539,16 @@ D: Desierta</Summary>
           <Summary>Fecha ultima actualizacion</Summary>
         </Documentation>
       </Column>
-      <Column Name="PROV_AUTORRETENEDOR" Member="PROVAUTORRETENEDOR" Type="System.String" DbType="VARCHAR2(1 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="false" ed:Guid="4e18ae25-6925-4d5a-8338-c43fe9b43146" />
-      <Column Name="PROV_CONTRIBUYENTERENTA" Member="PROVCONTRIBUYENTERENTA" Type="System.String" DbType="VARCHAR2(1 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="false" ed:Guid="7ec15354-5624-4d77-9332-7fe08455be41" />
+      <Column Name="PROV_AUTORRETENEDOR" Member="PROVAUTORRETENEDOR" Type="System.String" DbType="VARCHAR2(1 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="false" ed:Guid="4e18ae25-6925-4d5a-8338-c43fe9b43146">
+        <Documentation>
+          <Summary>Indica si el proveedor es autorretenedor</Summary>
+        </Documentation>
+      </Column>
+      <Column Name="PROV_CONTRIBUYENTERENTA" Member="PROVCONTRIBUYENTERENTA" Type="System.String" DbType="VARCHAR2(1 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="false" ed:Guid="7ec15354-5624-4d77-9332-7fe08455be41">
+        <Documentation>
+          <Summary>Indica si el proveedor es contribuyente de renta</Summary>
+        </Documentation>
+      </Column>
       <Column Name="CLAS_ACTPEREIRA14" Member="CLASACTPEREIRA14" Type="System.String" DbType="VARCHAR2(4 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="4" ed:ValidateMaxLength="4" ed:ValidateRequired="false" ed:Guid="3b8b6cae-ffde-4928-ba0e-b1dd50aa1255">
         <Documentation>
           <Summary>Actividad Economica Responsable Pereira</Summary>
@@ -1922,14 +1934,14 @@ D: Desierta</Summary>
           <Summary>Codigo del municipio, se baso en el DANE, pero sirve para almacenar de cualquier pais</Summary>
         </Documentation>
       </Column>
-      <Column Name="DEPA_CODIGO" Member="DEPACODIGO" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" Scale="0" ed:ValidateRequired="true" ed:Guid="585696a7-2fd4-43e7-b7d9-fd13a8d3505f">
-        <Documentation>
-          <Summary>Codigo de la secuencia de la tabla de departamento al que pertenece el municipio</Summary>
-        </Documentation>
-      </Column>
       <Column Name="MUNI_NOMBRE" Member="MUNINOMBRE" Type="System.String" DbType="VARCHAR2(30 CHAR) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="30" ed:ValidateMaxLength="30" ed:ValidateRequired="true" ed:Guid="29cbc3c1-159a-48ba-a78c-826e2262165c">
         <Documentation>
           <Summary>Nombre del municipio</Summary>
+        </Documentation>
+      </Column>
+      <Column Name="DEPA_CODIGO" Member="DEPACODIGO" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" Scale="0" ed:ValidateRequired="true" ed:Guid="585696a7-2fd4-43e7-b7d9-fd13a8d3505f">
+        <Documentation>
+          <Summary>Codigo de la secuencia de la tabla de departamento al que pertenece el municipio</Summary>
         </Documentation>
       </Column>
       <Association Name="POGEDEPARTAMENTO_POGEMUNICIPIO" ed:AssociationGuid="0520ef72-80af-42ca-93d3-4fc444193cd7" Member="POGEDEPARTAMENTO" ed:Guid="567aefc8-5d68-462b-b39a-e8e77ea484e9" ThisKey="DEPACODIGO" OtherKey="DEPACODIGO" Type="POGEDEPARTAMENTO" DeleteRule="NO ACTION" IsForeignKey="true" />
@@ -2215,6 +2227,9 @@ D: Desierta</Summary>
   </Table>
   <Table Name="PORTAL_NEGOCIOS.PONE_VTIPO_IDENTIFICACION" Member="PONEVTIPOIDENTIFICACIONs">
     <Type Name="PONEVTIPOIDENTIFICACION" ed:Guid="0f542685-e4ac-4a52-973e-185c8b95026d">
+      <Documentation>
+        <Summary>Vista para los tipos de identificación, viene  de la parametrizacion de clases y valores</Summary>
+      </Documentation>
       <Column Name="CLVA_CLASEVALOR" Member="CLVACLASEVALOR" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" Scale="0" ed:ValidateRequired="true" ed:Guid="54393d6d-2e43-4dec-91c5-c21686ddbb84" />
       <Column Name="CLVA_CODIGOVALOR" Member="CLVACODIGOVALOR" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" Scale="0" ed:ValidateRequired="true" ed:Guid="366f6d81-1dfa-4a29-89f5-d6e6f75d4510" />
       <Column Name="CLVA_VALOR" Member="CLVAVALOR" Type="System.String" DbType="VARCHAR2(200 CHAR) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="200" ed:ValidateMaxLength="200" ed:ValidateRequired="true" ed:Guid="3414dc2c-c78a-4b6a-aaa0-aa961987eeb7" />
@@ -2225,6 +2240,9 @@ D: Desierta</Summary>
   </Table>
   <Table Name="PORTAL_NEGOCIOS.PONE_VSAIA" Member="PONEVSAIAs">
     <Type Name="PONEVSAIA" ed:Guid="68aaa88c-44f4-4d84-a812-0f08ab539463">
+      <Documentation>
+        <Summary>Vista para obtener los SAIA que estan autorizados para usar en solicitudes de compra</Summary>
+      </Documentation>
       <Column Name="NUMERO" Type="System.String" DbType="VARCHAR2(150 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="150" ed:ValidateMaxLength="150" ed:ValidateRequired="false" ed:Guid="38c9f600-46d5-4994-bd98-d8569d9a2534" />
       <Column Name="PROYECTO" Type="System.String" DbType="VARCHAR2(765 CHAR) NULL" CanBeNull="true" UpdateCheck="Never" MaxLength="765" ed:ValidateMaxLength="765" ed:ValidateRequired="false" ed:Guid="2d0985f2-7cca-40eb-bcd9-b33396272fff" />
       <Column Name="FECHA_SOLICITUD" Member="FECHASOLICITUD" Type="System.DateTime" DbType="DATE NULL" CanBeNull="true" UpdateCheck="Never" Precision="0" ed:ValidateRequired="false" ed:Guid="4a72f1ad-25de-4baf-b0ee-a24f3f62beaa" />
@@ -2234,6 +2252,9 @@ D: Desierta</Summary>
   </Table>
   <Table Name="PORTAL_NEGOCIOS.PONE_VTIPO_PERSONA" Member="PONEVTIPOPERSONAs">
     <Type Name="PONEVTIPOPERSONA" ed:Guid="e540e534-4ada-4fa5-ab03-55504cbf7a27">
+      <Documentation>
+        <Summary>Vista para obtener los tipos de persona</Summary>
+      </Documentation>
       <Column Name="CLVA_CLASEVALOR" Member="CLVACLASEVALOR" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" Scale="0" ed:ValidateRequired="true" ed:Guid="9dc918f7-ddc8-4021-8acd-9bf5a8dbd984" />
       <Column Name="CLVA_CODIGOVALOR" Member="CLVACODIGOVALOR" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" Scale="0" ed:ValidateRequired="true" ed:Guid="17fdcc24-5a97-48c3-81a7-eb17aaac0c72" />
       <Column Name="CLVA_VALOR" Member="CLVAVALOR" Type="System.String" DbType="VARCHAR2(200 CHAR) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="200" ed:ValidateMaxLength="200" ed:ValidateRequired="true" ed:Guid="68a9d840-45e8-4fc8-b232-3baad89d75cf" />
@@ -2244,6 +2265,9 @@ D: Desierta</Summary>
   </Table>
   <Table Name="PORTAL_NEGOCIOS.PONE_VAREAS" Member="PONEVAREAs">
     <Type Name="PONEVAREA" ed:Guid="9e224dc4-6d57-44c4-b2ec-edff5d8394c7">
+      <Documentation>
+        <Summary>Vista para obtener las areas de le empresa</Summary>
+      </Documentation>
       <Column Name="COD_AREA" Member="CODAREA" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" Scale="0" ed:ValidateRequired="true" ed:Guid="ac5427e6-e7fa-417b-929e-9d0460d5fb24" />
       <Column Name="NOMBRE" Type="System.String" DbType="VARCHAR2(1000 CHAR) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="1000" ed:ValidateMaxLength="1000" ed:ValidateRequired="true" ed:Guid="d3cbdb95-a925-4e6b-8939-4ba07fe2de64" />
       <Column Name="GERENCIA" Type="System.Decimal" DbType="NUMBER NULL" CanBeNull="true" UpdateCheck="Never" Scale="0" ed:ValidateRequired="false" ed:Guid="d56eb5f0-b73d-4f7c-b88a-84970e51ed3d" />
@@ -2252,6 +2276,9 @@ D: Desierta</Summary>
   </Table>
   <Table Name="PORTAL_NEGOCIOS.PONE_VGERENCIAS" Member="PONEVGERENCIAs">
     <Type Name="PONEVGERENCIA" ed:Guid="ff28476a-d9ef-47ca-bcca-b30397a1d961">
+      <Documentation>
+        <Summary>Vista para obtener las gerencias de la empresa</Summary>
+      </Documentation>
       <Column Name="ID" Type="System.Decimal" DbType="NUMBER NOT NULL" CanBeNull="false" UpdateCheck="Never" ed:ValidateRequired="true" ed:Guid="7b00589d-6d5a-4363-a8cf-9678ace67f8d" />
       <Column Name="NOMBRE" Type="System.String" DbType="VARCHAR2(255 CHAR) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="255" ed:ValidateMaxLength="255" ed:ValidateRequired="true" ed:Guid="681c9ff8-9b67-4746-8761-f35224c5258c" />
     </Type>

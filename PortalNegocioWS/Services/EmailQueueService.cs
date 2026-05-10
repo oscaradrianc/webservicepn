@@ -40,8 +40,10 @@ namespace PortalNegocioWS.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("EmailQueueService started, waiting for messages...");
             await foreach (var message in _channel.Reader.ReadAllAsync(stoppingToken))
             {
+                _logger.LogInformation("Processing email to {Recipients}: {Subject}", message.Recipients, message.Subject);
                 await ProcessWithRetryAsync(message, stoppingToken);
             }
         }

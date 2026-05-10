@@ -17,9 +17,10 @@ namespace Negocio.Business
         List<ProveedorDatosBasicos> ConsultarDatosBasicosProveedor();
         Proveedor ObtenerProveedor(int idProveedor);
         Task<ProveedorFormato> ObtenerProveedorFormato(int idProveedor);
-        string ActualizarDocsProveedor(Proveedor proveedor);
+        Task<string> ActualizarDocsProveedor(Proveedor proveedor);
         Task<List<ProveedorEstado>> ObtenerCantidadProveedorPorEstado();
         Task<List<FPROVEEDORESREGISTRADOSMEResult>> ObtenerNroProveedoresRegistradoPorMes(int vigencia);
         Task<ProveedorFormato> ObtenerProveedorFormatoJson(Proveedor proveedor);
+        string ObtenerEmailxProveedor(int idProveedor);
     }
 }
