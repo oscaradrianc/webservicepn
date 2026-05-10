@@ -1,40 +1,40 @@
-using AutoMapper;
+using Mapster;
 using Negocio.Data;
 using Negocio.Model;
 
 namespace PortalNegocioWS.Mappings.Profiles
 {
-    public class CatalogoProfile : Profile
+    public class CatalogoRegister : IRegister
     {
-        public CatalogoProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<PONECATALOGO, Catalogo>()
-                .ForMember(d => d.CodigoInterno, opt => opt.MapFrom(src => src.CATACATALOGO))
-                .ForMember(d => d.CodigoCatalogo, opt => opt.MapFrom(src => src.CATACODCATALOGO))
-                .ForMember(d => d.Nombre, opt => opt.MapFrom(src => src.CATANOMBRE))
-                .ForMember(d => d.Estado, opt => opt.MapFrom(src => src.CATAESTADO))
-                .ForMember(d => d.UnidadMedida, opt => opt.MapFrom(src => src.CLASUNIDADMEDIDA4))
-                .ForMember(d => d.Tipo, opt => opt.MapFrom(src => src.CATATIPO))
-                .ForMember(d => d.LogsFecha, opt => opt.MapFrom(src => src.LOGSFECHA))
-                .ForMember(d => d.LogsUsuario, opt => opt.MapFrom(src => src.LOGSUSUARIO))
-                .ForMember(d => d.Medida, opt => opt.Ignore())
-                .ReverseMap();
+            config.NewConfig<PONECATALOGO, Catalogo>()
+                .Map(dest => dest.CodigoInterno, src => src.CATACATALOGO)
+                .Map(dest => dest.CodigoCatalogo, src => src.CATACODCATALOGO)
+                .Map(dest => dest.Nombre, src => src.CATANOMBRE)
+                .Map(dest => dest.Estado, src => src.CATAESTADO)
+                .Map(dest => dest.UnidadMedida, src => src.CLASUNIDADMEDIDA4)
+                .Map(dest => dest.Tipo, src => src.CATATIPO)
+                .Map(dest => dest.LogsFecha, src => src.LOGSFECHA)
+                .Map(dest => dest.LogsUsuario, src => src.LOGSUSUARIO)
+                .Ignore(dest => dest.Medida)
+                .TwoWays();
 
-            CreateMap<POGECLASE, Clases>()
-                  .ForMember(d => d.IdClase, opt => opt.MapFrom(src => src.CLASCLASE))
-                  .ForMember(d => d.NombreClase, opt => opt.MapFrom(src => src.CLASNOMBRE))
-                  .ForMember(d => d.Editable, opt => opt.MapFrom(src => src.CLASEDITABLE))
-                .ReverseMap();
+            config.NewConfig<POGECLASE, Clases>()
+                .Map(dest => dest.IdClase, src => src.CLASCLASE)
+                .Map(dest => dest.NombreClase, src => src.CLASNOMBRE)
+                .Map(dest => dest.Editable, src => src.CLASEDITABLE)
+                .TwoWays();
 
-            CreateMap<POGECLASEVALOR, ClaseValor>()
-                .ForMember(d => d.IdClaseValor, opt => opt.MapFrom(src => src.CLVACLASEVALOR))
-                .ForMember(d => d.Clase, opt => opt.MapFrom(src => src.CLASCLASE))
-                .ForMember(d => d.CodigoValor, opt => opt.MapFrom(src => src.CLVACODIGOVALOR))
-                .ForMember(d => d.Descripcion, opt => opt.MapFrom(src => src.CLVADESCRIPCION))
-                .ForMember(d => d.Estado, opt => opt.MapFrom(src => src.CLVAESTADO))
-                .ForMember(d => d.Valor, opt => opt.MapFrom(src => src.CLVAVALOR))
-                .ForMember(d => d.LogsUsuario, opt => opt.MapFrom(src => src.LOGSUSUARIO))
-                .ReverseMap();
+            config.NewConfig<POGECLASEVALOR, ClaseValor>()
+                .Map(dest => dest.IdClaseValor, src => src.CLVACLASEVALOR)
+                .Map(dest => dest.Clase, src => src.CLASCLASE)
+                .Map(dest => dest.CodigoValor, src => src.CLVACODIGOVALOR)
+                .Map(dest => dest.Descripcion, src => src.CLVADESCRIPCION)
+                .Map(dest => dest.Estado, src => src.CLVAESTADO)
+                .Map(dest => dest.Valor, src => src.CLVAVALOR)
+                .Map(dest => dest.LogsUsuario, src => src.LOGSUSUARIO)
+                .TwoWays();
         }
     }
 }

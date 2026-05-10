@@ -1,52 +1,55 @@
-using AutoMapper;
+using Mapster;
 using Negocio.Data;
 using Negocio.Model;
 
 namespace PortalNegocioWS.Mappings.Profiles
 {
-    public class AuthProfile : Profile
+    public class AuthRegister : IRegister
     {
-        public AuthProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<POGEUSUARIO, Usuario>()
-                .ForMember(d => d.IdUsuario, opt => opt.MapFrom(src => src.USUAUSUARIO))
-                .ForMember(d => d.Identificador, opt => opt.MapFrom(src => src.USUAIDENTIFICADOR))
-                .ForMember(d => d.Nombres, opt => opt.MapFrom(src => src.USUANOMBRE))
-                .ForMember(d => d.Identificacion, opt => opt.MapFrom(src => src.USUAIDENTIFICACION))
-                .ForMember(d => d.Estado, opt => opt.MapFrom(src => src.USUAESTADO))
-                .ForMember(d => d.Clave, opt => opt.MapFrom(src => src.USUACLAVE))
-                .ForMember(d => d.LogsUsuario, opt => opt.MapFrom(src => src.LOGSUSUARIO))
-                .ForMember(d => d.LogsFecha, opt => opt.MapFrom(src => src.LOGSFECHA))
-                .ForMember(d => d.Email, opt => opt.MapFrom(src => src.USUACORREO))
-                .ForMember(d => d.Tipo, opt => opt.MapFrom(src => src.USUATIPO))
-                .ForMember(d => d.UrlDefecto, opt => opt.MapFrom(src => src.USUAURLDEFECTO))
-                .ForMember(d => d.IdRol, opt => opt.MapFrom(src => src.ROLEROL))
-                .ForMember(d => d.IdProveedor, opt => opt.MapFrom(src => src.PROVPROVEEDOR))
-                .ForMember(d => d.IdArea, opt => opt.MapFrom(src => src.CLASAREA2))
-                .ForMember(d => d.VenceClave, opt => opt.MapFrom(src => src.USUAVENCECLAVE))
-                .ForMember(d => d.FechaVence, opt => opt.MapFrom(src => src.USUAFECHAVENCE))
-                .ForMember(d => d.CambiarClave, opt => opt.MapFrom(src => src.USUACAMBIARCLAVE))
-                .ForMember(d => d.ResultadoLogin, opt => opt.Ignore())
-                .ForMember(d => d.Token, opt => opt.Ignore())
-                .ForMember(d => d.Proveedor, opt => opt.Ignore())
-                .ForMember(d => d.Opciones, opt => opt.Ignore())
-                .ReverseMap();
+            config.NewConfig<POGEUSUARIO, Usuario>()
+                .Map(dest => dest.IdUsuario, src => src.USUAUSUARIO)
+                .Map(dest => dest.Identificador, src => src.USUAIDENTIFICADOR)
+                .Map(dest => dest.Nombres, src => src.USUANOMBRE)
+                .Map(dest => dest.Identificacion, src => src.USUAIDENTIFICACION)
+                .Map(dest => dest.Estado, src => src.USUAESTADO)
+                .Map(dest => dest.Clave, src => src.USUACLAVE)
+                .Map(dest => dest.LogsUsuario, src => src.LOGSUSUARIO)
+                .Map(dest => dest.LogsFecha, src => src.LOGSFECHA)
+                .Map(dest => dest.Email, src => src.USUACORREO)
+                .Map(dest => dest.Tipo, src => src.USUATIPO)
+                .Map(dest => dest.UrlDefecto, src => src.USUAURLDEFECTO)
+                .Map(dest => dest.IdRol, src => src.ROLEROL)
+                .Map(dest => dest.IdProveedor, src => src.PROVPROVEEDOR)
+                .Map(dest => dest.IdArea, src => src.CLASAREA2)
+                .Map(dest => dest.VenceClave, src => src.USUAVENCECLAVE)
+                .Map(dest => dest.FechaVence, src => src.USUAFECHAVENCE)
+                .Map(dest => dest.CambiarClave, src => src.USUACAMBIARCLAVE)
+                // DTO-only fields not present on POGEUSUARIO — ignore both directions.
+                // TwoWays() + Ignore() correctly prevents writing these in the reverse
+                // (Usuario -> POGEUSUARIO) direction since they have no DB column anyway.
+                .Ignore(dest => dest.ResultadoLogin)
+                .Ignore(dest => dest.Token)
+                .Ignore(dest => dest.Proveedor)
+                .Ignore(dest => dest.Opciones)
+                .TwoWays();
 
-            CreateMap<POGEROL, Rol>()
-                .ForMember(d => d.Id, opt => opt.MapFrom(src => src.ROLEROL))
-                .ForMember(d => d.Nombre, opt => opt.MapFrom(src => src.ROLENOMBRE))
-                .ForMember(d => d.Estado, opt => opt.MapFrom(src => src.ROLEESTADO))
-                .ForMember(d => d.Observacion, opt => opt.MapFrom(src => src.ROLEOBSERVACION))
-                .ForMember(d => d.LogsUsuario, opt => opt.MapFrom(src => src.LOGSUSUARIO))
-                .ForMember(d => d.ListaOpciones, opt => opt.Ignore())
-                .ReverseMap();
+            config.NewConfig<POGEROL, Rol>()
+                .Map(dest => dest.Id, src => src.ROLEROL)
+                .Map(dest => dest.Nombre, src => src.ROLENOMBRE)
+                .Map(dest => dest.Estado, src => src.ROLEESTADO)
+                .Map(dest => dest.Observacion, src => src.ROLEOBSERVACION)
+                .Map(dest => dest.LogsUsuario, src => src.LOGSUSUARIO)
+                .Ignore(dest => dest.ListaOpciones)
+                .TwoWays();
 
-            CreateMap<POGEOPCIONXROL, OpcionxRol>()
-                .ForMember(d => d.IdRolxOpcion, opt => opt.MapFrom(src => src.OPROOPCIONXROL))
-                .ForMember(d => d.IdRol, opt => opt.MapFrom(src => src.ROLEROL))
-                .ForMember(d => d.IdOpcion, opt => opt.MapFrom(src => src.OPCIOPCION))
-                .ForMember(d => d.LogsUsuario, opt => opt.MapFrom(src => src.LOGSUSUARIO))
-                .ReverseMap();
+            config.NewConfig<POGEOPCIONXROL, OpcionxRol>()
+                .Map(dest => dest.IdRolxOpcion, src => src.OPROOPCIONXROL)
+                .Map(dest => dest.IdRol, src => src.ROLEROL)
+                .Map(dest => dest.IdOpcion, src => src.OPCIOPCION)
+                .Map(dest => dest.LogsUsuario, src => src.LOGSUSUARIO)
+                .TwoWays();
         }
     }
 }

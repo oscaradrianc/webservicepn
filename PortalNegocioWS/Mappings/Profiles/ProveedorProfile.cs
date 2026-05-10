@@ -1,18 +1,18 @@
-using AutoMapper;
+using Mapster;
 using Negocio.Data;
 using Negocio.Model;
 
 namespace PortalNegocioWS.Mappings.Profiles
 {
-    public class ProveedorProfile : Profile
+    public class ProveedorRegister : IRegister
     {
-        public ProveedorProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<FPROVEEDORESREGISTRADOSMEResult, ProveedoresPorMes>()
-                .ForMember(d => d.NumeroMes, opt => opt.MapFrom(src => src.NUMEROMES))
-                .ForMember(d => d.Mes, opt => opt.MapFrom(src => src.NOMBREMES))
-                .ForMember(d => d.CantidadRegistros, opt => opt.MapFrom(src => src.NROREGISTROS))
-                .ReverseMap();
+            config.NewConfig<FPROVEEDORESREGISTRADOSMEResult, ProveedoresPorMes>()
+                .Map(dest => dest.NumeroMes, src => src.NUMEROMES)
+                .Map(dest => dest.Mes, src => src.NOMBREMES)
+                .Map(dest => dest.CantidadRegistros, src => src.NROREGISTROS)
+                .TwoWays();
         }
     }
 }

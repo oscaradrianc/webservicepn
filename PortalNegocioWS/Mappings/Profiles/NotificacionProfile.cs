@@ -1,24 +1,25 @@
-using AutoMapper;
+using Mapster;
 using Negocio.Data;
 using Negocio.Model;
 
 namespace PortalNegocioWS.Mappings.Profiles
 {
-    public class NotificacionProfile : Profile
+    public class NotificacionRegister : IRegister
     {
-        public NotificacionProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<PONENOTICIA, Noticias>()
-                .ForMember(d => d.CodigoNoticia, opt => opt.MapFrom(src => src.NOTINOTICIA))
-                .ForMember(d => d.Titulo, opt => opt.MapFrom(src => src.NOTITITULO))
-                .ForMember(d => d.Fecha, opt => opt.MapFrom(src => src.NOTIFECHA))
-                .ForMember(d => d.Contenido, opt => opt.MapFrom(src => src.NOTICONTENIDO))
-                .ForMember(d => d.Estado, opt => opt.MapFrom(src => src.NOTIESTADO))
-                .ForMember(d => d.URL, opt => opt.MapFrom(src => src.NOTIURL))
-                .ForMember(d => d.CorreoNotificacion, opt => opt.Ignore())
-                .ForMember(d => d.ArchivoB64, opt => opt.Ignore())
-                .ForMember(d => d.FotoB64, opt => opt.Ignore())
-                .ReverseMap();
+            config.NewConfig<PONENOTICIA, Noticias>()
+                .Map(dest => dest.CodigoNoticia, src => src.NOTINOTICIA)
+                .Map(dest => dest.Titulo, src => src.NOTITITULO)
+                .Map(dest => dest.Fecha, src => src.NOTIFECHA)
+                .Map(dest => dest.Contenido, src => src.NOTICONTENIDO)
+                .Map(dest => dest.Estado, src => src.NOTIESTADO)
+                .Map(dest => dest.URL, src => src.NOTIURL)
+                // DTO-only fields — no DB columns for these on PONENOTICIA
+                .Ignore(dest => dest.CorreoNotificacion)
+                .Ignore(dest => dest.ArchivoB64)
+                .Ignore(dest => dest.FotoB64)
+                .TwoWays();
         }
     }
 }
