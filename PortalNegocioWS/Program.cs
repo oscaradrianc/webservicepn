@@ -1,4 +1,5 @@
 using System;
+using Mapster;
 using Serilog;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -96,6 +97,9 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    // Per locked decision D-03: validate mapping config only in Development.
+    app.Services.GetRequiredService<TypeAdapterConfig>().Compile();
+
     OracleMonitor myMonitor = new OracleMonitor();
     myMonitor.IsActive = true;
 }
